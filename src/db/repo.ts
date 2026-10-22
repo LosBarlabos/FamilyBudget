@@ -286,8 +286,17 @@ export async function addCategory(c: Category, currentId: PeriodId) {
  * (ha a költségvetés még nem indult el, az elsőtől) érvényes terv lesz belőle („ettől a hónaptól”), a múltbeli
  * tervek nem változnak. Visszaadja a kategória korábbi terveit a visszavonáshoz (restoreCategory), és hogy
  * melyik időszaktól hat a módosítás.
+ *
+ * `autoPayments`: a csoportos beszedés kikapcsolásakor a rögzítés nélkül kifizetettnek számító számlák
+ * (autoPaidPayments), amelyek most valódi, lezáró rögzítést kapnak. Az azonosítójuk időszakonként állandó, így
+ * a szinkron sem kettőzi meg őket. A visszavonáshoz az új rögzítések azonosítóit is visszaadja.
  */
-export async function updateCategory(prev: Category, next: Category, currentId: PeriodId) {
+export async function updateCategory(
+  prev: Category,
+  next: Category,
+  currentId: PeriodId,
+  autoPayments: { periodId: PeriodId; amount: number; date: ISODate }[] = [],
+) {
   return db.transaction('rw', [db.settings, db.categories, db.plans, db.entries], async () => {
     if (prev.type !== next.type) {
       const used = (await db.entries.where('categoryId').equals(prev.id).count()) > 0;
@@ -303,7 +312,12 @@ export async function updateCategory(prev: Category, next: Category, currentId: 
       await db.plans.bulkDelete(ops.del.map((d) => [d.periodId, d.categoryId] as [string, string]));
       await db.plans.bulkPut(ops.put);
     }
-    return { plansBefore: own, amountChanged, fromId };
+    const added = autoPayments.map((a) => ({
+      ...entryRecord(a.periodId, next.id, a.amount, a.date, 'csoportos beszedés', undefined, true),
+      id: `auto-${a.periodId}-${next.id}`,
+    }));
+    await db.entries.bulkPut(added);
+    return { plansBefore: own, amountChanged, fromId, addedEntryIds: added.map((e) => e.id) };
   });
 }
 

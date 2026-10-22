@@ -2,13 +2,14 @@
  * Hash-alapú útvonalak (`#/rogzites/<kategóriaId>?gyors`). Az URL-ben él a képernyő, így működik a vissza
  * gesztus, a könyvjelző és a PWA-parancsikon.
  */
-export type Screen = 'dashboard' | 'record' | 'planner' | 'analysis' | 'categories' | 'settings';
+export type Screen = 'dashboard' | 'record' | 'planner' | 'analysis' | 'calendar' | 'categories' | 'settings';
 
 export const SCREEN_PATH: Record<Screen, string> = {
   dashboard: 'attekintes',
   record: 'rogzites',
   planner: 'terv',
   analysis: 'elemzes',
+  calendar: 'naptar',
   categories: 'kategoriak',
   settings: 'beallitasok',
 };

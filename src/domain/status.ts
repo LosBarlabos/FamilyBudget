@@ -1,7 +1,7 @@
 import { addMonths, getDaysInMonth } from 'date-fns';
 import { formatFt } from './money';
 import { fromISO, toISO } from './periods';
-import type { Category, CategoryType, ISODate } from './types';
+import type { Category, CategoryType, ISODate, PeriodId } from './types';
 
 export type FixStatus = 'unpaid' | 'partial' | 'paid' | 'paidDiff';
 
@@ -24,6 +24,22 @@ export function dueDateInPeriod(dueDay: number, start: ISODate, end: ISODate): I
     month = addMonths(month, 1);
   }
   return null;
+}
+
+/**
+ * Csoportos beszedésű számlánál az esedékesség dátuma, ha az időszakban már elérkezett (ettől számít
+ * automatikusan kifizetettnek); egyébként null. A kézi rögzítést a hívó veszi figyelembe.
+ */
+export function autoPaidDue(
+  c: Pick<Category, 'type' | 'dueDay' | 'autoPayFrom'>,
+  periodId: PeriodId,
+  start: ISODate,
+  end: ISODate,
+  today: ISODate,
+): ISODate | null {
+  if (c.type !== 'fix' || !c.autoPayFrom || !c.dueDay || periodId < c.autoPayFrom) return null;
+  const due = dueDateInPeriod(c.dueDay, start, end);
+  return due !== null && due <= today ? due : null;
 }
 
 export function isOverdue(due: ISODate | null, today: ISODate, status: FixStatus): boolean {

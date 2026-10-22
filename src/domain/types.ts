@@ -32,6 +32,12 @@ export interface Category {
   group?: string;
   defaultAmount: number;
   dueDay?: number;
+  /**
+   * Csak esedékességi nappal rendelkező 'fix' számla: csoportos beszedés, ettől az időszaktól. Az esedékesség
+   * napjától a számla rögzítés nélkül is kifizetettnek számít a terv összegével (lásd autoPaidDue); egy kézi
+   * rögzítés („Más összeg”, „Nem volt”) felülírja.
+   */
+  autoPayFrom?: PeriodId;
   incomeMode?: 'fix' | 'keret';
   /** Csak 'megtakaritas': megtakarítási cél. */
   goalAmount?: number;

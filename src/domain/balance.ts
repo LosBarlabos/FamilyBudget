@@ -2,6 +2,7 @@ import { addDays, differenceInCalendarDays } from 'date-fns';
 import { fromISO, makeConfig, MAX_PERIOD_RANGE, periodEnd, periodForDate, periodRange, periodStart, periodStatus, shiftPeriod, toISO } from './periods';
 import type { PeriodConfig, PeriodStatus } from './periods';
 import { effectivePlan, indexPlans } from './plans';
+import { autoPaidDue, dueDateInPeriod } from './status';
 import type { BudgetData, Category, Entry, ISODate, PeriodId } from './types';
 import { isExpense, recordStyle } from './types';
 
@@ -18,6 +19,11 @@ export interface CategoryFigures {
    * (pl. fix→keret váltás után) a régi jelző nem számít, mert ott nincs lezárás.
    */
   settled: boolean;
+  /**
+   * Csoportos beszedésű számla, amelynek elérkezett az esedékessége, de nincs rögzítése: a terv összegével
+   * kifizetettnek számít (actual = plan, settled), rögzítés nélkül.
+   */
+  auto?: true;
 }
 
 export interface PeriodSummary {
@@ -89,19 +95,28 @@ export function computeSummaries(data: BudgetData, today: ISODate): Summaries {
 
   for (const id of periodRange(firstId, lastId)) {
     const status = periodStatus(id, currentId);
+    const start = periodStart(id, cfg);
+    const end = periodEnd(id, cfg);
     const byCategory = new Map<string, CategoryFigures>();
     let income = 0;
     let expense = 0;
     let savings = 0;
 
     for (const c of data.categories) {
-      const actual = actuals.get(figKey(id, c.id)) ?? 0;
-      const settled = recordStyle(c) === 'fix' && settledKeys.has(figKey(id, c.id));
+      const key = figKey(id, c.id);
+      let actual = actuals.get(key) ?? 0;
+      let settled = recordStyle(c) === 'fix' && settledKeys.has(key);
       // Archivált kategória a múltban a ténnyel még számít, a jövőre viszont már nincs terve.
       const plan = c.archived && status !== 'closed' ? 0 : effectivePlan(plans, c, id, settings.firstPeriodId);
+      // Csoportos beszedés: rögzítés nélkül az esedékességtől kifizetett; bármely kézi rögzítés felülírja.
+      const auto = !actuals.has(key) && !settled && plan > 0 && autoPaidDue(c, id, start, end, today) !== null;
+      if (auto) {
+        actual = plan;
+        settled = true;
+      }
       if (c.archived && actual === 0) continue;
       const counted = countedAmount(status, plan, actual, settled);
-      byCategory.set(c.id, { plan, actual, counted, settled });
+      byCategory.set(c.id, auto ? { plan, actual, counted, settled, auto: true } : { plan, actual, counted, settled });
       if (c.type === 'bevetel') income += counted;
       else if (c.type === 'megtakaritas') savings += counted;
       else expense += counted;
@@ -112,8 +127,8 @@ export function computeSummaries(data: BudgetData, today: ISODate): Summaries {
     savingsTotal += savings;
     periods.push({
       id,
-      start: periodStart(id, cfg),
-      end: periodEnd(id, cfg),
+      start,
+      end,
       status,
       income,
       expense,
@@ -126,6 +141,20 @@ export function computeSummaries(data: BudgetData, today: ISODate): Summaries {
   }
 
   return { currentId, periods, byId: new Map(periods.map((p) => [p.id, p])) };
+}
+
+/**
+ * A csoportos beszedés kikapcsolásakor ezek a rögzítés nélkül kifizetettnek számító számlák kapnak valódi,
+ * lezáró rögzítést (az esedékesség napjával), hogy a múlt ne változzon meg.
+ */
+export function autoPaidPayments(s: Summaries, cat: Category): { periodId: PeriodId; amount: number; date: ISODate }[] {
+  const out: { periodId: PeriodId; amount: number; date: ISODate }[] = [];
+  for (const p of s.periods) {
+    const f = p.byCategory.get(cat.id);
+    const date = f?.auto && cat.dueDay ? dueDateInPeriod(cat.dueDay, p.start, p.end) : null;
+    if (f && date) out.push({ periodId: p.id, amount: f.actual, date });
+  }
+  return out;
 }
 
 /** A megadott időszak előtti legfeljebb n lezárt időszak tényének átlaga. */

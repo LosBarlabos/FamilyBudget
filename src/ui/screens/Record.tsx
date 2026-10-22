@@ -164,6 +164,7 @@ export function Record() {
         withdrawals={withdrawalsByCat.get(c.id) ?? []}
         fee={fees.get(c.id)}
         onDismissFee={() => dismissFee(c)}
+        auto={fig(c).auto}
       />
     ) : (
       <EnvelopeRow
@@ -286,7 +287,7 @@ interface RowProps {
 }
 
 function FixRow({
-  periodId, cat, plan, entries, date, due, checkOverdue, today, goal, withdrawals = [], fee, onDismissFee,
+  periodId, cat, plan, entries, date, due, checkOverdue, today, goal, withdrawals = [], fee, onDismissFee, auto,
 }: RowProps & {
   due: ISODate | null;
   checkOverdue: boolean;
@@ -296,6 +297,8 @@ function FixRow({
   /** Díjváltozás-javaslat: az új díj, ha a számla a tervtől eltérő összeggel lett kifizetve. */
   fee?: number;
   onDismissFee?: () => void;
+  /** Csoportos beszedés: rögzítés nélkül kifizetettnek számít (lásd CategoryFigures.auto). */
+  auto?: true;
 }) {
   const toast = useToast();
   const rowRef = useRef<HTMLDivElement>(null);
@@ -311,7 +314,9 @@ function FixRow({
   const expenseCats = data.categories.filter((c) => isExpense(c) && !c.archived).sort((a, b) => a.order - b.order);
   const actual = entries.reduce((s, e) => s + e.amount, 0);
   const settled = entries.some((e) => e.settles);
-  const status = fixStatus(plan, actual, settled);
+  // Kézi rögzítés nélkül a csoportos beszedés a terv összegével kifizette; a rögzítés felülírja.
+  const autoPaid = !!auto && entries.length === 0;
+  const status = autoPaid ? 'paid' : fixStatus(plan, actual, settled);
   const done = status === 'paid' || status === 'paidDiff';
   const left = plan - actual;
   const late = checkOverdue && isOverdue(due, today, status);
@@ -372,6 +377,7 @@ function FixRow({
   let text: React.ReactNode;
   if (status === 'unpaid') text = plan > 0 ? `terv ${formatFt(plan)}` : 'nincs tervezett összeg';
   else if (status === 'partial') text = `${formatFt(actual)} / ${formatFt(plan)} · hátra ${formatFt(left)}`;
+  else if (autoPaid) text = `Automatikusan kifizetve${due ? ` ${shortDate(due)}` : ''} · ${formatFt(plan)}`;
   else if (status === 'paid') text = `${word} · ${formatFt(actual)}`;
   else if (actual === 0) text = `${word === 'Félretéve' ? 'Nem volt félretétel' : 'Nem volt'} (terv ${formatFt(plan)})`;
   else text = `${word} · ${formatFt(actual)} (terv ${formatFt(plan)})`;
@@ -386,7 +392,8 @@ function FixRow({
     }
     setCheckBusy(true);
     try {
-      if (done) await undoAll();
+      if (autoPaid) await safe(() => record(0, true, `${cat.name}: nem volt terhelés`));
+      else if (done) await undoAll();
       else
         await safe(async () => {
           await settleRest(periodId, cat, left, date, status === 'partial');
@@ -396,18 +403,21 @@ function FixRow({
       setCheckBusy(false);
     }
   };
-  const checkLabel = done
-    ? `${cat.name}: ${word.toLowerCase()} – visszavonás`
-    : left > 0
-      ? `${cat.name}: ${settleLabel(cat.type, status === 'partial').toLowerCase()} ${formatFt(left)}`
-      : `${cat.name}: összeg megadása`;
+  const checkLabel = autoPaid
+    ? `${cat.name}: automatikusan kifizetve – nem volt terhelés`
+    : done
+      ? `${cat.name}: ${word.toLowerCase()} – visszavonás`
+      : left > 0
+        ? `${cat.name}: ${settleLabel(cat.type, status === 'partial').toLowerCase()} ${formatFt(left)}`
+        : `${cat.name}: összeg megadása`;
 
   const menu: MenuItem[] = [];
   if (goal && !withdrawing && goal.saved > 0) menu.push({ label: 'Felhasználás', icon: 'arrow-down-right', onSelect: () => setWithdrawing(true) });
-  if (!done && status === 'unpaid') menu.push({ label: 'Más összeg', icon: 'pencil', onSelect: () => setEditing('settle') });
+  if ((!done && status === 'unpaid') || autoPaid) menu.push({ label: 'Más összeg', icon: 'pencil', onSelect: () => setEditing('settle') });
+  if (autoPaid) menu.push({ label: 'Nem volt terhelés', icon: 'ban', onSelect: () => safe(() => record(0, true, `${cat.name}: nem volt terhelés`)) });
   if (!done) menu.push({ label: 'Részlet', icon: 'chart-pie', onSelect: () => setEditing('part') });
   if (status === 'partial') menu.push({ label: 'Kész, több nem lesz', icon: 'flag-check', onSelect: finish });
-  if (status !== 'unpaid') menu.push({ label: 'Visszavonás', icon: 'arrow-back-up', onSelect: undoAll });
+  if (status !== 'unpaid' && !autoPaid) menu.push({ label: 'Visszavonás', icon: 'arrow-back-up', onSelect: undoAll });
   // Részleges állapotban és több részletnél az egyes rögzítések egyenként is törölhetők.
   const showParts = status === 'partial' || entries.length > 1;
 

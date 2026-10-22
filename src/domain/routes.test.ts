@@ -18,6 +18,7 @@ describe('útvonalak', () => {
     expect(parseRoute('#/rogzites')).toEqual(r('record'));
     expect(parseRoute('#/terv')).toEqual(r('planner'));
     expect(parseRoute('#/elemzes')).toEqual(r('analysis'));
+    expect(parseRoute('#/naptar')).toEqual(r('calendar'));
     expect(parseRoute('#/kategoriak')).toEqual(r('categories'));
     expect(parseRoute('#/beallitasok')).toEqual(r('settings'));
     // Kis- és nagybetű, záró perjel, hiányzó perjel.

@@ -193,6 +193,7 @@ export function normalizeExport(f: Record<string, unknown>, now = new Date()): E
       group: str(c.group)?.trim(),
       defaultAmount: defaultAmount ?? 0,
       dueDay: dueDay !== null && Number.isInteger(dueDay) && dueDay >= 1 && dueDay <= 31 ? dueDay : undefined,
+      autoPayFrom: typeof c.autoPayFrom === 'string' && PERIOD_ID_RE.test(c.autoPayFrom) ? c.autoPayFrom : undefined,
       incomeMode: c.incomeMode === 'fix' || c.incomeMode === 'keret' ? c.incomeMode : undefined,
       goalAmount: goalAmount !== null && goalAmount > 0 ? goalAmount : undefined,
       goalDeadline: typeof c.goalDeadline === 'string' && PERIOD_ID_RE.test(c.goalDeadline) ? c.goalDeadline : undefined,

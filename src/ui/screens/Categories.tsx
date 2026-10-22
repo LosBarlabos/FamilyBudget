@@ -5,7 +5,8 @@ import { countsInDaily } from '../../domain/pace';
 import { periodFromName, periodName, periodRange, periodShortLabel, periodShortWithYear, shiftPeriod } from '../../domain/periods';
 import { planChangeEffect, planStartId, plansRemovedFrom } from '../../domain/plans';
 import { allowedTypes, type Category, type CategoryType, type PeriodId, type Plan } from '../../domain/types';
-import { addCategory, reorderCategories, restoreCategory, saveCategory, updateCategory } from '../../db/repo';
+import { autoPaidPayments } from '../../domain/balance';
+import { addCategory, reorderCategories, restoreCategory, restoreEntries, saveCategory, updateCategory } from '../../db/repo';
 import { NEW_GOAL, useBudget, useSafe, useToast } from '../context';
 import { CatIcon, Icon } from '../components/common';
 
@@ -108,13 +109,21 @@ export function Categories() {
                 onCancel={() => edit(null)}
                 onSave={(nc) =>
                   safe(async () => {
-                    const { plansBefore, amountChanged, fromId: from } = await updateCategory(c, nc, summaries.currentId);
+                    // A csoportos beszedés kikapcsolása ne írja át a múltat: az eddig automatikusan kifizetett
+                    // számlák valódi rögzítést kapnak.
+                    const autoPayments = c.autoPayFrom && !nc.autoPayFrom ? autoPaidPayments(summaries, c) : [];
+                    const { plansBefore, amountChanged, fromId: from, addedEntryIds } = await updateCategory(c, nc, summaries.currentId, autoPayments);
                     edit(null);
                     // Ugyanúgy kimondja a törölt későbbi egyedi terveket, mint a Tervező.
                     const msg = amountChanged
                       ? `${nc.name} mentve · terv ${planChangeEffect(plansBefore, nc, from, nc.defaultAmount, 'from')}`
-                      : `${nc.name} mentve`;
-                    toast(msg, () => restoreCategory(c, plansBefore));
+                      : addedEntryIds.length > 0
+                        ? `${nc.name} mentve · az eddigi automatikus fizetések rögzítésként megmaradnak`
+                        : `${nc.name} mentve`;
+                    toast(msg, async () => {
+                      await restoreCategory(c, plansBefore);
+                      await restoreEntries([], addedEntryIds);
+                    });
                   })
                 }
               />
@@ -175,6 +184,8 @@ function CategoryRow({
     cat.group !== TYPE_LABEL[cat.type] ? cat.group : null,
     `alap ${formatFt(cat.defaultAmount)}`,
     cat.type === 'fix' && cat.dueDay ? `esedékes: hó ${cat.dueDay}.` : null,
+    cat.type === 'fix' && cat.dueDay && cat.autoPayFrom ? 'csoportos beszedés' : null,
+    cat.type === 'bevetel' && cat.dueDay ? `érkezik: hó ${cat.dueDay}.` : null,
     cat.type === 'keret' && !countsInDaily(cat) ? 'napi összegen kívül' : null,
     cat.type === 'bevetel' ? (cat.incomeMode === 'keret' ? 'részletekben' : 'egy összegben') : null,
     cat.goalAmount ? `cél ${formatFt(cat.goalAmount)}${cat.goalDeadline ? `, ${periodShortWithYear(cat.goalDeadline)}` : ''}` : null,
@@ -222,6 +233,8 @@ export function CategoryForm({
   if (initial.goalDeadline && !deadlines.includes(initial.goalDeadline)) deadlines.unshift(initial.goalDeadline);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const set = (patch: Partial<Category>) => setC({ ...c, ...patch });
+  // Esedékességi nap a fix számlának és az egyösszegű bevételnek van (a számlanaptár ehhez igazodik).
+  const hasDueDay = c.type === 'fix' || (c.type === 'bevetel' && (c.incomeMode ?? 'fix') === 'fix');
   // Az eredeti típusból számol, hogy szerkesztés közbeni váltás után is visszaválasztható legyen.
   const types = allowedTypes(initial, hasEntries);
   const typedAmount = amountText.trim() === '' || amountText.trim() === '0' ? 0 : parseAmount(amountText);
@@ -238,6 +251,7 @@ export function CategoryForm({
     if (amount === null) e.amount = 'Ez nem érvényes összeg';
     const due = dueText.trim() === '' ? undefined : Number(dueText);
     if (due !== undefined && (!Number.isInteger(due) || due < 1 || due > 31)) e.due = '1 és 31 közötti nap';
+    else if (c.type === 'fix' && c.autoPayFrom && due === undefined) e.due = 'A csoportos beszedéshez add meg az esedékesség napját';
     const savings = c.type === 'megtakaritas';
     const goal = goalText.trim() === '' ? undefined : parseAmount(goalText);
     if (savings && goal === null) e.goal = 'Ez nem érvényes összeg';
@@ -250,7 +264,8 @@ export function CategoryForm({
       name: c.name.trim(),
       group: c.group?.trim() || undefined,
       defaultAmount: amount ?? 0,
-      dueDay: c.type === 'fix' ? due : undefined,
+      dueDay: hasDueDay ? due : undefined,
+      autoPayFrom: c.type === 'fix' && due !== undefined ? c.autoPayFrom : undefined,
       incomeMode: c.type === 'bevetel' ? (c.incomeMode ?? 'fix') : undefined,
       goalAmount: savings ? (goal ?? undefined) : undefined,
       goalDeadline: savings && goal ? c.goalDeadline : undefined,
@@ -303,9 +318,9 @@ export function CategoryForm({
             </span>
           )}
         </label>
-        {c.type === 'fix' && (
+        {hasDueDay && (
           <label className="field">
-            Esedékesség napja (nem kötelező)
+            {c.type === 'fix' ? 'Esedékesség napja' : 'Érkezés napja'} (nem kötelező)
             <input type="number" min={1} max={31} value={dueText} placeholder="15" onChange={(e) => setDueText(e.target.value)} />
             {errors.due && <span className="error">{errors.due}</span>}
           </label>
@@ -320,6 +335,24 @@ export function CategoryForm({
           </label>
         )}
       </div>
+      {c.type === 'fix' && (
+        <div className="check-field-wrap">
+          <label className="check-field">
+            <input
+              type="checkbox"
+              checked={!!c.autoPayFrom}
+              aria-describedby="cat-autopay-hint"
+              // Az első bekapcsolás a mostani időszaktól hat; a korábbi kifizetéseket nem írja át.
+              onChange={(e) => set({ autoPayFrom: e.target.checked ? (initial.autoPayFrom ?? currentId) : undefined })}
+            />
+            Csoportos beszedés (automatikusan kifizetve)
+          </label>
+          <span id="cat-autopay-hint" className="tiny faint">
+            Az esedékesség napján magától kifizetettnek számít a terv összegével. Ha a terhelés más összeg volt, a
+            Rögzítésen javítható.
+          </span>
+        </div>
+      )}
       {c.type === 'keret' && (
         <div className="check-field-wrap">
           <label className="check-field">

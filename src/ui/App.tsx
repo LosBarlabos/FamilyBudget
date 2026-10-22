@@ -19,6 +19,7 @@ import { tagSummary } from '../domain/analysis';
 import { SyncButton, useAutoSync } from './components/SyncButton';
 import { useSyncConfig } from '../sync/engine';
 import { Analysis } from './screens/Analysis';
+import { BillCalendar } from './screens/BillCalendar';
 import { Categories } from './screens/Categories';
 import { Dashboard } from './screens/Dashboard';
 import { Onboarding } from './screens/Onboarding';
@@ -31,13 +32,14 @@ const NAV: { id: Screen; label: string; icon: string }[] = [
   { id: 'record', label: 'Rögzítés', icon: 'pencil-plus' },
   { id: 'planner', label: 'Tervező', icon: 'adjustments-horizontal' },
   { id: 'analysis', label: 'Elemzés', icon: 'chart-histogram' },
+  { id: 'calendar', label: 'Számlanaptár', icon: 'calendar-due' },
   { id: 'categories', label: 'Kategóriák', icon: 'tags' },
   { id: 'settings', label: 'Beállítások', icon: 'settings' },
 ];
 const nav = (id: Screen) => NAV.find((n) => n.id === id)!;
 
 /** Mobilon a ritkábban használt képernyők a Továbbiak alsó lapra kerülnek, hogy középen elférjen a + gomb. */
-const MORE: Screen[] = ['analysis', 'categories', 'settings'];
+const MORE: Screen[] = ['analysis', 'calendar', 'categories', 'settings'];
 
 /** Indításkori adatmigráció; a felület csak utána jelenik meg, hogy ne számoljon a régi adatokkal. */
 function useStartupMigration() {
@@ -258,6 +260,7 @@ function Main({ data }: { data: BudgetData }) {
             {screen === 'record' && <Record />}
             {screen === 'planner' && <Planner />}
             {screen === 'analysis' && <Analysis />}
+            {screen === 'calendar' && <BillCalendar />}
             {screen === 'categories' && <Categories />}
             {screen === 'settings' && <Settings />}
           </ErrorBoundary>

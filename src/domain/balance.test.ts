@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { averageActual, changeVsPrevious, changeVsSameDay, computeSummaries, countedAmount } from './balance';
+import { autoPaidPayments, averageActual, changeVsPrevious, changeVsSameDay, computeSummaries, countedAmount } from './balance';
 import { makeConfig, MAX_PERIOD_RANGE } from './periods';
+import { dueBills } from './todos';
 import type { BudgetData, Category, Entry } from './types';
 
 const cat = (id: string, type: Category['type'], defaultAmount: number, extra: Partial<Category> = {}): Category => ({
@@ -211,5 +212,62 @@ describe('összevetés az előző időszak azonos napjáig', () => {
     const e = [entry('2026-01', 'kaja', 10_000, { date: '2026-02-27' }), entry('2026-02', 'kaja', 5_000, { date: '2026-03-01' })];
     const r = changeVsSameDay(e, ['kaja'], '2026-02', '2026-03-29', cfg31);
     expect(r.previous).toBe(10_000);
+  });
+});
+
+describe('csoportos beszedés (automatikusan kifizetett számla)', () => {
+  // A rezsi 15-én esedékes, szeptembertől csoportos beszedéssel.
+  const auto = (entries: Entry[], extra: Partial<Category> = {}) =>
+    data(entries, {
+      categories: [cat('fizetes', 'bevetel', 500_000), cat('rezsi', 'fix', 50_000, { dueDay: 15, autoPayFrom: '2026-09', ...extra })],
+    });
+  const fig = (d: BudgetData, periodId: string, today = TODAY) => computeSummaries(d, today).byId.get(periodId)!.byCategory.get('rezsi')!;
+
+  it('az esedékességtől rögzítés nélkül kifizetett a terv összegével', () => {
+    expect(fig(auto([]), '2026-09')).toEqual({ plan: 50_000, actual: 50_000, counted: 50_000, settled: true, auto: true });
+    expect(fig(auto([]), '2026-10')).toMatchObject({ actual: 50_000, settled: true, auto: true });
+  });
+
+  it('az esedékesség előtt még nyitott, de a terv már számít', () => {
+    expect(fig(auto([]), '2026-10', '2026-10-14')).toEqual({ plan: 50_000, actual: 0, counted: 50_000, settled: false });
+  });
+
+  it('a bekapcsolás előtti időszakot nem érinti', () => {
+    expect(fig(auto([]), '2026-08')).toEqual({ plan: 50_000, actual: 0, counted: 0, settled: false });
+  });
+
+  it('a lezárt időszak egyenlegében is kifizetettként szerepel', () => {
+    const s = computeSummaries(auto([]), TODAY);
+    expect(s.byId.get('2026-09')!.expense).toBe(50_000);
+  });
+
+  it('a kézi rögzítés felülírja („Nem volt”, „Más összeg”, részlet)', () => {
+    expect(fig(auto([entry('2026-10', 'rezsi', 0, { settles: true })]), '2026-10')).toEqual({ plan: 50_000, actual: 0, counted: 0, settled: true });
+    expect(fig(auto([entry('2026-10', 'rezsi', 47_000, { settles: true })]), '2026-10')).toMatchObject({ actual: 47_000, settled: true });
+    expect(fig(auto([entry('2026-10', 'rezsi', 20_000)]), '2026-10')).toEqual({ plan: 50_000, actual: 20_000, counted: 50_000, settled: false });
+  });
+
+  it('esedékességi nap vagy terv nélkül nincs automatikus fizetés', () => {
+    expect(fig(auto([], { dueDay: undefined }), '2026-10').auto).toBeUndefined();
+    expect(fig(auto([], { defaultAmount: 0 }), '2026-10').auto).toBeUndefined();
+  });
+
+  it('csak fix számlánál érvényes', () => {
+    const d = data([], { categories: [cat('rezsi', 'keret', 50_000, { dueDay: 15, autoPayFrom: '2026-09' })] });
+    expect(fig(d, '2026-10').auto).toBeUndefined();
+  });
+
+  it('az automatikusan kifizetett számla nem teendő', () => {
+    const d = auto([]);
+    const p = computeSummaries(d, TODAY).byId.get('2026-10')!;
+    expect(dueBills(d.categories, p, TODAY)).toEqual([]);
+    const before = computeSummaries(d, '2026-10-12').byId.get('2026-10')!;
+    expect(dueBills(d.categories, before, '2026-10-12').map((b) => b.cat.id)).toEqual(['rezsi']);
+  });
+
+  it('kikapcsoláskor a rögzítés nélküli fizetések listája az esedékesség napjával', () => {
+    const d = auto([entry('2026-10', 'rezsi', 0, { settles: true })]);
+    const s = computeSummaries(d, TODAY);
+    expect(autoPaidPayments(s, d.categories[1])).toEqual([{ periodId: '2026-09', amount: 50_000, date: '2026-09-15' }]);
   });
 });
