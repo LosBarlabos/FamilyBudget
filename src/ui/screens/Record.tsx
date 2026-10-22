@@ -4,7 +4,7 @@ import { goalProgress, goalSummary, type GoalProgress } from '../../domain/goals
 import { formatFt } from '../../domain/money';
 import { envelopeLeftText, paceOverview, type EnvelopeStatus } from '../../domain/pace';
 import { clampToPeriod, periodName, shortDate } from '../../domain/periods';
-import { planChangeSummary } from '../../domain/plans';
+import { cycleLabel, cycleOf, isDuePeriod, nextDuePeriod, planChangeSummary } from '../../domain/plans';
 import { recentEntries, recordedAtText, suggestedAmounts } from '../../domain/quick';
 import { dueDateInPeriod, fixStatus, isOverdue, PAID_WORD, settleLabel } from '../../domain/status';
 import type { PeriodSummary } from '../../domain/balance';
@@ -104,7 +104,8 @@ export function Record() {
   const fig = (c: Category) => p.byCategory.get(c.id) ?? { plan: 0, actual: 0, counted: 0, settled: false };
   // A keretek tempója és a napi összeg ugyanabból számol, mint az Áttekintés.
   const pace = useMemo(() => paceOverview(data.categories, p, today), [data.categories, p, today]);
-  const due = (c: Category) => (c.dueDay ? dueDateInPeriod(c.dueDay, p.start, p.end) : null);
+  // A nem havonta esedékes számlának a köztes hónapban nincs esedékessége.
+  const due = (c: Category) => (c.dueDay && isDuePeriod(c, p.id) ? dueDateInPeriod(c.dueDay, p.start, p.end) : null);
 
   const income = active.filter((c) => c.type === 'bevetel');
   const fixed = active
@@ -375,7 +376,13 @@ function FixRow({
   };
 
   let text: React.ReactNode;
-  if (status === 'unpaid') text = plan > 0 ? `terv ${formatFt(plan)}` : 'nincs tervezett összeg';
+  if (status === 'unpaid')
+    text =
+      plan > 0
+        ? `terv ${formatFt(plan)}`
+        : !isDuePeriod(cat, periodId)
+          ? `${cycleLabel(cycleOf(cat))} · legközelebb ${periodName(nextDuePeriod(cat, periodId)).toLowerCase()}`
+          : 'nincs tervezett összeg';
   else if (status === 'partial') text = `${formatFt(actual)} / ${formatFt(plan)} · hátra ${formatFt(left)}`;
   else if (autoPaid) text = `Automatikusan kifizetve${due ? ` ${shortDate(due)}` : ''} · ${formatFt(plan)}`;
   else if (status === 'paid') text = `${word} · ${formatFt(actual)}`;

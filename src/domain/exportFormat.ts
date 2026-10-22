@@ -1,6 +1,7 @@
 import type { Summaries } from './balance';
 import { PERIOD_ID_RE, periodDistance, periodIdOf, periodName } from './periods';
 import { TYPE_LABEL } from './defaults';
+import { CYCLES } from './plans';
 import type { BudgetData, Category, CategoryType, Entry, Plan, PeriodOverride, Settings } from './types';
 
 export const APP_ID = 'csaladi-koltsegvetes';
@@ -121,6 +122,12 @@ function clean<T extends object>(o: T): T {
   return Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) as T;
 }
 
+/** A gyakoriság csak érvényes párként marad meg (választható hónapszám és esedékes időszak), különben havonta. */
+function cycleFields(months: unknown, start: unknown): Pick<Category, 'cycleMonths' | 'cycleStart'> {
+  const ok = CYCLES.some((c) => c.months === months && c.months > 1) && typeof start === 'string' && PERIOD_ID_RE.test(start);
+  return ok ? { cycleMonths: months as number, cycleStart: start as string } : { cycleMonths: undefined, cycleStart: undefined };
+}
+
 /**
  * Rekordszintű ellenőrzés és normalizálás. A hiányzó, de pótolható mezők alapértéket kapnak
  * (előrejelzés 6, nyitó egyenleg 0, archivált nem, sorrend a helye szerint), az összegek egész forintra
@@ -194,6 +201,7 @@ export function normalizeExport(f: Record<string, unknown>, now = new Date()): E
       defaultAmount: defaultAmount ?? 0,
       dueDay: dueDay !== null && Number.isInteger(dueDay) && dueDay >= 1 && dueDay <= 31 ? dueDay : undefined,
       autoPayFrom: typeof c.autoPayFrom === 'string' && PERIOD_ID_RE.test(c.autoPayFrom) ? c.autoPayFrom : undefined,
+      ...cycleFields(c.cycleMonths, c.cycleStart),
       incomeMode: c.incomeMode === 'fix' || c.incomeMode === 'keret' ? c.incomeMode : undefined,
       goalAmount: goalAmount !== null && goalAmount > 0 ? goalAmount : undefined,
       goalDeadline: typeof c.goalDeadline === 'string' && PERIOD_ID_RE.test(c.goalDeadline) ? c.goalDeadline : undefined,

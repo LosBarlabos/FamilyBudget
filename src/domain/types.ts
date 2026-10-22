@@ -38,6 +38,14 @@ export interface Category {
    * rögzítés („Más összeg”, „Nem volt”) felülírja.
    */
   autoPayFrom?: PeriodId;
+  /**
+   * Csak 'fix' számla: hány havonta esedékes (2, 3, 6 vagy 12; hiányában havonta). A terv csak a cycleStart
+   * időszaktól ennyi időszakonként érvényes, a köztes hónapokban 0 (lásd isDuePeriod). Az alapösszeg és a
+   * Tervező összege egy alkalomra szól.
+   */
+  cycleMonths?: number;
+  /** A ciklus egyik esedékes időszaka (cycleMonths mellett kötelező). */
+  cycleStart?: PeriodId;
   incomeMode?: 'fix' | 'keret';
   /** Csak 'megtakaritas': megtakarítási cél. */
   goalAmount?: number;

@@ -3,7 +3,10 @@ import { averageActual, computeSummaries, quickFillAmount, totalsByType } from '
 import { goalProgress, goalSummary, type GoalProgress } from '../../domain/goals';
 import { formatFt, formatSigned, parseAmount } from '../../domain/money';
 import { periodName, periodShortLabel, shiftPeriod } from '../../domain/periods';
-import { applyPlanOps, laterPlanChanges, planChangeOps, planChangeSummary, type PlanMode } from '../../domain/plans';
+import {
+  applyPlanOps, cycleLabel, cycleOf, effectivePlan, indexPlans, isDuePeriod, laterPlanChanges, nextDuePeriod, planChangeOps, planChangeSummary,
+  type PlanMode,
+} from '../../domain/plans';
 import type { Category, PeriodId, Plan } from '../../domain/types';
 import { changePlan, replacePlans, restorePlansOf, snapshotPlans } from '../../db/repo';
 import { useBudget, useSafe, useToast } from '../context';
@@ -103,6 +106,13 @@ export function Planner() {
   const closedBefore = summaries.periods.filter((x) => x.status === 'closed' && x.id < periodId);
   const lastClosed = closedBefore.at(-1);
   const last3 = closedBefore.slice(-3).map((x) => x.id);
+  const planIdx = indexPlans(data.plans);
+  // Nem havonta esedékes számlánál a havi átlag félrevezető: a legutóbbi esedékesség ténye látszik helyette.
+  const cycleText = (c: Category) => {
+    const last = closedBefore.findLast((x) => isDuePeriod(c, x.id));
+    const tail = last ? ` · legutóbb ${periodName(last.id, true)}: ${formatFt(last.byCategory.get(c.id)?.actual ?? 0)}` : '';
+    return `${cycleLabel(cycleOf(c))}${tail}`;
+  };
 
   return (
     <>
@@ -151,7 +161,16 @@ export function Planner() {
                     {formatFt(cats.reduce((sum, c) => sum + (p.byCategory.get(c.id)?.plan ?? 0), 0))}
                   </span>
                 </div>
-                {cats.map((c) => (
+                {cats.map((c) =>
+                  !isDuePeriod(c, periodId) ? (
+                    <OffCycleRow
+                      key={`${c.id}-${periodId}`}
+                      cat={c}
+                      next={nextDuePeriod(c, periodId)}
+                      amount={effectivePlan(planIdx, c, nextDuePeriod(c, periodId), data.settings.firstPeriodId)}
+                      onGo={setPeriodId}
+                    />
+                  ) : (
                   <PlanRow
                     key={`${c.id}-${periodId}`}
                     cat={c}
@@ -167,8 +186,10 @@ export function Planner() {
                     onApplyGoal={(amount) => commit(c, amount, 'from', summaries.currentId)}
                     later={laterPlanChanges(data.plans, c, periodId)}
                     periodId={periodId}
+                    cycleText={cycleOf(c) > 1 ? cycleText(c) : undefined}
                   />
-                ))}
+                  ),
+                )}
               </div>
             );
           })}
@@ -223,9 +244,31 @@ function niceMax(...vals: number[]) {
   return Math.ceil(m / step) * step;
 }
 
+/** Nem havonta esedékes számla egy köztes hónapban: nincs mit tervezni, csak a következő esedékesség látszik. */
+function OffCycleRow({ cat, next, amount, onGo }: { cat: Category; next: PeriodId; amount: number; onGo: (id: PeriodId) => void }) {
+  return (
+    <div className="plan-row off-cycle">
+      <div className="plan-name">
+        <CatIcon cat={cat} />
+        <div style={{ minWidth: 0 }}>
+          <div className="rec-name">{cat.name}</div>
+          <div className="tiny faint num">
+            {cycleLabel(cycleOf(cat))} · ebben a hónapban nem esedékes
+          </div>
+        </div>
+      </div>
+      <button className="sm ghost num" onClick={() => onGo(next)} title={`${periodName(next, true)} tervének megnyitása`}>
+        {periodName(next)}: {formatFt(amount)} <Icon name="chevron-right" />
+      </button>
+    </div>
+  );
+}
+
 function PlanRow({
-  cat, value, committedValue, prevActual, avg, onDraft, onCommit, goal, later, periodId, currentId, currentPlan, onApplyGoal,
+  cat, value, committedValue, prevActual, avg, onDraft, onCommit, goal, later, periodId, currentId, currentPlan, onApplyGoal, cycleText,
 }: {
+  /** Nem havonta esedékes számla: a havi tények helyett a gyakoriság és a legutóbbi esedékesség. */
+  cycleText?: string;
   goal?: GoalProgress;
   currentId: PeriodId;
   /** A mostani időszak terve: a cél javaslata ehhez mérődik. */
@@ -282,10 +325,14 @@ function PlanRow({
         <div style={{ minWidth: 0 }}>
           <div className="rec-name">{cat.name}</div>
           <div className="tiny faint num">
-            {prevActual !== null && <>előző tény {formatFt(prevActual)}</>}
-            {prevActual !== null && avg !== null && ' · '}
-            {avg !== null && <>3 havi átlag {formatFt(avg)}</>}
-            {prevActual === null && avg === null && 'még nincs tényadat'}
+            {cycleText ?? (
+              <>
+                {prevActual !== null && <>előző tény {formatFt(prevActual)}</>}
+                {prevActual !== null && avg !== null && ' · '}
+                {avg !== null && <>3 havi átlag {formatFt(avg)}</>}
+                {prevActual === null && avg === null && 'még nincs tényadat'}
+              </>
+            )}
           </div>
           {later.length > 0 && (
             <div className="tiny num later-plans" title="Későbbi egyedi terv; „Ettől a hónaptól” mentésnél törlődik">

@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { ICONS, newId, PALETTE, TYPE_LABEL } from '../../domain/defaults';
 import { formatFt, parseAmount } from '../../domain/money';
 import { countsInDaily } from '../../domain/pace';
-import { periodFromName, periodName, periodRange, periodShortLabel, periodShortWithYear, shiftPeriod } from '../../domain/periods';
-import { planChangeEffect, planStartId, plansRemovedFrom } from '../../domain/plans';
+import { periodDistance, periodFromName, periodName, periodRange, periodShortLabel, periodShortWithYear, shiftPeriod } from '../../domain/periods';
+import { CYCLES, cycleLabel, cycleOf, nextDuePeriod, planChangeEffect, planStartId, plansRemovedFrom } from '../../domain/plans';
 import { allowedTypes, type Category, type CategoryType, type PeriodId, type Plan } from '../../domain/types';
 import { autoPaidPayments } from '../../domain/balance';
 import { addCategory, reorderCategories, restoreCategory, restoreEntries, saveCategory, updateCategory } from '../../db/repo';
@@ -120,7 +120,11 @@ export function Categories() {
                       : addedEntryIds.length > 0
                         ? `${nc.name} mentve · az eddigi automatikus fizetések rögzítésként megmaradnak`
                         : `${nc.name} mentve`;
-                    toast(msg, async () => {
+                    const cycleNote =
+                      cycleOf(nc) > 1
+                        ? ` · ${cycleLabel(cycleOf(nc))}, legközelebb ${periodName(nextDuePeriod(nc, summaries.currentId)).toLowerCase()}`
+                        : '';
+                    toast(msg + cycleNote, async () => {
                       await restoreCategory(c, plansBefore);
                       await restoreEntries([], addedEntryIds);
                     });
@@ -183,6 +187,7 @@ function CategoryRow({
     TYPE_LABEL[cat.type],
     cat.group !== TYPE_LABEL[cat.type] ? cat.group : null,
     `alap ${formatFt(cat.defaultAmount)}`,
+    cycleOf(cat) > 1 ? cycleLabel(cycleOf(cat)) : null,
     cat.type === 'fix' && cat.dueDay ? `esedékes: hó ${cat.dueDay}.` : null,
     cat.type === 'fix' && cat.dueDay && cat.autoPayFrom ? 'csoportos beszedés' : null,
     cat.type === 'bevetel' && cat.dueDay ? `érkezik: hó ${cat.dueDay}.` : null,
@@ -235,6 +240,15 @@ export function CategoryForm({
   const set = (patch: Partial<Category>) => setC({ ...c, ...patch });
   // Esedékességi nap a fix számlának és az egyösszegű bevételnek van (a számlanaptár ehhez igazodik).
   const hasDueDay = c.type === 'fix' || (c.type === 'bevetel' && (c.incomeMode ?? 'fix') === 'fix');
+  const cycle = c.type === 'fix' ? (c.cycleMonths ?? 1) : 1;
+  // A „legközelebb” választó a mostani időszaktól egy teljes ciklusnyi hónapot kínál.
+  const cycleChoices = cycle > 1 ? periodRange(currentId, shiftPeriod(currentId, cycle - 1)) : [];
+  const setCycle = (months: number) => {
+    if (months === 1) return set({ cycleMonths: undefined, cycleStart: undefined });
+    // A meglévő ciklus következő esedékessége marad kiválasztva, ha az az új ciklusban is választható.
+    const next = initial.cycleStart ? nextDuePeriod({ ...initial, type: 'fix' }, currentId) : currentId;
+    set({ cycleMonths: months, cycleStart: periodDistance(currentId, next) < months ? next : currentId });
+  };
   // Az eredeti típusból számol, hogy szerkesztés közbeni váltás után is visszaválasztható legyen.
   const types = allowedTypes(initial, hasEntries);
   const typedAmount = amountText.trim() === '' || amountText.trim() === '0' ? 0 : parseAmount(amountText);
@@ -265,6 +279,8 @@ export function CategoryForm({
       group: c.group?.trim() || undefined,
       defaultAmount: amount ?? 0,
       dueDay: hasDueDay ? due : undefined,
+      cycleMonths: cycle > 1 ? cycle : undefined,
+      cycleStart: cycle > 1 ? c.cycleStart : undefined,
       autoPayFrom: c.type === 'fix' && due !== undefined ? c.autoPayFrom : undefined,
       incomeMode: c.type === 'bevetel' ? (c.incomeMode ?? 'fix') : undefined,
       goalAmount: savings ? (goal ?? undefined) : undefined,
@@ -308,7 +324,7 @@ export function CategoryForm({
           <datalist id="cat-groups">{groups.map((g) => <option key={g} value={g} />)}</datalist>
         </label>
         <label className="field">
-          Alapértelmezett havi összeg
+          {cycle > 1 ? 'Összeg alkalmanként' : 'Alapértelmezett havi összeg'}
           <input type="text" inputMode="numeric" className="num" value={amountText} placeholder="0" onChange={(e) => setAmountText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && save()} />
           {errors.amount && <span className="error">{errors.amount}</span>}
           {removedLater.length > 0 && (
@@ -318,6 +334,26 @@ export function CategoryForm({
             </span>
           )}
         </label>
+        {c.type === 'fix' && (
+          <label className="field">
+            Milyen gyakran?
+            <select value={cycle} onChange={(e) => setCycle(Number(e.target.value))}>
+              {CYCLES.map((x) => (
+                <option key={x.months} value={x.months}>{capitalize(x.label)}</option>
+              ))}
+            </select>
+          </label>
+        )}
+        {cycle > 1 && (
+          <label className="field">
+            Legközelebb esedékes
+            <select value={c.cycleStart ?? currentId} onChange={(e) => set({ cycleStart: e.target.value })}>
+              {cycleChoices.map((p) => (
+                <option key={p} value={p}>{periodName(p, p.slice(0, 4) !== currentId.slice(0, 4))}</option>
+              ))}
+            </select>
+          </label>
+        )}
         {hasDueDay && (
           <label className="field">
             {c.type === 'fix' ? 'Esedékesség napja' : 'Érkezés napja'} (nem kötelező)
@@ -396,7 +432,9 @@ export function CategoryForm({
       <div className="tiny faint" style={{ margin: '6px 0 14px' }}>
         {c.type === 'megtakaritas'
           ? `Az alapértelmezett összeg a havi félretétel terve. ${effect} A célnál látod, mikor gyűlik össze, és határidőnél azt is, mennyi kell havonta.`
-          : `Az alapértelmezett összeg a havi terv. ${effect}`}
+          : cycle > 1
+            ? `Az összeg egy alkalomra szól, és csak az esedékes hónapokban kerül a tervbe; a köztes hónapokban 0. ${effect}`
+            : `Az alapértelmezett összeg a havi terv. ${effect}`}
       </div>
 
       <div className="field small muted" style={{ marginBottom: 6 }}>Ikon</div>

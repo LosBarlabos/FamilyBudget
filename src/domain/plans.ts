@@ -1,5 +1,5 @@
 import { formatFt } from './money';
-import { periodAdjective, periodForName, periodFromName, periodShortLabel, shiftPeriod } from './periods';
+import { periodAdjective, periodDistance, periodForName, periodFromName, periodShortLabel, shiftPeriod } from './periods';
 import type { Category, PeriodId, Plan } from './types';
 
 export type PlanIndex = Map<string, Plan[]>;
@@ -34,6 +34,48 @@ export function effectivePlan(idx: PlanIndex, cat: Category, periodId: PeriodId,
     }
   }
   return firstPeriodId !== undefined && periodId < firstPeriodId ? 0 : cat.defaultAmount;
+}
+
+/** A választható gyakoriságok (hónapban) és a felület szava. */
+export const CYCLES: { months: number; label: string }[] = [
+  { months: 1, label: 'havonta' },
+  { months: 2, label: 'kéthavonta' },
+  { months: 3, label: 'negyedévente' },
+  { months: 6, label: 'félévente' },
+  { months: 12, label: 'évente' },
+];
+
+/** A kategória gyakorisága hónapban: 1, ha havonta (vagy nem fix számla, vagy hiányos a beállítás). */
+export function cycleOf(cat: Pick<Category, 'type' | 'cycleMonths' | 'cycleStart'>): number {
+  const n = cat.cycleMonths;
+  return cat.type === 'fix' && cat.cycleStart && n && CYCLES.some((c) => c.months === n && n > 1) ? n : 1;
+}
+
+export function cycleLabel(months: number): string {
+  return CYCLES.find((c) => c.months === months)?.label ?? `${months} havonta`;
+}
+
+/** Esedékes-e a számla az időszakban (havonta mindig). */
+export function isDuePeriod(cat: Pick<Category, 'type' | 'cycleMonths' | 'cycleStart'>, periodId: PeriodId): boolean {
+  const n = cycleOf(cat);
+  if (n === 1) return true;
+  const d = periodDistance(cat.cycleStart!, periodId);
+  return ((d % n) + n) % n === 0;
+}
+
+/** Az első esedékes időszak fromId-tól (azt is beleértve). */
+export function nextDuePeriod(cat: Pick<Category, 'type' | 'cycleMonths' | 'cycleStart'>, fromId: PeriodId): PeriodId {
+  let id = fromId;
+  for (let i = 0; i < cycleOf(cat) && !isDuePeriod(cat, id); i++) id = shiftPeriod(id, 1);
+  return id;
+}
+
+/**
+ * Az időszak terve a gyakorisággal együtt: nem esedékes hónapban 0, egyébként az (alkalmankénti) érvényes terv.
+ * A tervrekordok öröklése nem függ a gyakoriságtól, így a ciklus módosítása nem írja át a tárolt összegeket.
+ */
+export function scheduledPlan(idx: PlanIndex, cat: Category, periodId: PeriodId, firstPeriodId?: PeriodId): number {
+  return isDuePeriod(cat, periodId) ? effectivePlan(idx, cat, periodId, firstPeriodId) : 0;
 }
 
 /**

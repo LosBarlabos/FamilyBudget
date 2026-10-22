@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { applyPlanOps, effectivePlan, indexPlans, missingBasePlans, newCategoryPlans, planChangeOps, planStartId } from './plans';
+import {
+  applyPlanOps, cycleOf, effectivePlan, indexPlans, isDuePeriod, missingBasePlans, newCategoryPlans, nextDuePeriod, planChangeOps, planStartId,
+  scheduledPlan,
+} from './plans';
 import type { Category, Plan } from './types';
 
 const cat: Category = {
@@ -122,5 +125,37 @@ describe('alapértelmezett összeg mint sablon', () => {
     const plans = newCategoryPlans(cat, '2026-10', '2026-09');
     expect(plans).toEqual([{ periodId: '2026-10', categoryId: 'c1', amount: 100_000 }]);
     expect(effectivePlan(indexPlans(plans), cat, '2026-09', '2026-10')).toBe(0);
+  });
+});
+
+describe('nem havonta esedékes számla', () => {
+  const q: Category = { ...cat, id: 'q', type: 'fix', defaultAmount: 45_000, cycleMonths: 3, cycleStart: '2026-11' };
+
+  it('a ciklus kezdetétől minden n-edik időszakban esedékes, visszafelé is', () => {
+    const due = ['2026-08', '2026-09', '2026-10', '2026-11', '2026-12', '2027-01', '2027-02'].filter((p) => isDuePeriod(q, p));
+    expect(due).toEqual(['2026-08', '2026-11', '2027-02']);
+  });
+
+  it('a következő esedékes időszak (az adott időszakot is beleértve)', () => {
+    expect(nextDuePeriod(q, '2026-10')).toBe('2026-11');
+    expect(nextDuePeriod(q, '2026-11')).toBe('2026-11');
+    expect(nextDuePeriod(q, '2026-12')).toBe('2027-02');
+  });
+
+  it('a köztes hónapban 0 a terv, az esedékesben az alkalmankénti összeg', () => {
+    const idx = indexPlans([{ periodId: '2026-09', categoryId: 'q', amount: 45_000 }, { periodId: '2027-01', categoryId: 'q', amount: 48_000 }]);
+    expect(scheduledPlan(idx, q, '2026-10')).toBe(0);
+    expect(scheduledPlan(idx, q, '2026-11')).toBe(45_000);
+    // A köztes hónapban rögzített új összeg a következő esedékességtől látszik.
+    expect(scheduledPlan(idx, q, '2027-01')).toBe(0);
+    expect(scheduledPlan(idx, q, '2027-02')).toBe(48_000);
+  });
+
+  it('havonta, ha nem fix számla vagy hiányos a beállítás', () => {
+    expect(cycleOf(q)).toBe(3);
+    expect(cycleOf({ ...q, type: 'keret' })).toBe(1);
+    expect(cycleOf({ ...q, cycleStart: undefined })).toBe(1);
+    expect(cycleOf({ ...q, cycleMonths: 5 })).toBe(1);
+    expect(isDuePeriod({ ...q, type: 'keret' }, '2026-10')).toBe(true);
   });
 });

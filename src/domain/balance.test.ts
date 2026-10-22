@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { autoPaidPayments, averageActual, changeVsPrevious, changeVsSameDay, computeSummaries, countedAmount } from './balance';
+import { autoPaidPayments, averageActual, changeVsPrevious, changeVsSameDay, computeSummaries, countedAmount, quickFillAmount } from './balance';
 import { makeConfig, MAX_PERIOD_RANGE } from './periods';
 import { dueBills } from './todos';
 import type { BudgetData, Category, Entry } from './types';
@@ -269,5 +269,28 @@ describe('csoportos beszedés (automatikusan kifizetett számla)', () => {
     const d = auto([entry('2026-10', 'rezsi', 0, { settles: true })]);
     const s = computeSummaries(d, TODAY);
     expect(autoPaidPayments(s, d.categories[1])).toEqual([{ periodId: '2026-09', amount: 50_000, date: '2026-09-15' }]);
+  });
+});
+
+describe('negyedéves számla', () => {
+  // Biztosítás: negyedévente, novembertől (aug., nov., febr. …), alkalmanként 45 000 Ft.
+  const d = (entries: Entry[] = []) =>
+    data(entries, { categories: [cat('fizetes', 'bevetel', 500_000), cat('biztositas', 'fix', 45_000, { cycleMonths: 3, cycleStart: '2026-11' })] });
+  const plans = (s: ReturnType<typeof computeSummaries>) => s.periods.map((p) => `${p.id}:${p.byCategory.get('biztositas')?.plan}`);
+
+  it('csak az esedékes időszakokban van terve, és csak ott csökkenti az egyenleget', () => {
+    const s = computeSummaries(d(), TODAY);
+    expect(plans(s)).toEqual(['2026-08:45000', '2026-09:0', '2026-10:0', '2026-11:45000', '2026-12:0']);
+    expect(s.byId.get('2026-11')!.expense).toBe(45_000);
+    expect(s.byId.get('2026-12')!.expense).toBe(0);
+  });
+
+  it('a köztes hónapban rögzített tény is számít', () => {
+    expect(computeSummaries(d([entry('2026-10', 'biztositas', 12_000)]), TODAY).byId.get('2026-10')!.expense).toBe(12_000);
+  });
+
+  it('a gyors kitöltés nem írja át a havi tények alapján', () => {
+    const dd = d([entry('2026-09', 'biztositas', 45_000)]);
+    expect(quickFillAmount(computeSummaries(dd, TODAY), dd.entries, dd.categories[1], ['2026-09'])).toBeNull();
   });
 });

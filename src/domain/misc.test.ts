@@ -82,6 +82,15 @@ describe('mentés', () => {
     expect(previewImport(f)).toMatchObject({ periods: 2, categories: 1, entries: 1, lastChange: '2026-11-11T10:00:00Z' });
   });
 
+  it('a gyakoriság csak érvényes párként marad meg', () => {
+    const withCycle = (cycleMonths: unknown, cycleStart: unknown) =>
+      parseImport(file((f) => ({ ...f, categories: [{ ...f.categories[0], type: 'fix', cycleMonths, cycleStart }] }))).categories[0];
+    expect(withCycle(3, '2026-11')).toMatchObject({ cycleMonths: 3, cycleStart: '2026-11' });
+    expect(withCycle(5, '2026-11')).not.toHaveProperty('cycleMonths');
+    expect(withCycle(3, 'tegnap')).not.toHaveProperty('cycleStart');
+    expect(withCycle(1, '2026-11')).not.toHaveProperty('cycleMonths');
+  });
+
   it('hibás fájlt elutasít', () => {
     expect(() => parseImport('nem json')).toThrow('JSON');
     expect(() => parseImport('{"app":"mas"}')).toThrow();

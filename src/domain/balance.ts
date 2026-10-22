@@ -1,7 +1,7 @@
 import { addDays, differenceInCalendarDays } from 'date-fns';
 import { fromISO, makeConfig, MAX_PERIOD_RANGE, periodEnd, periodForDate, periodRange, periodStart, periodStatus, shiftPeriod, toISO } from './periods';
 import type { PeriodConfig, PeriodStatus } from './periods';
-import { effectivePlan, indexPlans } from './plans';
+import { cycleOf, indexPlans, scheduledPlan } from './plans';
 import { autoPaidDue, dueDateInPeriod } from './status';
 import type { BudgetData, Category, Entry, ISODate, PeriodId } from './types';
 import { isExpense, recordStyle } from './types';
@@ -107,7 +107,8 @@ export function computeSummaries(data: BudgetData, today: ISODate): Summaries {
       let actual = actuals.get(key) ?? 0;
       let settled = recordStyle(c) === 'fix' && settledKeys.has(key);
       // Archivált kategória a múltban a ténnyel még számít, a jövőre viszont már nincs terve.
-      const plan = c.archived && status !== 'closed' ? 0 : effectivePlan(plans, c, id, settings.firstPeriodId);
+      // A nem havonta esedékes számla köztes hónapjaiban 0 a terv.
+      const plan = c.archived && status !== 'closed' ? 0 : scheduledPlan(plans, c, id, settings.firstPeriodId);
       // Csoportos beszedés: rögzítés nélkül az esedékességtől kifizetett; bármely kézi rögzítés felülírja.
       const auto = !actuals.has(key) && !settled && plan > 0 && autoPaidDue(c, id, start, end, today) !== null;
       if (auto) {
@@ -231,7 +232,8 @@ export function totalsByType(cats: Category[], figs: Map<string, CategoryFigures
  * hogy egy hiányzó adat ne nullázza a tervet.
  */
 export function quickFillAmount(s: Summaries, entries: Entry[], cat: Category, sourceIds: PeriodId[]): number | null {
-  if (!isExpense(cat) || sourceIds.length === 0) return null;
+  // A nem havonta esedékes számla összegét az előző hónapok (többnyire 0) ténye nem mutatja.
+  if (!isExpense(cat) || cycleOf(cat) > 1 || sourceIds.length === 0) return null;
   const src = new Set(sourceIds);
   if (!entries.some((e) => e.categoryId === cat.id && e.kind !== 'withdrawal' && src.has(e.periodId))) return null;
   const sum = sourceIds.reduce((a, id) => a + (s.byId.get(id)?.byCategory.get(cat.id)?.actual ?? 0), 0);

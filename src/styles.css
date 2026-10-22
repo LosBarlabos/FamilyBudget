@@ -828,3 +828,5 @@ label.ob-row.ob-past { cursor: pointer; }
   .cal-month { min-width: 0; }
   .cal-row { grid-template-columns: 52px 30px minmax(0, 1fr) auto; gap: 8px; }
 }
+.plan-row.off-cycle { grid-template-columns: minmax(0, 1fr) auto; }
+.plan-row.off-cycle .rec-name { color: var(--text-2); }
