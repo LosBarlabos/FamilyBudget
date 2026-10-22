@@ -1,0 +1,43 @@
+import { formatRange, periodName } from '../../domain/periods';
+import { useBudget } from '../context';
+import { Icon } from './common';
+
+const STATUS_LABEL = { closed: 'Lezárt', current: 'Folyamatban', future: 'Terv' } as const;
+
+export function PeriodSwitcher() {
+  const { summaries, periodId, setPeriodId } = useBudget();
+  const list = summaries.periods;
+  const i = list.findIndex((p) => p.id === periodId);
+  const p = list[i];
+  const thisYear = summaries.currentId.slice(0, 4);
+
+  return (
+    <div className="period-switch">
+      <button className="icon" aria-label="Előző időszak" disabled={i <= 0} onClick={() => setPeriodId(list[i - 1].id)}>
+        <Icon name="chevron-left" />
+      </button>
+      <select aria-label="Időszak" value={periodId} onChange={(e) => setPeriodId(e.target.value)}>
+        {list.map((x) => (
+          <option key={x.id} value={x.id}>
+            {periodName(x.id, x.id.slice(0, 4) !== thisYear)}
+            {x.status === 'current' ? ' •' : ''}
+          </option>
+        ))}
+      </select>
+      <button className="icon" aria-label="Következő időszak" disabled={i >= list.length - 1} onClick={() => setPeriodId(list[i + 1].id)}>
+        <Icon name="chevron-right" />
+      </button>
+      {p && (
+        <span className="small muted num" style={{ marginLeft: 4 }}>
+          {formatRange(p.start, p.end)}
+        </span>
+      )}
+      {p && <span className={`period-badge ${p.status === 'current' ? 'current' : ''}`}>{STATUS_LABEL[p.status]}</span>}
+      {p && p.status !== 'current' && (
+        <button className="sm ghost" onClick={() => setPeriodId(summaries.currentId)}>
+          Ugrás a mostanira
+        </button>
+      )}
+    </div>
+  );
+}
