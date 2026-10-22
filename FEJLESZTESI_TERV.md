@@ -142,6 +142,8 @@ Ha nincs teendő, egy sor jelenik meg: „Minden rendben”.
 
 ## 8. Elemzés (új képernyő)
 
+> **Megbeszélt első kör (2026. október):** a „Hova ment a pénz” (tény/terv kategóriánként a választott időablakban), a legnagyobb eltérések (csak lezárt időszakokból), a hőtérkép a kategória-trenddel, a kereső és a #címkék, valamint a megtakarításból fizetett költés kiadásként. Időablak: „Ez az időszak / Utolsó 12 időszak / Naptári év”. Az éves összesítő (idei és tavalyi) és a „ki mennyit rögzített” bontás későbbre marad. Telefonon az Elemzés a Továbbiak lapon marad.
+
 - **Időablak:** „Utolsó 12 időszak” vagy naptári év választó.
 - **Hőtérkép:**
   - A sorok a kategóriák, csoportonként összecsukhatók. Az oszlopok az időszakok, a lezártak és a folyamatban lévő.

@@ -7,6 +7,9 @@ import { useToast } from '../context';
 import { writeError } from '../errors';
 import { readLocal, subscribeLocal, writeLocal } from '../localStore';
 
+/** A megjegyzésmezők közös javaslatlistája (#címkék); az App tölti fel. */
+export const NOTE_TAGS_LIST = 'note-tags';
+
 export function Icon({ name, style, className = '' }: { name: string; style?: CSSProperties; className?: string }) {
   return <i className={`ti ti-${name} ${className}`} style={style} aria-hidden="true" />;
 }
@@ -168,6 +171,7 @@ export function AmountInput({
         {(withNote || (noteToggle && noteOpen)) && (
           <input
             ref={noteRef}
+            list={NOTE_TAGS_LIST}
             type="text"
             className="sm"
             style={{ width: 150 }}

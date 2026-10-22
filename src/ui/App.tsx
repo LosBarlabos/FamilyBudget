@@ -8,11 +8,14 @@ import { backupIsStale, backupLabel, daysSince, exportBackup } from './backup';
 import { BudgetProvider, ToastProvider, useSafe, type Screen } from './context';
 import { useRouter } from './router';
 import { isQuickEntryKey } from './shortcuts';
-import { Icon } from './components/common';
+import { Icon, NOTE_TAGS_LIST } from './components/common';
 import { CoverSheet, coverSheetName, parseCoverSheet } from './components/Cover';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { QuickEntry } from './components/QuickEntry';
 import { Sheet } from './components/Sheet';
+import { parseTrendSheet, TrendSheet, trendSheetName } from './components/Trend';
+import { tagSummary } from '../domain/analysis';
+
 import { SyncButton, useAutoSync } from './components/SyncButton';
 import { useSyncConfig } from '../sync/engine';
 import { Analysis } from './screens/Analysis';
@@ -139,6 +142,10 @@ function Main({ data }: { data: BudgetData }) {
   // A lap a megnyitáskori időszakhoz tartozik: egy közben bekövetkező időszakváltás ne vigye át máshová.
   const openCover = useCallback((categoryId: string) => openSheet(coverSheetName(periodId, categoryId)), [openSheet, periodId]);
   const cover = parseCoverSheet(router.sheet);
+  const openTrend = useCallback((key: string) => openSheet(trendSheetName(key)), [openSheet]);
+  const trend = parseTrendSheet(router.sheet);
+  // A megjegyzésmezők javaslatai a korábbi #címkékből.
+  const tags = useMemo(() => tagSummary(data.entries).map((t) => t.tag), [data.entries]);
 
   const setPeriodId = useCallback(
     (id: PeriodId) => setSelected(id === summaries.currentId ? null : id),
@@ -172,7 +179,7 @@ function Main({ data }: { data: BudgetData }) {
   const days = daysSince(s.lastExportAt);
 
   return (
-    <BudgetProvider value={{ data, summaries, cfg, today, periodId, setPeriodId, go, openQuick, openCover, focusCategoryId: route.focus, clearFocus }}>
+    <BudgetProvider value={{ data, summaries, cfg, today, periodId, setPeriodId, go, openQuick, openCover, openTrend, focusCategoryId: route.focus, clearFocus }}>
       <div className="app">
         <header className="topbar">
           <div className="brand">
@@ -293,6 +300,10 @@ function Main({ data }: { data: BudgetData }) {
             </div>
           </Sheet>
         )}
+        {trend && <TrendSheet unitKey={trend} onClose={closeLayer} />}
+        <datalist id={NOTE_TAGS_LIST}>
+          {tags.map((t) => <option key={t} value={`#${t}`} />)}
+        </datalist>
         {cover && <CoverSheet periodId={cover.periodId} categoryId={cover.categoryId} onClose={closeLayer} />}
         {route.quick && <QuickEntry onClose={closeLayer} />}
       </div>

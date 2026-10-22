@@ -6,7 +6,7 @@ import { clampToPeriod } from '../../domain/periods';
 import { isExpense } from '../../domain/types';
 import { addEntry, ensureUnexpectedCategory, restoreEntries } from '../../db/repo';
 import { useBudget, useSafe, useToast } from '../context';
-import { Icon } from './common';
+import { Icon, NOTE_TAGS_LIST } from './common';
 
 const UNEXPECTED = '__unexpected__';
 
@@ -83,7 +83,9 @@ export function UnexpectedExpense({ onClose }: { onClose: () => void }) {
     if (source === 'savings') {
       if (!chosenSavings) return setError('Nincs megtakarítási kategória');
       if (amount > chosenSavings.saved) return setError(`Ezen csak ${formatFt(chosenSavings.saved)} van`);
-      const e = await addEntry(periodId, chosenSavings.cat.id, amount, date, text, 'withdrawal');
+      // A kimutatásokban a választott kategória kiadásaként látszik, „megtakarításból” jelöléssel.
+      const spend = catId === UNEXPECTED ? await ensureUnexpectedCategory() : data.categories.find((c) => c.id === catId);
+      const e = await addEntry(periodId, chosenSavings.cat.id, amount, date, text, 'withdrawal', false, spend?.id);
       toast(`${chosenSavings.cat.name}: ${formatFt(amount)} felhasználva`, () => restoreEntries([], [e.id]));
       onClose();
       go('record', chosenSavings.cat.id);
@@ -114,7 +116,7 @@ export function UnexpectedExpense({ onClose }: { onClose: () => void }) {
         </label>
         <label className="field">
           Mire ment?
-          <input type="text" placeholder="Autószerelés" value={note} onChange={(e) => setNote(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && submit()} />
+          <input type="text" list={NOTE_TAGS_LIST} placeholder="Autószerelés" value={note} onChange={(e) => setNote(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && submit()} />
         </label>
       </div>
 
@@ -126,18 +128,18 @@ export function UnexpectedExpense({ onClose }: { onClose: () => void }) {
             Megtakarításból
           </button>
         </div>
-        {source === 'monthly' ? (
-          <select className="sm" aria-label="Kategória" value={catId} onChange={(e) => setCatId(e.target.value)}>
-            <option value={unexpectedCat?.id ?? UNEXPECTED}>{unexpectedCat?.name ?? 'Váratlan kiadások'}</option>
-            <optgroup label="Vagy egy meglévő kategória">
-              {expenseCats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </optgroup>
-          </select>
-        ) : (
+        {source === 'savings' && (
           <select className="sm" aria-label="Megtakarítás" value={savingsId} onChange={(e) => { setSavingsId(e.target.value); setError(''); }}>
             {savings.map((s) => <option key={s.cat.id} value={s.cat.id}>{s.cat.name} · {formatFt(s.saved)} van rajta</option>)}
           </select>
         )}
+        {/* Megtakarításból fizetve is egy kiadási kategóriához tartozik: az Elemzésben annak költéseként látszik. */}
+        <select className="sm" aria-label={source === 'savings' ? 'Melyik kiadásként jelenjen meg' : 'Kategória'} value={catId} onChange={(e) => setCatId(e.target.value)}>
+          <option value={unexpectedCat?.id ?? UNEXPECTED}>{unexpectedCat?.name ?? 'Váratlan kiadások'}</option>
+          <optgroup label="Vagy egy meglévő kategória">
+            {expenseCats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </optgroup>
+        </select>
       </div>
 
       {impact && <div className="small muted impact"><Icon name="info-circle" /> {impact}</div>}

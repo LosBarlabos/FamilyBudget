@@ -248,6 +248,8 @@ export function normalizeExport(f: Record<string, unknown>, now = new Date()): E
       monthlyTotal: e.monthlyTotal === true ? (true as const) : undefined,
       createdAt: str(e.createdAt) ?? exportedAt,
       createdBy: str(e.createdBy)?.trim(),
+      // Ismeretlen kategóriára mutató hivatkozás nem hiba: a felhasználás megmarad, csak kiadásként nem látszik.
+      spendCategoryId: e.kind === 'withdrawal' && typeof e.spendCategoryId === 'string' && catIds.has(e.spendCategoryId) ? e.spendCategoryId : undefined,
     }));
   });
 

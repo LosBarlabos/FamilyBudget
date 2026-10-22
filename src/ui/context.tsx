@@ -30,6 +30,8 @@ export interface BudgetCtx {
   openQuick: () => void;
   /** A „Fedezet áthozása” lap megnyitása a kiválasztott időszakban, a megadott kerethez. */
   openCover: (categoryId: string) => void;
+  /** Az Elemzés trendlapja egy kategóriához („c:<id>”) vagy csoporthoz („g:<név>”). */
+  openTrend: (key: string) => void;
   focusCategoryId: string | null;
   /** A fókusz törlése az URL-ből, hogy a vissza lépés és az újratöltés ne alkalmazza újra. */
   clearFocus: () => void;

@@ -9,7 +9,7 @@ import { addEntry, restoreEntries } from '../../db/repo';
 import { useSettleRest } from '../actions';
 import { UNEXPECTED_PANEL, useBudget, useToast } from '../context';
 import { writeError } from '../errors';
-import { CatIcon, Icon, useLocalState } from './common';
+import { CatIcon, Icon, NOTE_TAGS_LIST, useLocalState } from './common';
 import { Sheet } from './Sheet';
 import { handOffUnexpected } from './UnexpectedExpense';
 
@@ -233,6 +233,7 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
           <input
             type="text"
             className="quick-note"
+            list={NOTE_TAGS_LIST}
             autoFocus
             placeholder="Megjegyzés"
             aria-label="Megjegyzés (nem kötelező)"

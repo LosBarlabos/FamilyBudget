@@ -9,7 +9,7 @@ import { recentEntries, recordedAtText, suggestedAmounts } from '../../domain/qu
 import { dueDateInPeriod, fixStatus, isOverdue, PAID_WORD, settleLabel } from '../../domain/status';
 import type { PeriodSummary } from '../../domain/balance';
 import type { Category, Entry, ISODate } from '../../domain/types';
-import { recordStyle } from '../../domain/types';
+import { isExpense, recordStyle } from '../../domain/types';
 import {
   addEntry, addSettlingEntry, changePlan, clearEntries, deleteEntry, markSettled, restoreEntries, restorePlansOf, setMonthlyTotal,
 } from '../../db/repo';
@@ -305,6 +305,10 @@ function FixRow({
   // 'settle': „Más összeg” (lezáró), 'part': „Részlet” (nem lezáró).
   const [editing, setEditing] = useState<'settle' | 'part' | null>(null);
   const [withdrawing, setWithdrawing] = useState(false);
+  // A felhasználás melyik kiadási kategória költéseként látszódjon a kimutatásokban (üres: egyik sem).
+  const [spendId, setSpendId] = useState('');
+  const { data } = useBudget();
+  const expenseCats = data.categories.filter((c) => isExpense(c) && !c.archived).sort((a, b) => a.order - b.order);
   const actual = entries.reduce((s, e) => s + e.amount, 0);
   const settled = entries.some((e) => e.settles);
   const status = fixStatus(plan, actual, settled);
@@ -327,7 +331,7 @@ function FixRow({
     });
 
   const withdraw = async (amount: number, note?: string) => {
-    const e = await addEntry(periodId, cat.id, amount, date, note, 'withdrawal');
+    const e = await addEntry(periodId, cat.id, amount, date, note, 'withdrawal', false, spendId || undefined);
     setWithdrawing(false);
     toast(`${cat.name}: ${formatFt(amount)} felhasználva`, () => restoreEntries([], [e.id]));
   };
@@ -511,7 +515,14 @@ function FixRow({
               </div>
             )}
             {withdrawing && (
-              <div style={{ marginTop: 8 }}>
+              <div style={{ marginTop: 8, display: 'grid', gap: 8 }}>
+                <label className="small muted" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  Mire ment?
+                  <select className="sm" value={spendId} onChange={(e) => setSpendId(e.target.value)}>
+                    <option value="">Nem számít kiadásnak</option>
+                    {expenseCats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </label>
                 <AmountInput
                   autoFocus
                   withNote

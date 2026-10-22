@@ -102,8 +102,9 @@ export async function addEntry(
   note?: string,
   kind?: Entry['kind'],
   settles?: boolean,
+  spendCategoryId?: string,
 ) {
-  const e = entryRecord(periodId, categoryId, amount, date, note, kind, settles);
+  const e = entryRecord(periodId, categoryId, amount, date, note, kind, settles, spendCategoryId);
   await db.entries.add(e);
   return e;
 }
@@ -116,6 +117,7 @@ function entryRecord(
   note?: string,
   kind?: Entry['kind'],
   settles?: boolean,
+  spendCategoryId?: string,
 ): Entry {
   // 0 Ft-os rögzítés csak lezárásként értelmes (havi zárás: „Nem volt”).
   if (!Number.isInteger(amount) || amount < 0 || (amount === 0 && !settles)) throw new Error('Érvénytelen összeg.');
@@ -124,6 +126,7 @@ function entryRecord(
     settles: settles && kind !== 'withdrawal' ? true : undefined,
     createdAt: new Date().toISOString(),
     createdBy: entryAuthor,
+    spendCategoryId: kind === 'withdrawal' ? spendCategoryId || undefined : undefined,
   };
 }
 

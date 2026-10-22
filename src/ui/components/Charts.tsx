@@ -6,8 +6,9 @@ import { useMemo } from 'react';
 import { Bar as BarChart, Line } from 'react-chartjs-2';
 import type { Summaries } from '../../domain/balance';
 import { formatFt, formatShort } from '../../domain/money';
-import { periodName, periodShortName } from '../../domain/periods';
-import type { Category, PeriodId } from '../../domain/types';
+import { periodName, periodShortLabel, periodShortName } from '../../domain/periods';
+import { savingsSpend, type TrendPoint } from '../../domain/analysis';
+import type { Category, Entry, PeriodId } from '../../domain/types';
 import { isExpense } from '../../domain/types';
 import { displayUnits } from '../../domain/units';
 import { useColorScheme } from './common';
@@ -147,18 +148,27 @@ const MAX_UNITS = 8;
 export function SpendingChart({
   summaries,
   categories,
+  entries = [],
   selectedId,
   onSelect,
   height = 240,
 }: {
   summaries: Summaries;
   categories: Category[];
+  /** A megtakarításból fizetett költés (felhasználás „Mire ment?” kategóriával) halvány rétegként jelenik meg. */
+  entries?: Entry[];
   selectedId: PeriodId;
   onSelect: (id: PeriodId) => void;
   height?: number;
 }) {
   const t = useChartTheme();
   const ps = summaries.periods;
+  const savings = useMemo(() => {
+    const spend = savingsSpend(entries);
+    return displayUnits(categories.filter(isExpense))
+      .map((u) => ({ ...u, values: ps.map((p) => u.categories.reduce((s, c) => s + (spend.get(c.id)?.get(p.id) ?? 0), 0)) }))
+      .filter((u) => u.values.some((v) => v > 0));
+  }, [entries, categories, ps]);
 
   const series = useMemo(() => {
     const units = displayUnits(categories.filter(isExpense));
@@ -199,6 +209,19 @@ export function SpendingChart({
       borderRadius: 2,
     })),
   };
+  data.datasets.push(
+    ...savings.map((s) => ({
+      label: `${s.name} (megtakarításból)`,
+      data: s.values,
+      backgroundColor: `${s.color}40`,
+      borderColor: s.color,
+      borderWidth: 1,
+      borderDash: [3, 2],
+      borderSkipped: false as const,
+      maxBarThickness: 34,
+      borderRadius: 2,
+    })),
+  );
 
   const base = baseOptions(t, (i) => onSelect(ps[i].id)) as ChartOptions<'bar'>;
   const options: ChartOptions<'bar'> = {
@@ -232,9 +255,110 @@ export function SpendingChart({
             {s.name}
           </span>
         ))}
+        {savings.length > 0 && (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <span style={{ width: 10, height: 10, borderRadius: 2, background: `${t.tick}40`, border: `1px dashed ${t.tick}` }} />
+            halvány: megtakarításból
+          </span>
+        )}
       </div>
       <div style={{ position: 'relative', height }}>
         <BarChart data={data} options={options} aria-label="Kiadások kategóriánként, időszakonként" role="img" />
+      </div>
+    </div>
+  );
+}
+
+/** Egy kategória (csoport) trendje: tény vonalként, terv lépcsőként, 3 havi átlag szaggatottan. */
+export function TrendChart({ points, refId, height = 220 }: { points: TrendPoint[]; refId: PeriodId; height?: number }) {
+  const t = useChartTheme();
+  const withSavings = points.some((p) => p.fromSavings > 0);
+  const data: ChartData<'line'> = {
+    labels: points.map((p) => periodShortLabel(p.periodId, refId)),
+    datasets: [
+      {
+        label: 'Terv',
+        data: points.map((p) => p.plan),
+        borderColor: t.faint,
+        borderWidth: 2,
+        stepped: 'middle',
+        pointRadius: 0,
+      },
+      {
+        label: '3 havi átlag',
+        data: points.map((p) => p.avg3),
+        borderColor: t.tick,
+        borderWidth: 1.5,
+        borderDash: [5, 4],
+        pointRadius: 0,
+        tension: 0.25,
+      },
+      ...(withSavings
+        ? [{
+            label: 'Megtakarításból együtt',
+            data: points.map((p) => p.actual + p.fromSavings),
+            borderColor: `${t.accent}80`,
+            borderWidth: 2,
+            borderDash: [2, 3],
+            pointRadius: 0,
+            tension: 0.25,
+          }]
+        : []),
+      {
+        label: 'Tény',
+        data: points.map((p) => p.actual),
+        borderColor: t.accent,
+        backgroundColor: `${t.accent}14`,
+        fill: 'origin',
+        borderWidth: 2.5,
+        pointRadius: points.map((p) => (p.current ? 5 : 3)),
+        pointBackgroundColor: points.map((p) => (p.current ? t.surface : t.accent)),
+        pointBorderColor: points.map((p) => (p.current ? t.accent : t.surface)),
+        pointBorderWidth: 2,
+        tension: 0.25,
+      },
+    ],
+  };
+  const base = baseOptions(t, () => {}) as ChartOptions<'line'>;
+  const options: ChartOptions<'line'> = {
+    ...base,
+    onHover: undefined,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        itemSort: (a, b) => b.datasetIndex - a.datasetIndex,
+        filter: (item) => item.raw !== null,
+        callbacks: {
+          title: (items) => {
+            const p = points[items[0].dataIndex];
+            return `${periodName(p.periodId, true)}${p.current ? ' (eddig)' : ''}`;
+          },
+          label: (c) => `${c.dataset.label}: ${formatFt(Number(c.raw))}`,
+        },
+      },
+    },
+    scales: { ...base.scales, y: { ...base.scales!.y, beginAtZero: true } },
+  };
+  return (
+    <div>
+      <div className="tiny muted" style={{ display: 'flex', gap: '6px 16px', marginBottom: 8, flexWrap: 'wrap' }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ width: 16, height: 2, background: t.accent }} /> Tény
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ width: 16, height: 2, background: t.faint }} /> Terv
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ width: 16, borderTop: `2px dashed ${t.tick}` }} /> 3 havi átlag
+        </span>
+        {withSavings && (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ width: 16, borderTop: `2px dotted ${t.accent}` }} /> Megtakarításból együtt
+          </span>
+        )}
+      </div>
+      <div style={{ position: 'relative', height }}>
+        <Line data={data} options={options} aria-label="Kiadás időszakonként a tervvel és az átlaggal" role="img" />
       </div>
     </div>
   );

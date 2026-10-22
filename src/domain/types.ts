@@ -69,6 +69,11 @@ export interface Entry {
    */
   kind?: 'withdrawal';
   /**
+   * Csak 'withdrawal': a megtakarításból fizetett költés melyik kiadási kategória költéseként látszódjon a
+   * kimutatásokban (Elemzés, havi kiadás-grafikon), „megtakarításból” jelöléssel. A futó egyenleget nem érinti.
+   */
+  spendCategoryId?: string;
+  /**
    * Fix tételnél (számla, egyösszegű bevétel, megtakarítás): ezzel a tétel ebben az időszakban lezárult,
    * több rögzítés nem várható, akkor sem, ha a tény eltér a tervtől. Ilyenkor a futó egyenleg a tényt számolja.
    */

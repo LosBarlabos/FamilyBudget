@@ -128,7 +128,7 @@ export function Dashboard() {
         </div>
         <div className="card">
           <div className="card-head"><h2>Kiadások havonta</h2></div>
-          <SpendingChart summaries={summaries} categories={data.categories} selectedId={periodId} onSelect={setPeriodId} />
+          <SpendingChart summaries={summaries} categories={data.categories} entries={data.entries} selectedId={periodId} onSelect={setPeriodId} />
         </div>
       </div>
 
