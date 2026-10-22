@@ -15,6 +15,7 @@ import { QuickEntry } from './components/QuickEntry';
 import { Sheet } from './components/Sheet';
 import { parseTrendSheet, TrendSheet, trendSheetName } from './components/Trend';
 import { tagSummary } from '../domain/analysis';
+import { dueBills } from '../domain/todos';
 
 import { SyncButton, useAutoSync } from './components/SyncButton';
 import { useSyncConfig } from '../sync/engine';
@@ -179,36 +180,64 @@ function Main({ data }: { data: BudgetData }) {
   useAutoSync(data);
   const stale = !syncCfg && backupIsStale(data);
   const days = daysSince(s.lastExportAt);
+  // Az oldalsáv Rögzítés menüpontja a folyamatban lévő időszak lejárt számláit számolja.
+  const overdue = useMemo(() => dueBills(data.categories, cur, today).filter((b) => b.overdue).length, [data.categories, cur, today]);
+  // A mentés vagy a szinkron állapota: telefonon a fejlécben ikonként, asztalon az oldalsáv alján.
+  const saveStatus = syncCfg ? (
+    <SyncButton onOpenSettings={() => tab('settings')} />
+  ) : (
+    <button
+      className={`sm backup ${stale ? 'stale' : ''}`}
+      title={`Mentés letöltése fájlba · ${backupLabel(days)}`}
+      aria-label={`Mentés letöltése fájlba · ${backupLabel(days)}`}
+      onClick={() => safe(() => exportBackup(data))}
+    >
+      <Icon name={stale ? 'alert-triangle' : 'cloud-download'} /> <span className="backup-label">{stale ? 'Mentés most' : backupLabel(days)}</span>
+    </button>
+  );
 
   return (
     <BudgetProvider value={{ data, summaries, cfg, today, periodId, setPeriodId, go, openQuick, openCover, openTrend, focusCategoryId: route.focus, clearFocus }}>
       <div className="app">
+        {/* Asztalon oldalsáv: logó, kiemelt rögzítés, a menü ikonokkal, alul a mentés állapota. */}
+        <aside className="sidebar">
+          <div className="side-brand">
+            <span className="side-logo"><Icon name="wallet" /></span>
+            <span>Családi<br />költségvetés</span>
+          </div>
+          <button className="primary side-add" title="Gyors rögzítés (N)" aria-label="Gyors rögzítés" aria-keyshortcuts="N" onClick={openQuick}>
+            <Icon name="plus" /> Rögzítés <kbd aria-hidden="true">N</kbd>
+          </button>
+          <nav className="side-nav" aria-label="Fő navigáció">
+            {NAV.map((n) => (
+              <button key={n.id} className={screen === n.id ? 'on' : ''} aria-current={screen === n.id ? 'page' : undefined} onClick={() => tab(n.id)}>
+                <Icon name={n.icon} /> {n.label}
+                {n.id === 'record' && overdue > 0 && (
+                  <span className="side-badge" title={`${overdue} lejárt számla`}>
+                    {overdue}
+                    <span className="sr-only"> lejárt számla</span>
+                  </span>
+                )}
+              </button>
+            ))}
+          </nav>
+          <div className="side-foot">
+            {!syncCfg && stale && (
+              <div className="side-alert">
+                <strong>{backupLabel(days)}</strong>
+                <span>Az adatok csak ebben a böngészőben vannak.</span>
+              </div>
+            )}
+            {saveStatus}
+          </div>
+        </aside>
+
+        <div className="app-main">
         <header className="topbar">
           <div className="brand">
             <Icon name="wallet" /> <span>Családi költségvetés</span>
           </div>
-          <nav className="nav" aria-label="Fő navigáció">
-            {NAV.map((n) => (
-              <button key={n.id} className={screen === n.id ? 'on' : ''} aria-current={screen === n.id ? 'page' : undefined} onClick={() => tab(n.id)}>
-                {n.label}
-              </button>
-            ))}
-          </nav>
-          <button className="primary quick-add" title="Gyors rögzítés (N)" aria-label="Gyors rögzítés" aria-keyshortcuts="N" onClick={openQuick}>
-            <Icon name="plus" /> Rögzítés
-          </button>
-          {syncCfg ? (
-            <SyncButton onOpenSettings={() => tab('settings')} />
-          ) : (
-            <button
-              className={`sm backup ${stale ? 'stale' : ''}`}
-              title={`Mentés letöltése fájlba · ${backupLabel(days)}`}
-              aria-label={`Mentés letöltése fájlba · ${backupLabel(days)}`}
-              onClick={() => safe(() => exportBackup(data))}
-            >
-              <Icon name={stale ? 'alert-triangle' : 'cloud-download'} /> <span className="backup-label">{backupLabel(days)}</span>
-            </button>
-          )}
+          {saveStatus}
         </header>
 
         {newPeriod && (
@@ -309,6 +338,7 @@ function Main({ data }: { data: BudgetData }) {
         </datalist>
         {cover && <CoverSheet periodId={cover.periodId} categoryId={cover.categoryId} onClose={closeLayer} />}
         {route.quick && <QuickEntry onClose={closeLayer} />}
+        </div>
       </div>
     </BudgetProvider>
   );
