@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { computeSummaries } from '../domain/balance';
 import { formatRange, makeConfig, msUntilNextDay, periodName, periodStart, shortDate, todayISO } from '../domain/periods';
 import type { BudgetData, PeriodId } from '../domain/types';
+import { SAMPLE } from '../db/sampleMode';
 import { loadAll, migrateBasePlans, requestPersistence, updateSettings } from '../db/repo';
 import { backupIsStale, backupLabel, daysSince, exportBackup } from './backup';
 import { BudgetProvider, ToastProvider, useSafe, type Screen } from './context';
@@ -124,7 +125,9 @@ function Main({ data }: { data: BudgetData }) {
   }, []);
 
   useEffect(() => {
-    document.title = screen === 'dashboard' ? 'Családi költségvetés' : `${nav(screen).label} · Családi költségvetés`;
+    // A mintaadatos fül a címéről is felismerhető (a képernyőn nem jelenik meg, hogy a felmérést ne zavarja).
+    const prefix = SAMPLE.active ? '[Minta] ' : '';
+    document.title = prefix + (screen === 'dashboard' ? 'Családi költségvetés' : `${nav(screen).label} · Családi költségvetés`);
   }, [screen]);
 
   const go = useCallback(

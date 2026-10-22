@@ -2,6 +2,12 @@
 // érvényesül, ha a beállító komponens közben lecsatolódott (pl. egy később megnyomott toast-visszavonás), és
 // minden ugyanazt a kulcsot olvasó komponens frissül. Ha a localStorage nem érhető el, csak memóriában él.
 
+import { SAMPLE } from '../db/sampleMode';
+
+/** Mintaadatos módban (csak fejlesztéskor) a kulcsok külön névteret kapnak, hogy a valódi beállítások érintetlenek maradjanak. */
+export const SAMPLE_PREFIX = 'minta:';
+const storageKey = (key: string) => (SAMPLE.active ? SAMPLE_PREFIX + key : key);
+
 const cache = new Map<string, unknown>();
 const subs = new Map<string, Set<() => void>>();
 
@@ -9,7 +15,7 @@ export function readLocal<T>(key: string, initial: T): T {
   if (cache.has(key)) return cache.get(key) as T;
   let v = initial;
   try {
-    const s = localStorage.getItem(key);
+    const s = localStorage.getItem(storageKey(key));
     if (s) v = JSON.parse(s) as T;
   } catch {
     /* nem kritikus */
@@ -23,7 +29,7 @@ export function writeLocal<T>(key: string, initial: T, nv: T | ((prev: T) => T))
   const next = typeof nv === 'function' ? (nv as (prev: T) => T)(readLocal(key, initial)) : nv;
   cache.set(key, next);
   try {
-    localStorage.setItem(key, JSON.stringify(next));
+    localStorage.setItem(storageKey(key), JSON.stringify(next));
   } catch {
     /* nem kritikus */
   }

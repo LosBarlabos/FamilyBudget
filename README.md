@@ -11,9 +11,10 @@ npm install
 npm run dev        # http://localhost:5173
 npm test           # a számítási logika tesztjei
 npm run build      # éles build a dist/ mappába
+npm run kepek      # képernyőképek a mintaadattal (fut a dev szerver mellett, lásd docs/design/00-elokeszites.md)
 ```
 
-Fejlesztői módban az adatbázis a böngészőkonzolból `db` néven elérhető (Dexie), hibakereséshez.
+Fejlesztői módban az adatbázis a böngészőkonzolból `db` néven elérhető (Dexie), hibakereséshez. A `?minta=teljes`, `?minta=szelso` vagy `?minta=ures` paraméter mintaadattal indítja az appot egy külön adatbázisban, a `?minta=ki` visszavált a valódi adatokra.
 
 ## Felépítés
 

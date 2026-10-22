@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie';
+import { SAMPLE, SAMPLE_DB_NAME } from './sampleMode';
 import type { BudgetData, Category, Entry, PeriodOverride, Plan, Settings } from '../domain/types';
 
 /** Közös használat: a legutóbb szinkronizált állapot (a háromutas összefésülés alapja) és a fájl sha-ja. */
@@ -31,4 +32,4 @@ export class BudgetDB extends Dexie {
   }
 }
 
-export const db = new BudgetDB();
+export const db = new BudgetDB(SAMPLE.active ? SAMPLE_DB_NAME : undefined);
