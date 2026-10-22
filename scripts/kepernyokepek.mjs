@@ -8,39 +8,15 @@
 // Kimenet: docs/design/kepek/<címke>/<minta>/<téma>/<szélesség>/<nn-képernyő>.png (a hajtás feletti rész) és
 // ...-teljes.png (az egész oldal), valamint egy index.html áttekintő. A mappa nincs a gitben.
 
-import { spawn } from 'node:child_process';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
+import { openBrowser, parseArgs, requireServer, SCREENS, sleep, THEMES, VIEWPORTS } from './cdp.mjs';
 
-const args = Object.fromEntries(
-  process.argv.slice(2).reduce((acc, a, i, all) => (a.startsWith('--') ? [...acc, [a.slice(2), all[i + 1]]] : acc), []),
-);
+const args = parseArgs();
 const BASE = (args.url ?? 'http://localhost:5173/').replace(/#.*$/, '');
 const LABEL = args.cimke ?? 'alap';
 const OUT = join('docs', 'design', 'kepek', LABEL);
-const CHROME = process.env.CHROME ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
-/** A mérési mátrix (a 0. fázis leírása: docs/design/00-elokeszites.md). */
-const VIEWPORTS = [
-  { width: 375, height: 812, touch: true }, // telefon
-  { width: 768, height: 1024, touch: true }, // táblagép állva
-  { width: 1024, height: 768, touch: false }, // kis laptop, táblagép fekve
-  { width: 1440, height: 900, touch: false }, // asztali
-];
-const THEMES = [
-  { name: 'vilagos', scheme: 'light' },
-  { name: 'sotet', scheme: 'dark' },
-];
-const SCREENS = [
-  ['01-attekintes', '#/attekintes'],
-  ['02-rogzites', '#/rogzites'],
-  ['03-tervezo', '#/terv'],
-  ['04-elemzes', '#/elemzes'],
-  ['05-szamlanaptar', '#/naptar'],
-  ['06-kategoriak', '#/kategoriak'],
-  ['07-beallitasok', '#/beallitasok'],
-];
 /** Rétegek: a hash nyitja meg őket, a Továbbiak lapot a mobil alsó sáv gombja. */
 const LAYERS = [
   ['10-gyorsrogzito', '#/attekintes?gyors'],
@@ -54,98 +30,9 @@ const PLAN = [
   { sample: 'ures', viewports: [VIEWPORTS[0], VIEWPORTS[3]], screens: [['00-elso-inditas', '']], layers: [] },
 ].filter((p) => !args.csak || p.sample === args.csak);
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
-/** Minimális DevTools-kliens: kérés–válasz azonosítóval, és egy eseményre várás. */
-async function connect(wsUrl) {
-  const ws = new WebSocket(wsUrl);
-  await new Promise((ok, fail) => {
-    ws.onopen = ok;
-    ws.onerror = fail;
-  });
-  let id = 0;
-  const pending = new Map();
-  const waiters = [];
-  ws.onmessage = (m) => {
-    const msg = JSON.parse(m.data);
-    if (msg.id && pending.has(msg.id)) {
-      const { ok, fail } = pending.get(msg.id);
-      pending.delete(msg.id);
-      if (msg.error) fail(new Error(`${msg.error.message} (${msg.error.code})`));
-      else ok(msg.result);
-    } else if (msg.method) {
-      for (let i = waiters.length - 1; i >= 0; i--) if (waiters[i].method === msg.method) waiters.splice(i, 1)[0].ok(msg.params);
-    }
-  };
-  return {
-    send: (method, params = {}) =>
-      new Promise((ok, fail) => {
-        pending.set(++id, { ok, fail });
-        ws.send(JSON.stringify({ id, method, params }));
-      }),
-    once: (method, timeout = 15_000) =>
-      new Promise((ok, fail) => {
-        waiters.push({ method, ok });
-        setTimeout(() => fail(new Error(`Nem jött meg: ${method}`)), timeout);
-      }),
-    close: () => ws.close(),
-  };
-}
-
-async function launchChrome() {
-  const profile = await mkdtemp(join(tmpdir(), 'kepernyokepek-'));
-  const proc = spawn(CHROME, [
-    '--headless=new', '--remote-debugging-port=0', `--user-data-dir=${profile}`, '--no-first-run',
-    '--no-default-browser-check', '--hide-scrollbars', '--lang=hu-HU', 'about:blank',
-  ]);
-  const port = await new Promise((ok, fail) => {
-    let err = '';
-    proc.stderr.on('data', (d) => {
-      err += d;
-      const m = err.match(/DevTools listening on ws:\/\/[^:]+:(\d+)\//);
-      if (m) ok(m[1]);
-    });
-    proc.on('exit', (code) => fail(new Error(`A Chrome kilépett (${code}). Más útvonalon van? CHROME=... \n${err}`)));
-  });
-  const target = await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, { method: 'PUT' })).json();
-  const cdp = await connect(target.webSocketDebuggerUrl);
-  return {
-    cdp,
-    stop: async () => {
-      cdp.close();
-      proc.kill();
-      await sleep(300);
-      await rm(profile, { recursive: true, force: true });
-    },
-  };
-}
-
 async function main() {
-  try {
-    await fetch(BASE);
-  } catch {
-    throw new Error(`Nem érhető el: ${BASE}. Előbb indítsd el a fejlesztői szervert (npm run dev).`);
-  }
-  const { cdp, stop } = await launchChrome();
-  const evaluate = async (expression) =>
-    (await cdp.send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true })).result.value;
-  const settle = async () => {
-    for (let i = 0; i < 50 && !(await evaluate(`document.querySelector('#root')?.childElementCount > 0`)); i++) await sleep(200);
-    await evaluate('document.fonts.ready.then(() => true)');
-    // A grafikonok animációja és a késleltetett elrendezés.
-    await sleep(1200);
-  };
-  const load = async (url) => {
-    // Előbb egy üres lap: ha csak a hash változna, az a lapon belül maradna, de minden kép tiszta betöltésből
-    // készüljön. A mintaadatos mód a fülön (sessionStorage) közben megmarad.
-    const blank = cdp.once('Page.loadEventFired');
-    await cdp.send('Page.navigate', { url: 'about:blank' });
-    await blank;
-    const loaded = cdp.once('Page.loadEventFired');
-    await cdp.send('Page.navigate', { url });
-    await loaded;
-    await settle();
-  };
+  await requireServer(BASE);
+  const { cdp, evaluate, load, setViewport, setTheme, stop } = await openBrowser();
   const shots = [];
   const capture = async (dir, name) => {
     await mkdir(dir, { recursive: true });
@@ -162,16 +49,13 @@ async function main() {
   };
 
   try {
-    await cdp.send('Page.enable');
-    await cdp.send('Runtime.enable');
     for (const p of PLAN) {
       // A minta egyszer töltődik be; a fül utána mintaadatos marad (sessionStorage), az újratöltések nem írják felül.
       await load(`${BASE}?minta=${p.sample}`);
       for (const theme of THEMES) {
-        await cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: theme.scheme }] });
+        await setTheme(theme);
         for (const vp of p.viewports) {
-          await cdp.send('Emulation.setDeviceMetricsOverride', { width: vp.width, height: vp.height, deviceScaleFactor: vp.touch ? 2 : 1, mobile: vp.touch });
-          await cdp.send('Emulation.setTouchEmulationEnabled', vp.touch ? { enabled: true, maxTouchPoints: 5 } : { enabled: false });
+          await setViewport(vp);
           const dir = join(OUT, p.sample, theme.name, String(vp.width));
           for (const [name, hash] of p.screens) {
             await load(`${BASE}${hash}`);

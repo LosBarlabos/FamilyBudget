@@ -54,6 +54,7 @@ describe('buildSample', () => {
     expect(kinds).toContain('income');
     expect(kinds).not.toContain('idle');
     expect(s.periods.at(-1)!.endBalance).toBeGreaterThan(0);
+    expect(f.entries.every((e) => new Date(e.createdAt) <= now)).toBe(true);
   });
 
   it.each(DAYS)('szelso, %s: negatív egyenleg, 40 kategória, nyolcjegyű összeg, havi zárás', (day) => {

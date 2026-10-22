@@ -59,6 +59,8 @@ A `FEJLESZTESI_TERV.md` általános szabályai érvényesek (magyar, mondatkezd�
 - Fekvő telefon, képernyő-billentyűzet a gyorsrögzítő alatt, `safe-area` a Dynamic Island és a gesztussáv körül.
 - Szöveg 200%-os nagyításnál és iOS nagy betűméretnél.
 
+**Állapot: kész (2026-10-22).** Az összefoglaló és a gyors javítások listája: `docs/design/01-osszefoglalo.md`. A mérések újrafuttatása: `npm run meresek -- --probak <a UX/UI Audit plugin scripts mappája>`.
+
 ## 2. Használói felmérés és összegzés
 
 - **2.1 `design:user-research`:** rövid interjúvázlat a család felhasználóinak (10–15 perc), és egy egyhetes használati napló: mikor, melyik eszközön, mire használják; mi akad el; mit csinálnak még Excelben vagy fejben. A szinkron miatt két eszköz van, ezért a „ki rögzített” kérdés is ide tartozik.

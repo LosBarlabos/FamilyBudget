@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc",
-    "kepek": "node scripts/kepernyokepek.mjs"
+    "kepek": "node scripts/kepernyokepek.mjs",
+    "meresek": "node scripts/meresek.mjs"
   },
   "dependencies": {
     "@tabler/icons-webfont": "^3.49.0",
