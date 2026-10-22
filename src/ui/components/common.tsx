@@ -286,11 +286,13 @@ export function MenuButton({ label, items }: { label: string; items: MenuItem[] 
 }
 
 /** Egy kattintásos lezárás („Kifizetve”, „Megérkezett”); a mentés idejére letiltva, hogy dupla kattintás ne rögzítsen kétszer. */
-export function SettleButton({ label, onClick, ariaLabel }: { label: string; onClick: () => Promise<unknown>; ariaLabel?: string }) {
+export function SettleButton({
+  label, onClick, ariaLabel, primary = false,
+}: { label: string; onClick: () => Promise<unknown>; ariaLabel?: string; primary?: boolean }) {
   const [busy, setBusy] = useState(false);
   return (
     <button
-      className="sm success"
+      className={`sm ${primary ? 'primary' : 'success'}`}
       disabled={busy}
       aria-busy={busy}
       aria-label={ariaLabel}

@@ -185,10 +185,11 @@ function Main({ data }: { data: BudgetData }) {
           </button>
           <button
             className={`sm backup ${stale ? 'stale' : ''}`}
-            title="Mentés letöltése fájlba"
+            title={`Mentés letöltése fájlba · ${backupLabel(days)}`}
+            aria-label={`Mentés letöltése fájlba · ${backupLabel(days)}`}
             onClick={() => safe(() => exportBackup(data))}
           >
-            <Icon name={stale ? 'alert-triangle' : 'cloud-download'} /> {backupLabel(days)}
+            <Icon name={stale ? 'alert-triangle' : 'cloud-download'} /> <span className="backup-label">{backupLabel(days)}</span>
           </button>
         </header>
 

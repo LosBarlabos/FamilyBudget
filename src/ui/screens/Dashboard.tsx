@@ -63,7 +63,17 @@ export function Dashboard() {
   const savedNow = goals.reduce((sum, x) => sum + x.g.saved, 0);
   const inc = typeTotals(['bevetel']);
   const exp = typeTotals(['fix', 'keret']);
+  const sav = typeTotals(['megtakaritas']);
   const current = p.status === 'current';
+  // A folyamatban lévő időszakban az eddigi bevétel, kiadás és félretétel a kiemelt kártyán áll, ezért a
+  // KPI-sorban csak az egyenlegek maradnak.
+  const heroStats = current
+    ? [
+        { label: 'Bevétel', value: formatFt(inc.actual), sub: `terv ${formatFt(inc.plan)}` },
+        { label: 'Kiadás', value: formatFt(exp.actual), sub: `várható ${formatFt(p.expense)}` },
+        ...(sav.plan > 0 || sav.actual > 0 ? [{ label: 'Félretéve', value: formatFt(sav.actual), sub: `terv ${formatFt(sav.plan)}` }] : []),
+      ]
+    : [];
   const future = p.status === 'future';
 
   return (
@@ -72,29 +82,25 @@ export function Dashboard() {
         <PeriodSwitcher />
       </div>
 
-      <Hero p={p} pace={pace} />
+      <Hero p={p} pace={pace} stats={heroStats} />
       {current && <Todos p={p} pace={pace} goals={goals} />}
 
       {/* A folyamatban lévő időszakban a bevétel és a kiadás az eddigi tény, a terv és a várható alul. */}
       <div className="kpis">
+        {!current && (
+          <>
+            <Kpi label={future ? 'Bevétel (várható)' : 'Bevétel'} value={formatFt(p.income)} sub={`terv ${formatFt(inc.plan)}`} />
+            <Kpi label={future ? 'Kiadás (várható)' : 'Kiadás'} value={formatFt(p.expense)} sub={`terv ${formatFt(exp.plan)}`} />
+          </>
+        )}
         <Kpi
-          label={current ? 'Bevétel (eddig)' : future ? 'Bevétel (várható)' : 'Bevétel'}
-          value={formatFt(current ? inc.actual : p.income)}
-          sub={`terv ${formatFt(inc.plan)}`}
-        />
-        <Kpi
-          label={current ? 'Kiadás (eddig)' : future ? 'Kiadás (várható)' : 'Kiadás'}
-          value={formatFt(current ? exp.actual : p.expense)}
-          sub={current ? `várható ${formatFt(p.expense)}` : `terv ${formatFt(exp.plan)}`}
-        />
-        <Kpi
-          label={p.status === 'closed' ? 'Havi egyenleg' : 'Havi egyenleg (várható)'}
+          label={p.status === 'closed' ? 'Havi egyenleg' : 'Várható havi egyenleg'}
           value={formatSigned(p.net)}
           valueClass={p.net < 0 ? 'neg' : 'pos'}
           sub={p.savings > 0 ? `megtakarításra félretéve ${formatFt(p.savings)}` : undefined}
         />
         <Kpi
-          label="Futó egyenleg (időszak végén)"
+          label="Futó egyenleg a végén"
           value={formatFt(p.endBalance)}
           valueClass={p.endBalance < 0 ? 'neg' : ''}
           sub={
@@ -268,9 +274,10 @@ function Row({
         {!future && <Delta pct={change} goodWhenUp={income} title={changeTitle} />}
       </div>
       <div className="barcell">
+        {/* Terv és költés nélkül a sáv és a „ma” jelölő csak zaj lenne. */}
         {planOnly ? (
           <Bar value={figs.plan} max={figs.plan} tone="plan" />
-        ) : (
+        ) : unplanned && figs.actual === 0 ? null : (
           <Bar value={figs.actual} max={unplanned ? figs.actual : figs.plan} tone={tone} marker={income ? null : view.marker} />
         )}
       </div>

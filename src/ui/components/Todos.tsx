@@ -1,19 +1,23 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { PeriodSummary } from '../../domain/balance';
 import { coverSources, needsCover } from '../../domain/flex';
 import type { GoalProgress } from '../../domain/goals';
 import type { PaceOverview } from '../../domain/pace';
 import { clampToPeriod } from '../../domain/periods';
 import { settleLabel } from '../../domain/status';
-import { buildTodos, MAX_TODOS, todoText, type Todo } from '../../domain/todos';
+import {
+  buildTodos, groupSettleMessage, groupText, groupTodos, MAX_TODOS, todoText, type Todo, type TodoGroup, type TodoItem,
+} from '../../domain/todos';
 import type { Category } from '../../domain/types';
-import { useSettleRest } from '../actions';
+import { useSettleAll, useSettleRest } from '../actions';
 import { backupIsStale, daysSince, exportBackup } from '../backup';
 import { useBudget, useSafe } from '../context';
 import { Icon, SettleButton } from './common';
 
-const todoKey = (t: Todo) => {
+const todoKey = (t: TodoItem) => {
   switch (t.kind) {
+    case 'group':
+      return `group:${t.of}`;
     case 'bill':
     case 'income':
     case 'goal':
@@ -26,8 +30,11 @@ const todoKey = (t: Todo) => {
 };
 
 /** Ikon és szín a teendő súlya szerint: lejárt és túllépett piros, a figyelmeztetések borostyán. */
-function todoIcon(t: Todo): { name: string; tone: 'bad' | 'warn' | 'info' } {
+function todoIcon(t: TodoItem): { name: string; tone: 'bad' | 'warn' | 'info' } {
   switch (t.kind) {
+    case 'group':
+      if (t.of === 'income') return { name: 'cash', tone: 'warn' };
+      return t.items.some((b) => b.overdue) ? { name: 'receipt', tone: 'bad' } : { name: 'calendar-due', tone: 'warn' };
     case 'bill':
       return t.overdue ? { name: 'alert-circle', tone: 'bad' } : { name: 'calendar-due', tone: 'warn' };
     case 'income':
@@ -67,6 +74,10 @@ export function Todos({ p, pace, goals }: { p: PeriodSummary; pace: PaceOverview
       }),
     [data.categories, data.entries, data.settings.createdAt, p, pace, today, goals, stale, backupDays],
   );
+  const items = useMemo(() => groupTodos(todos), [todos]);
+  const settleAll = useSettleAll();
+  // A kinyitott csoportok („Egyenként”): a csoport kulcsa szerint.
+  const [expanded, setExpanded] = useState<string[]>([]);
 
   // A lezárt teendő eltűnik, vele a fókuszban lévő gomb is: a fókusz a helyére lépő teendő gombjára kerül,
   // ha nincs ilyen, a címre vagy a „Minden rendben” sorra, hogy billentyűzettel ne az oldal tetejéről kelljen
@@ -74,14 +85,14 @@ export function Todos({ p, pace, goals }: { p: PeriodSummary; pace: PaceOverview
   const pendingFocus = useRef<{ key: string; index: number } | null>(null);
   useEffect(() => {
     const pf = pendingFocus.current;
-    if (!pf || todos.slice(0, MAX_TODOS).some((t) => todoKey(t) === pf.key)) return;
+    if (!pf || items.slice(0, MAX_TODOS).some((t) => todoKey(t) === pf.key)) return;
     pendingFocus.current = null;
     // Ha a felhasználó közben máshová lépett, nem rántjuk el a fókuszt.
     if (document.activeElement && document.activeElement !== document.body) return;
-    const items = document.querySelectorAll<HTMLElement>('#todo-list > li');
-    const next = items[Math.min(pf.index, items.length - 1)]?.querySelector<HTMLElement>('button:not(:disabled)');
+    const rows = document.querySelectorAll<HTMLElement>('#todo-list > li');
+    const next = rows[Math.min(pf.index, rows.length - 1)]?.querySelector<HTMLElement>('button:not(:disabled)');
     (next ?? document.getElementById('todos-title') ?? document.getElementById('todos-ok'))?.focus();
-  }, [todos]);
+  }, [items]);
 
   if (todos.length === 0) {
     return (
@@ -91,7 +102,7 @@ export function Todos({ p, pace, goals }: { p: PeriodSummary; pace: PaceOverview
     );
   }
 
-  const shown = todos.slice(0, MAX_TODOS);
+  const shown = items.slice(0, MAX_TODOS);
   const date = clampToPeriod(today, p.id, cfg);
 
   const action = (t: Todo, index: number) => {
@@ -159,22 +170,76 @@ export function Todos({ p, pace, goals }: { p: PeriodSummary; pace: PaceOverview
     }
   };
 
+  const groupAction = (g: TodoGroup, index: number) => {
+    const key = todoKey(g);
+    const open = expanded.includes(key);
+    return (
+      <span className="todo-actions">
+        <button
+          className="sm"
+          aria-expanded={open}
+          aria-controls={`todo-sub-${g.of}`}
+          onClick={() => setExpanded(open ? expanded.filter((k) => k !== key) : [...expanded, key])}
+        >
+          {open ? 'Becsuk' : 'Egyenként'}
+        </button>
+        <SettleButton
+          primary
+          label={g.of === 'bill' ? 'Mind kifizetve' : 'Mind megjött'}
+          ariaLabel={`${groupText(g).title}: ${g.of === 'bill' ? 'mind kifizetve' : 'mind megérkezett'}`}
+          onClick={async () => {
+            pendingFocus.current = { key, index };
+            const ok = await safe(async () => {
+              await settleAll(p.id, g.items, date, groupSettleMessage(g));
+              return true;
+            });
+            if (!ok) pendingFocus.current = null;
+          }}
+        />
+      </span>
+    );
+  };
+
+  const row = (t: TodoItem, i: number) => {
+    const icon = todoIcon(t);
+    const { title, sub } = t.kind === 'group' ? groupText(t) : splitText(todoText(t, today));
+    const open = t.kind === 'group' && expanded.includes(todoKey(t));
+    return (
+      <li key={todoKey(t)} className="todo">
+        <span className={`todo-icon ${icon.tone}`}>
+          <Icon name={icon.name} />
+        </span>
+        <span className="todo-text num">
+          <span className="todo-title">{title}</span>
+          {sub && <span className="todo-sub">{sub}</span>}
+        </span>
+        {t.kind === 'group' ? groupAction(t, i) : action(t, i)}
+        {open && (
+          <ul id={`todo-sub-${t.of}`} className="todo-list todo-sublist">
+            {t.items.map((it) => row(it, i))}
+          </ul>
+        )}
+      </li>
+    );
+  };
+
   return (
     <section className="card todos" aria-labelledby="todos-title">
-      <h2 id="todos-title" className="todos-title" tabIndex={-1}>Teendők</h2>
+      <div className="todos-head">
+        <h2 id="todos-title" className="todos-title" tabIndex={-1}>Teendők</h2>
+        <span className="todos-count num" aria-hidden="true">{items.length}</span>
+      </div>
       <ul id="todo-list" className="todo-list">
-        {shown.map((t, i) => {
-          const icon = todoIcon(t);
-          return (
-            <li key={todoKey(t)} className="todo">
-              <Icon name={icon.name} className={`todo-icon ${icon.tone}`} />
-              <span className="todo-text small num">{todoText(t, today)}</span>
-              {action(t, i)}
-            </li>
-          );
-        })}
+        {shown.map(row)}
       </ul>
-      {todos.length > shown.length && <p className="tiny faint todo-more">és még {todos.length - shown.length} teendő</p>}
+      {items.length > shown.length && <p className="tiny faint todo-more">és még {items.length - shown.length} teendő</p>}
     </section>
   );
+}
+
+/** „Áram · lejárt okt. 15. · 18 000 Ft” → cím („Áram”) és alsor; elválasztó nélkül csak cím. */
+function splitText(text: string): { title: string; sub: string } {
+  const m = /( · |: )/.exec(text);
+  if (!m) return { title: text, sub: '' };
+  return { title: text.slice(0, m.index), sub: text.slice(m.index + m[0].length) };
 }

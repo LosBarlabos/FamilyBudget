@@ -3,7 +3,7 @@ import { computeSummaries } from './balance';
 import { goalProgress } from './goals';
 import { paceOverview } from './pace';
 import { settleLabel, settleMessage } from './status';
-import { buildTodos, daysSinceLastEntry, todoText, type Todo } from './todos';
+import { buildTodos, daysSinceLastEntry, groupSettleMessage, groupText, groupTodos, todoText, type Todo, type TodoGroup } from './todos';
 import type { BudgetData, Category, Entry } from './types';
 
 const sp = (s: string) => s.replace(/\s/g, ' ');
@@ -181,5 +181,41 @@ describe('egy kattintásos lezárás szövege', () => {
     expect(settleLabel('fix', true)).toBe('Maradék');
     expect(sp(settleMessage({ name: 'Áram', type: 'fix' }, 18_000, false))).toBe('Áram: kifizetve 18 000 Ft');
     expect(sp(settleMessage({ name: 'Fizetés', type: 'bevetel' }, 20_000, true))).toBe('Fizetés: maradék 20 000 Ft');
+  });
+});
+
+describe('teendők csoportosítása', () => {
+  const todos = setup('2026-10-20', base, { stale: true, days: 40 });
+  const items = groupTodos(todos);
+
+  it('a számlák és a bevételek egy-egy sorba kerülnek, a többi sorrend marad', () => {
+    expect(items.map((t) => (t.kind === 'group' ? `group:${t.of}` : t.kind))).toEqual([
+      'group:bill', 'group:income', 'envelope', 'envelope', 'goal', 'backup',
+    ]);
+  });
+
+  it('a csoport szövege és összege', () => {
+    const [bills, incomes] = items as TodoGroup[];
+    expect(bills.items.map((t) => t.cat.id)).toEqual(['aram', 'net']);
+    expect(bills.total).toBe(27_000);
+    expect(groupText(bills).title).toBe('2 számla, ebből 1 lejárt');
+    expect(sp(groupText(bills).sub)).toBe('Áram, Internet · 27 000 Ft');
+    expect(groupText(incomes).title).toBe('2 várt bevétel');
+    expect(incomes.total).toBe(520_000);
+    expect(sp(groupSettleMessage(bills))).toBe('2 számla kifizetve · 27 000 Ft');
+    expect(sp(groupSettleMessage(incomes))).toBe('2 bevétel megérkezett · 520 000 Ft');
+  });
+
+  it('csak lejárt, illetve csak közelgő számláknál', () => {
+    const late = groupTodos(setup('2026-11-06', base))[0] as TodoGroup & { of: 'bill' };
+    expect(late.items.map((t) => t.cat.id)).toEqual(['aram', 'net', 'gaz', 'hitel']);
+    expect(groupText(late).title).toBe('4 lejárt számla');
+    const soon = { ...late, items: late.items.map((t) => ({ ...t, overdue: false })) };
+    expect(groupText(soon).title).toBe('4 számla esedékes');
+  });
+
+  it('egyetlen számla vagy bevétel nem csoportosul', () => {
+    const one = todos.filter((t) => t.kind !== 'bill' || t.cat.id === 'aram').filter((t) => t.kind !== 'income' || t.cat.id === 'fiz');
+    expect(groupTodos(one)).toEqual(one);
   });
 });

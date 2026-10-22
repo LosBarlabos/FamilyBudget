@@ -15,7 +15,7 @@ import {
 } from '../../db/repo';
 import { useSettleRest } from '../actions';
 import { UNEXPECTED_PANEL, useBudget, useSafe, useToast } from '../context';
-import { AmountInput, Bar, CatIcon, Icon, Kpi, MenuButton, PACE_TONE, SettleButton, useLocalState } from '../components/common';
+import { AmountInput, Bar, CatIcon, Icon, Kpi, MenuButton, PACE_TONE, useLocalState, type MenuItem } from '../components/common';
 import { GoalStateChip } from '../components/Goals';
 import { UnexpectedExpense } from '../components/UnexpectedExpense';
 import { PeriodSwitcher } from '../components/PeriodSwitcher';
@@ -372,14 +372,56 @@ function FixRow({
   else if (actual === 0) text = `${word === 'Félretéve' ? 'Nem volt félretétel' : 'Nem volt'} (terv ${formatFt(plan)})`;
   else text = `${word} · ${formatFt(actual)} (terv ${formatFt(plan)})`;
 
-  const icon = done ? 'circle-check' : status === 'partial' ? 'progress' : 'circle';
-  const iconColor = done ? 'var(--success)' : status === 'partial' ? 'var(--warn-fill)' : 'var(--text-3)';
+  // A sor eleji pipa a fő művelet: kifizeti (a hátralékot), kifizetettnél visszavonja; terv nélkül az összeget kéri.
+  const [checkBusy, setCheckBusy] = useState(false);
+  const check = async () => {
+    if (checkBusy) return;
+    if (!done && left <= 0) {
+      setEditing('settle');
+      return;
+    }
+    setCheckBusy(true);
+    try {
+      if (done) await undoAll();
+      else
+        await safe(async () => {
+          await settleRest(periodId, cat, left, date, status === 'partial');
+          setEditing(null);
+        });
+    } finally {
+      setCheckBusy(false);
+    }
+  };
+  const checkLabel = done
+    ? `${cat.name}: ${word.toLowerCase()} – visszavonás`
+    : left > 0
+      ? `${cat.name}: ${settleLabel(cat.type, status === 'partial').toLowerCase()} ${formatFt(left)}`
+      : `${cat.name}: összeg megadása`;
+
+  const menu: MenuItem[] = [];
+  if (goal && !withdrawing && goal.saved > 0) menu.push({ label: 'Felhasználás', icon: 'arrow-down-right', onSelect: () => setWithdrawing(true) });
+  if (!done && status === 'unpaid') menu.push({ label: 'Más összeg', icon: 'pencil', onSelect: () => setEditing('settle') });
+  if (!done) menu.push({ label: 'Részlet', icon: 'chart-pie', onSelect: () => setEditing('part') });
+  if (status === 'partial') menu.push({ label: 'Kész, több nem lesz', icon: 'flag-check', onSelect: finish });
+  if (status !== 'unpaid') menu.push({ label: 'Visszavonás', icon: 'arrow-back-up', onSelect: undoAll });
   // Részleges állapotban és több részletnél az egyes rögzítések egyenként is törölhetők.
   const showParts = status === 'partial' || entries.length > 1;
 
   return (
-    <div className="rec-row" id={`cat-${cat.id}`} ref={rowRef} tabIndex={-1}>
-      <Icon name={icon} style={{ fontSize: 22, color: iconColor }} />
+    <div className={`rec-row ${done ? 'done' : ''}`} id={`cat-${cat.id}`} ref={rowRef} tabIndex={-1}>
+      <button
+        className={`check-btn ${done ? 'on' : status === 'partial' ? 'part' : late ? 'late' : ''}`}
+        aria-label={checkLabel}
+        title={checkLabel}
+        aria-pressed={done ? true : status === 'partial' ? 'mixed' : false}
+        disabled={checkBusy}
+        aria-busy={checkBusy}
+        onClick={check}
+      >
+        <span className="check-ring">
+          <Icon name={done ? 'check' : status === 'partial' ? 'minus' : 'check'} />
+        </span>
+      </button>
       <CatIcon cat={cat} />
       <div className="rec-main">
         <div className="rec-name">
@@ -486,40 +528,7 @@ function FixRow({
         )}
       </div>
       <div className="rec-actions">
-        {goal && !withdrawing && goal.saved > 0 && (
-          <button className="sm ghost" title="A félretett pénzből elköltött összeg rögzítése" onClick={() => setWithdrawing(true)}>
-            <Icon name="arrow-down-right" /> Felhasználás
-          </button>
-        )}
-        {!done && !editing && (
-          <>
-            {status === 'unpaid' && (
-              <button className="sm" title="Lezárja a tételt ezzel az összeggel" onClick={() => setEditing('settle')}>Más összeg</button>
-            )}
-            <button className="sm" title="Részletfizetés; a tétel nyitva marad" onClick={() => setEditing('part')}>Részlet</button>
-          </>
-        )}
-        {!done && left > 0 && (
-          <SettleButton
-            label={settleLabel(cat.type, status === 'partial')}
-            onClick={() =>
-              safe(async () => {
-                await settleRest(periodId, cat, left, date, status === 'partial');
-                setEditing(null);
-              })
-            }
-          />
-        )}
-        {status === 'partial' && (
-          <button className="sm" title="A tétel ebben a hónapban kész, a hátralék nem jön" onClick={finish}>
-            <Icon name="flag-check" /> Kész, több nem lesz
-          </button>
-        )}
-        {status !== 'unpaid' && (
-          <button className="sm ghost" title="A tétel összes rögzítésének törlése ebben a hónapban" onClick={undoAll}>
-            <Icon name="arrow-back-up" /> Visszavon
-          </button>
-        )}
+        {menu.length > 0 && !editing && <MenuButton label={`${cat.name}: további műveletek`} items={menu} />}
       </div>
     </div>
   );
@@ -621,7 +630,7 @@ function EnvelopeRow({
               {!income && pace === 'fast' && <span className="warn-text"> · gyorsan fogy</span>}
             </span>
           </div>
-          <Bar value={actual} max={plan} tone={income ? 'good' : PACE_TONE[pace]} marker={income ? null : env?.marker} />
+          {(plan > 0 || actual > 0) && <Bar value={actual} max={plan} tone={income ? 'good' : PACE_TONE[pace]} marker={income ? null : env?.marker} />}
         </div>
         <Icon name="chevron-down" className={`chev ${open ? 'open-down' : ''}`} />
       </div>

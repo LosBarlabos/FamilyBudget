@@ -108,6 +108,49 @@ export function buildTodos(input: TodoInput): Todo[] {
   return out;
 }
 
+export type IncomeTodo = Extract<Todo, { kind: 'income' }>;
+
+/** Több esedékes számla vagy várt bevétel egy sorban, egy „Mind kifizetve” / „Mind megjött” gombbal. */
+export type TodoGroup =
+  | { kind: 'group'; of: 'bill'; items: BillTodo[]; total: number }
+  | { kind: 'group'; of: 'income'; items: IncomeTodo[]; total: number };
+
+export type TodoItem = Todo | TodoGroup;
+
+/**
+ * Az azonos fajtájú számla- és bevételteendőket egy sorba vonja össze (legalább kettőnél), az első tagjuk
+ * helyén; a többi teendő sorrendje nem változik. Az Áttekintés ebből mutat legfeljebb MAX_TODOS sort.
+ */
+export function groupTodos(todos: Todo[]): TodoItem[] {
+  const bills = todos.filter((t): t is BillTodo => t.kind === 'bill');
+  const incomes = todos.filter((t): t is IncomeTodo => t.kind === 'income');
+  const sum = (l: { amount: number }[]) => l.reduce((s, t) => s + t.amount, 0);
+  const out: TodoItem[] = [];
+  for (const t of todos) {
+    if (t.kind === 'bill' && bills.length > 1) {
+      if (t === bills[0]) out.push({ kind: 'group', of: 'bill', items: bills, total: sum(bills) });
+    } else if (t.kind === 'income' && incomes.length > 1) {
+      if (t === incomes[0]) out.push({ kind: 'group', of: 'income', items: incomes, total: sum(incomes) });
+    } else out.push(t);
+  }
+  return out;
+}
+
+/** A csoport címe és alsora, pl. „3 lejárt számla” / „Hitel, Áram, Gáz · 217 000 Ft”. */
+export function groupText(g: TodoGroup): { title: string; sub: string } {
+  const n = g.items.length;
+  const sub = `${g.items.map((t) => t.cat.name).join(', ')} · ${formatFt(g.total)}`;
+  if (g.of === 'income') return { title: `${n} várt bevétel`, sub };
+  const late = g.items.filter((t) => t.overdue).length;
+  const title = late === n ? `${n} lejárt számla` : late === 0 ? `${n} számla esedékes` : `${n} számla, ebből ${late} lejárt`;
+  return { title, sub };
+}
+
+/** A csoport egyszerre lezárásának üzenete, pl. „3 számla kifizetve · 217 000 Ft”. */
+export function groupSettleMessage(g: TodoGroup): string {
+  return `${g.items.length} ${g.of === 'bill' ? 'számla kifizetve' : 'bevétel megérkezett'} · ${formatFt(g.total)}`;
+}
+
 const roundTo100 = (n: number) => Math.round(n / 100) * 100;
 
 /** A teendő egysoros szövege. */

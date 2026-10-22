@@ -19,3 +19,24 @@ export function useSettleRest() {
     [toast],
   );
 }
+
+/**
+ * Több fix tétel lezárása egyszerre (a teendők „Mind kifizetve” / „Mind megjött” gombja), egyetlen visszavonható
+ * üzenettel. Ha közben egy mentés nem sikerül, a már rögzítetteket visszaveszi, hogy ne maradjon félkész állapot.
+ */
+export function useSettleAll() {
+  const toast = useToast();
+  return useCallback(
+    async (periodId: PeriodId, items: { cat: Category; amount: number }[], date: ISODate, message: string) => {
+      const ids: string[] = [];
+      try {
+        for (const it of items) ids.push((await addSettlingEntry(periodId, it.cat.id, it.amount, date)).id);
+      } catch (err) {
+        await restoreEntries([], ids).catch(() => {});
+        throw err;
+      }
+      toast(message, () => restoreEntries([], ids));
+    },
+    [toast],
+  );
+}
