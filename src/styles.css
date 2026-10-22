@@ -64,6 +64,9 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
+/* Telefonon az oldal ne csússzon oldalra: ami véletlenül kilógna, le van vágva (a clip nem teszi görgethetővé
+   a törzset, így a ragadós fejléc működik). */
+html, body { overflow-x: clip; }
 body {
   background: var(--bg);
   color: var(--text);
@@ -133,6 +136,10 @@ input[type='text'], input[type='number'], input[type='date'], input[type='passwo
   min-width: 0;
 }
 input.sm, select.sm { height: 28px; font-size: 13px; }
+/* Érintőképernyőn a 16 px alatti mezőnél az iOS a fókuszkor ránagyít az oldalra, ami utána oldalra csúszkál. */
+@media (pointer: coarse), (max-width: 720px) {
+  input[type='text'], input[type='number'], input[type='date'], input[type='password'], select, input.sm, select.sm { font-size: 16px; }
+}
 input::placeholder { color: var(--text-3); }
 input[type='range'] { width: 100%; accent-color: var(--accent); margin: 0; }
 label.field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--text-2); }
@@ -210,7 +217,7 @@ label.field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; 
 
 .page-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
 .period-switch { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.period-switch select { font-weight: 600; font-size: 15px; height: 36px; }
+.period-switch select { font-weight: 600; font-size: 16px; height: 36px; }
 .period-badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--text-2); }
 .period-badge.current { background: var(--accent-bg); color: var(--accent-text); }
 
