@@ -13,6 +13,8 @@ import { CoverSheet, coverSheetName, parseCoverSheet } from './components/Cover'
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { QuickEntry } from './components/QuickEntry';
 import { Sheet } from './components/Sheet';
+import { SyncButton, useAutoSync } from './components/SyncButton';
+import { useSyncConfig } from '../sync/engine';
 import { Analysis } from './screens/Analysis';
 import { Categories } from './screens/Categories';
 import { Dashboard } from './screens/Dashboard';
@@ -163,7 +165,10 @@ function Main({ data }: { data: BudgetData }) {
   const beforeFirst = summaries.currentId < s.firstPeriodId;
 
   const cur = summaries.byId.get(summaries.currentId)!;
-  const stale = backupIsStale(data);
+  // Közös használatnál a GitHub tárolja az előzményeket is, a fájlba mentés nem kell külön figyelmeztetés.
+  const syncCfg = useSyncConfig();
+  useAutoSync(data);
+  const stale = !syncCfg && backupIsStale(data);
   const days = daysSince(s.lastExportAt);
 
   return (
@@ -183,14 +188,18 @@ function Main({ data }: { data: BudgetData }) {
           <button className="primary quick-add" title="Gyors rögzítés (N)" aria-label="Gyors rögzítés" aria-keyshortcuts="N" onClick={openQuick}>
             <Icon name="plus" /> Rögzítés
           </button>
-          <button
-            className={`sm backup ${stale ? 'stale' : ''}`}
-            title={`Mentés letöltése fájlba · ${backupLabel(days)}`}
-            aria-label={`Mentés letöltése fájlba · ${backupLabel(days)}`}
-            onClick={() => safe(() => exportBackup(data))}
-          >
-            <Icon name={stale ? 'alert-triangle' : 'cloud-download'} /> <span className="backup-label">{backupLabel(days)}</span>
-          </button>
+          {syncCfg ? (
+            <SyncButton onOpenSettings={() => tab('settings')} />
+          ) : (
+            <button
+              className={`sm backup ${stale ? 'stale' : ''}`}
+              title={`Mentés letöltése fájlba · ${backupLabel(days)}`}
+              aria-label={`Mentés letöltése fájlba · ${backupLabel(days)}`}
+              onClick={() => safe(() => exportBackup(data))}
+            >
+              <Icon name={stale ? 'alert-triangle' : 'cloud-download'} /> <span className="backup-label">{backupLabel(days)}</span>
+            </button>
+          )}
         </header>
 
         {newPeriod && (

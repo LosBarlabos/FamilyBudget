@@ -79,6 +79,8 @@ export interface Entry {
    */
   monthlyTotal?: true;
   createdAt: string;
+  /** Közös használatnál: ki rögzítette (az eszközön beállított név). */
+  createdBy?: string;
 }
 
 export interface BudgetData {

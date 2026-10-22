@@ -9,6 +9,7 @@ import { initialize, requestPersistence } from '../../db/repo';
 import { useSafe } from '../context';
 import { CatIcon, Icon } from '../components/common';
 import { ImportPanel } from './Settings';
+import { SyncPanel } from '../components/SyncPanel';
 
 interface Row {
   cat: Category;
@@ -41,6 +42,7 @@ export function Onboarding() {
   const [paid, setPaid] = useState<Record<string, boolean>>({});
   const [spentText, setSpentText] = useState<Record<string, string>>({});
   const [showImport, setShowImport] = useState(false);
+  const [showJoin, setShowJoin] = useState(false);
 
   const today = todayISO();
   const pd = Number(payday);
@@ -203,14 +205,25 @@ export function Onboarding() {
             </div>
           )}
           <div className="wizard-nav">
-            <button className="ghost" onClick={() => setShowImport(!showImport)}>
+            <button className="ghost" onClick={() => { setShowImport(!showImport); setShowJoin(false); }}>
               <Icon name="upload" /> Van már mentésem
+            </button>
+            <button className="ghost" onClick={() => { setShowJoin(!showJoin); setShowImport(false); }}>
+              <Icon name="users" /> Csatlakozom egy közöshöz
             </button>
             <button className="primary" onClick={next1}>Tovább <Icon name="arrow-right" /></button>
           </div>
           {showImport && (
             <div className="import-preview">
               <ImportPanel />
+            </div>
+          )}
+          {showJoin && (
+            <div className="import-preview">
+              <p className="small muted" style={{ marginTop: 0 }}>
+                Ha a párod már használja az appot közösen (GitHubon), add meg ugyanazt a tárolót és tokent, és a saját neved.
+              </p>
+              <SyncPanel join />
             </div>
           )}
         </div>

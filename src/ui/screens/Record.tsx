@@ -755,6 +755,7 @@ function RecentEntries() {
                   </div>
                   <div className="tiny faint">
                     {recordedAtText(e.createdAt, today)}
+                    {e.createdBy && ` · ${e.createdBy}`}
                     {e.kind === 'withdrawal' && ' · felhasználás'}
                     {e.settles && ' · lezárva'}
                     {e.periodId !== summaries.currentId && ` · ${periodName(e.periodId)} időszak`}

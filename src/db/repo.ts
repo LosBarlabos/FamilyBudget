@@ -88,6 +88,12 @@ export async function restoreSettings(before: Settings, overrides: PeriodOverrid
 
 // --- Rögzítés -------------------------------------------------------------
 
+/** Közös használatnál ezen a néven rögzít ez az eszköz (a rögzítés createdBy mezője); egyébként üres. */
+let entryAuthor: string | undefined;
+export function setEntryAuthor(name: string | undefined) {
+  entryAuthor = name?.trim() || undefined;
+}
+
 export async function addEntry(
   periodId: PeriodId,
   categoryId: string,
@@ -117,6 +123,7 @@ function entryRecord(
     id: newId(), periodId, categoryId, amount, date, note, kind,
     settles: settles && kind !== 'withdrawal' ? true : undefined,
     createdAt: new Date().toISOString(),
+    createdBy: entryAuthor,
   };
 }
 
@@ -337,8 +344,10 @@ export async function importAll(f: ExportFile) {
 }
 
 export async function wipeAll() {
-  await db.transaction('rw', [db.settings, db.categories, db.plans, db.entries, db.periodOverrides], async () => {
-    await Promise.all([db.settings.clear(), db.categories.clear(), db.plans.clear(), db.entries.clear(), db.periodOverrides.clear()]);
+  await db.transaction('rw', [db.settings, db.categories, db.plans, db.entries, db.periodOverrides, db.syncMeta], async () => {
+    await Promise.all([
+      db.settings.clear(), db.categories.clear(), db.plans.clear(), db.entries.clear(), db.periodOverrides.clear(), db.syncMeta.clear(),
+    ]);
   });
 }
 

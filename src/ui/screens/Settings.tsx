@@ -6,6 +6,8 @@ import { clearOverride, importAll, requestPersistence, restoreSettings, saveBasi
 import { backupLabel, daysSince, exportBackup } from '../backup';
 import { useBudget, useSafe, useToast } from '../context';
 import { downloadFile, Icon } from '../components/common';
+import { SyncPanel } from '../components/SyncPanel';
+import { disconnect } from '../../sync/engine';
 
 export function Settings() {
   const s = useBudget().data.settings;
@@ -17,6 +19,10 @@ export function Settings() {
       {/* A kulcs miatt az űrlap újraindul, ha a beállítások máshonnan (pl. visszatöltésből) változnak. */}
       <BasicSettings key={`${s.payday}|${s.openingBalance}|${s.forecastPeriods}`} />
       <PeriodOverrides />
+      <div className="card">
+        <div className="card-head"><h2>Közös használat (GitHub)</h2></div>
+        <SyncPanel />
+      </div>
       <Backup />
       <Storage />
       <DangerZone />
@@ -277,7 +283,18 @@ function DangerZone() {
           <span style={{ color: 'var(--danger)', flex: 1, minWidth: 220 }}>
             Minden kategória, terv és rögzítés végleg törlődik ebből a böngészőből. Előtte érdemes menteni.
           </span>
-          <button className="danger" onClick={() => safe(wipeAll)}>Végleges törlés</button>
+          {/* A közös használat előbb kikapcsol, különben a következő szinkron a közös költségvetést is kiürítené. */}
+          <button
+            className="danger"
+            onClick={() =>
+              safe(async () => {
+                await disconnect();
+                await wipeAll();
+              })
+            }
+          >
+            Végleges törlés
+          </button>
           <button className="ghost" onClick={() => setArmed(false)}>Mégse</button>
         </div>
       )}

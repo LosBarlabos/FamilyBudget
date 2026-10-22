@@ -12,6 +12,7 @@ import type { Category } from '../../domain/types';
 import { useSettleAll, useSettleRest } from '../actions';
 import { backupIsStale, daysSince, exportBackup } from '../backup';
 import { useBudget, useSafe } from '../context';
+import { useSyncConfig } from '../../sync/engine';
 import { Icon, SettleButton } from './common';
 
 const todoKey = (t: TodoItem) => {
@@ -58,7 +59,8 @@ export function Todos({ p, pace, goals }: { p: PeriodSummary; pace: PaceOverview
   const { data, today, cfg, go, openQuick, openCover } = useBudget();
   const safe = useSafe();
   const settleRest = useSettleRest();
-  const stale = backupIsStale(data);
+  // Közös használatnál a GitHub az előzményekkel együtt tárolja az adatokat, külön mentés nem kell.
+  const stale = !useSyncConfig() && backupIsStale(data);
   const backupDays = daysSince(data.settings.lastExportAt);
   const todos = useMemo(
     () =>

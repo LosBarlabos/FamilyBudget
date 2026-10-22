@@ -247,6 +247,7 @@ export function normalizeExport(f: Record<string, unknown>, now = new Date()): E
       settles: e.settles === true ? (true as const) : undefined,
       monthlyTotal: e.monthlyTotal === true ? (true as const) : undefined,
       createdAt: str(e.createdAt) ?? exportedAt,
+      createdBy: str(e.createdBy)?.trim(),
     }));
   });
 
