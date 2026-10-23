@@ -408,16 +408,26 @@ export function useColorScheme(): 'light' | 'dark' {
 }
 
 /** Csökkentett mozgás a rendszerben (a grafikonok animációja ilyenkor kikapcsol). */
-export function useReducedMotion(): boolean {
-  const q = '(prefers-reduced-motion: reduce)';
-  const [reduced, setReduced] = useState(() => window.matchMedia(q).matches);
+/** Egy médialekérdezés állása, követve a változását. */
+function useMedia(q: string): boolean {
+  const [on, setOn] = useState(() => window.matchMedia(q).matches);
   useEffect(() => {
     const m = window.matchMedia(q);
-    const h = () => setReduced(m.matches);
+    const h = () => setOn(m.matches);
+    h();
     m.addEventListener('change', h);
     return () => m.removeEventListener('change', h);
-  }, []);
-  return reduced;
+  }, [q]);
+  return on;
+}
+
+export function useReducedMotion(): boolean {
+  return useMedia('(prefers-reduced-motion: reduce)');
+}
+
+/** Érintőképernyő (durva mutató): a gyorsrögzítő ilyenkor saját számbillentyűzetet mutat. */
+export function useCoarsePointer(): boolean {
+  return useMedia('(pointer: coarse)');
 }
 
 export function downloadFile(name: string, content: string, mime: string) {

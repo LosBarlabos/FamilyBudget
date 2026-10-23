@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { coverAllowed, feeDismissKey, feeSuggestions, feeSuggestionText, needsCover, withDismissal } from '../../domain/flex';
 import { goalProgress, goalSummary, type GoalProgress } from '../../domain/goals';
 import { formatFt } from '../../domain/money';
@@ -213,7 +213,7 @@ export function Record() {
 
       <RecentEntries />
 
-      <div className="stats">
+      <section className="figures" aria-label="A hónap rögzítései">
         <Stat label="Rögzített kiadás" value={formatFt(expActual)} sub={`terv ${formatFt(expPlan)}`} />
         <Stat
           label="Fix számlák"
@@ -231,12 +231,16 @@ export function Record() {
           valueClass={allowance && allowance.left < 0 ? 'neg' : undefined}
           sub={
             <>
-              {allowance && allowance.left > 0 && allowance.perDay !== null && <>naponta ~{formatFt(allowance.perDay)} · </>}
-              {envNotes.length > 0 ? envNotes.map((n, i) => <Fragment key={i}>{i > 0 && ' · '}{n}</Fragment>) : 'minden keret rendben'}
+              {allowance && allowance.left > 0 && allowance.perDay !== null && <span className="stat-line">naponta kb. {formatFt(allowance.perDay)}</span>}
+              {envNotes.length > 0 ? (
+                envNotes.map((n, i) => <span key={i} className="stat-line">{n}</span>)
+              ) : (
+                <span className="stat-line">minden keret rendben</span>
+              )}
             </>
           }
         />
-      </div>
+      </section>
 
       {envelopes.length > 0 && <Section title="Keretek" icon="wallet" hint="koppints a sorra a rögzítéshez">{envelopes.map(renderCat)}</Section>}
       {fixed.length > 0 && (
@@ -461,6 +465,9 @@ function FixRow({
           {text}
           {entries.length > 1 && <span className="faint"> · {entries.length} részletben</span>}
         </div>
+      </div>
+      {/* A részletek, a díjváltozás, az összegmező és a cél a sor alatt, telefonon teljes szélességben. */}
+      <div className="rec-extra">
         {showParts && entries.length > 0 && (
           <div className="pills">
             {entries.map((e) => (

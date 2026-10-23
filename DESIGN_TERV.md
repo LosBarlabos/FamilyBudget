@@ -148,7 +148,7 @@ Sorrend (a keret előre, utána a leggyakrabban használt képernyők):
 
 A 3. fázisban elfogadott funkciók a hozzájuk tartozó képernyővel együtt készülnek, külön commitban.
 
-**Állapot (2026-10-23):** a keret (1.) az 5.C és az 5.E lépésben elkészült, a képernyőváltás animációja még nincs. A 2. Áttekintés kész: hónapcsík a heróban, a mínuszba forduló futó egyenleg piros sávja, „Fizetendő és várható” csekksorokkal, egyszer megjelenő keret-figyelmeztetés, „A hónap számai” kimondott jelentéssel és a megtakarítások összesített egyenlegével. A kategórialista sorai maradtak, a rácsuk a Rögzítéssel együtt egységesül. Következik a 3. (gyorsrögzítő és Rögzítés).
+**Állapot (2026-10-23):** a keret (1.) az 5.C és az 5.E lépésben elkészült, a képernyőváltás animációja még nincs. A 2. Áttekintés kész: hónapcsík a heróban, a mínuszba forduló futó egyenleg piros sávja, „Fizetendő és várható” csekksorokkal, egyszer megjelenő keret-figyelmeztetés, „A hónap számai” kimondott jelentéssel és a megtakarítások összesített egyenlegével. A kategórialista sorai maradtak, a rácsuk a Rögzítéssel együtt egységesül. A 3. gyorsrögzítő és Rögzítés kész: a gyorsrögzítőben keretválasztó a maradékkal, „utána marad” előnézet, a mentés gomb kimondja, hová rögzít, érintőképernyőn saját számbillentyűzet a lap alján; a Rögzítésen az összesítő a kártya nélküli számsorba került, a sorok alatti dobozok telefonon teljes szélességűek. Következik a 4. (Tervező).
 
 ## 7. Visszamérés
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { computeSummaries } from './balance';
 import {
-  billChipText, DEFAULT_QUICK_AMOUNTS, offersPreviousPeriod, quickEnvelopes, recentEntries, recordedAtText, suggestedAmounts, usageCounts,
+  afterEntryText, billChipText, DEFAULT_QUICK_AMOUNTS, envelopeChipText, offersPreviousPeriod, quickEnvelopes, recentEntries, recordedAtText, suggestedAmounts, usageCounts,
 } from './quick';
 import { dueBills } from './todos';
 import type { BudgetData, Category, Entry } from './types';
@@ -153,5 +153,26 @@ describe('legutóbbi rögzítések', () => {
     expect(recordedAtText(at(7, 9, 5), '2026-10-08')).toBe('tegnap 9:05');
     expect(recordedAtText(at(6, 0, 0), '2026-10-08')).toBe('okt. 6. 0:00');
     expect(recordedAtText('hibás', '2026-10-08')).toBe('');
+  });
+});
+
+describe('afterEntryText és envelopeChipText', () => {
+  it('kimondja, mennyi marad, és naponta mennyi jut', () => {
+    expect(sp(afterEntryText('Élelmiszer', 160_000, 32_750, 4500, 14))).toBe(
+      'Utána 28 250 Ft marad az Élelmiszer keretben, naponta kb. 2 000 Ft.',
+    );
+    expect(sp(afterEntryText('Szabadidő', 35_000, 18_740, 4500, null))).toBe('Utána 14 240 Ft marad a Szabadidő keretben.');
+    expect(sp(afterEntryText('Szabadidő', 35_000, 4500, 4500, 14))).toBe('Utána 0 Ft marad a Szabadidő keretben.');
+  });
+
+  it('túllépésnél és terv nélkül', () => {
+    expect(sp(afterEntryText('Ruházat', 25_000, 2000, 5000, 14))).toBe('Ezzel 3 000 Ft-tal túllépi a Ruházat keretet.');
+    expect(sp(afterEntryText('Ajándék', 0, -12_000, 5000, 14))).toBe('Az Ajándék keretnek ebben a hónapban nincs terve.');
+  });
+
+  it('a chip szövege', () => {
+    expect(sp(envelopeChipText(160_000, 32_750))).toBe('maradt 32 750 Ft');
+    expect(sp(envelopeChipText(25_000, -5480))).toBe('túllépve 5 480 Ft');
+    expect(envelopeChipText(0, 0)).toBe('nincs terv');
   });
 });

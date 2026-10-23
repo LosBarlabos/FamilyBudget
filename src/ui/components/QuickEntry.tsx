@@ -1,21 +1,33 @@
 import { useId, useMemo, useRef, useState } from 'react';
 import { formatFt, parseAmount } from '../../domain/money';
 import { clampToPeriod, periodName, periodShortName, shiftPeriod, shortDate } from '../../domain/periods';
-import { billChipText, offersPreviousPeriod, quickEnvelopes, suggestedAmounts } from '../../domain/quick';
+import { countsInDaily, paceOverview } from '../../domain/pace';
+import { afterEntryText, envelopeChipText, offersPreviousPeriod, quickEnvelopes, suggestedAmounts } from '../../domain/quick';
 import { settleLabel } from '../../domain/status';
-import { dueBills, type BillTodo } from '../../domain/todos';
+import { billWhenText, dueBills, type BillTodo } from '../../domain/todos';
 import type { Category } from '../../domain/types';
 import { addEntry, restoreEntries } from '../../db/repo';
 import { useSettleRest } from '../actions';
 import { UNEXPECTED_PANEL, useBudget, useToast } from '../context';
 import { writeError } from '../errors';
-import { CatIcon, Icon, NOTE_TAGS_LIST, Segmented, useLocalState } from './common';
+import { CatIcon, Icon, NOTE_TAGS_LIST, Segmented, useCoarsePointer, useLocalState } from './common';
 import { Sheet } from './Sheet';
 import { handOffUnexpected } from './UnexpectedExpense';
 
+/** A számbillentyűzet gombjai, soronként balról jobbra. */
+const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '000', '0', 'del'] as const;
+/** Legfeljebb ennyi számjegy (999 millió Ft alatt). */
+const MAX_DIGITS = 9;
+
+/** '4500' → '4 500' a kijelzőn (csak tiszta számjegyeknél; a kézzel gépelt formát nem írja át). */
+const grouped = (t: string) => (/^\d+$/.test(t) ? Number(t).toLocaleString('hu-HU') : t);
+
 /**
- * Gyors rögzítés bárhonnan (+ gomb, N billentyű, `?gyors`): összeg, majd egy koppintás a keretre vagy egy
- * esedékes számlára. A folyamatban lévő időszakba, a mai napra rögzít; az új időszak első napjaiban az előzőbe is.
+ * Gyors rögzítés bárhonnan (+ gomb, N billentyű, `?gyors`): összeg, a keret kiválasztása (alapból az utoljára
+ * használt), és a mentés gomb, amely kimondja, hová rögzít. Rögzítés előtt látszik, mennyi marad utána a keretben.
+ * Érintőképernyőn saját számbillentyűzet van a hüvelykujj magasságában, így a telefon billentyűzete nem takarja
+ * el a kereteket. Esedékes számla egy koppintással is lezárható. A folyamatban lévő időszakba, a mai napra
+ * rögzít; az új időszak első napjaiban az előzőbe is.
  */
 export function QuickEntry({ onClose }: { onClose: () => void }) {
   const { data, summaries, cfg, today, go, setPeriodId } = useBudget();
@@ -36,9 +48,12 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
   const cats = useMemo(() => quickEnvelopes(data.categories, data.entries, today), [data.categories, data.entries, today]);
   const bills = useMemo(() => dueBills(data.categories, p, today), [data.categories, p, today]);
   const [lastId, setLastId] = useLocalState('quick-category', '');
-  // Az Enter az utoljára itt használt keretbe rögzít (ha még létezik), különben a leggyakoribba.
-  const def = cats.find((c) => c.id === lastId) ?? cats[0];
+  // Alapból az utoljára itt használt keret van kiválasztva (ha még létezik), különben a leggyakoribb.
+  const [selId, setSelId] = useState<string | null>(null);
+  const def = cats.find((c) => c.id === (selId ?? lastId)) ?? cats[0];
   const suggested = useMemo(() => (def ? suggestedAmounts(data.entries, def.id, periodId) : []), [data.entries, def, periodId]);
+  const pace = useMemo(() => paceOverview(data.categories, p, today), [data.categories, p, today]);
+  const coarse = useCoarsePointer();
 
   const [text, setText] = useState('');
   const [note, setNote] = useState('');
@@ -51,6 +66,7 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
   const errorId = useId();
   const envTitleId = useId();
   const billTitleId = useId();
+  const previewId = useId();
 
   const fail = (msg: string) => {
     setError(msg);
@@ -92,6 +108,23 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
     return run(() => settleRest(periodId, b.cat, amount, date, b.partial, note.trim() || undefined));
   };
 
+  const amount = parseAmount(text);
+  const envOf = (c: Category) => pace.byId.get(c.id);
+  const selEnv = def ? envOf(def) : undefined;
+  const preview =
+    def && amount !== null && amount > 0
+      ? afterEntryText(def.name, selEnv?.plan ?? 0, selEnv?.left ?? 0, amount, p.status === 'current' && countsInDaily(def) ? pace.days.remaining : null)
+      : null;
+
+  const press = (k: (typeof KEYS)[number]) => {
+    setError('');
+    setText((t) => {
+      const digits = t.replace(/\s/g, '');
+      if (k === 'del') return digits.slice(0, -1);
+      return (digits + k).replace(/^0+(?=\d)/, '').slice(0, MAX_DIGITS);
+    });
+  };
+
   const onEnter = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && def) {
       e.preventDefault();
@@ -120,14 +153,14 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
           <input
             ref={amountRef}
             type="text"
-            inputMode="decimal"
+            inputMode={coarse ? 'none' : 'decimal'}
             className="num"
             autoFocus
             placeholder="0"
             aria-label="Összeg"
             aria-invalid={!!error}
-            aria-describedby={error ? errorId : undefined}
-            value={text}
+            aria-describedby={error ? errorId : preview ? previewId : undefined}
+            value={coarse ? grouped(text) : text}
             onChange={(e) => {
               setText(e.target.value);
               setError('');
@@ -140,6 +173,11 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
           <div id={errorId} className="error" role="alert">
             {error}
           </div>
+        )}
+        {preview && !error && (
+          <p id={previewId} className="quick-after num" aria-live="polite">
+            {preview}
+          </p>
         )}
 
         {def && (
@@ -183,20 +221,30 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
               <button className="btn link" onClick={() => go('categories')}>Kategóriák</button>
             </p>
           ) : (
-            <div className="chips">
-              {cats.map((c) => (
-                <button
-                  key={c.id}
-                  className={`chip chip-cat ${c.id === def?.id ? 'on' : ''}`}
-                  disabled={pending}
-                  aria-keyshortcuts={c.id === def?.id ? 'Enter' : undefined}
-                  onMouseDown={keepFocus}
-                  onClick={() => recordEnvelope(c)}
-                >
-                  <CatIcon cat={c} />
-                  <span className="chip-label">{c.name}</span>
-                </button>
-              ))}
+            <div className="quick-envs">
+              {cats.map((c) => {
+                const env = envOf(c);
+                const on = c.id === def?.id;
+                return (
+                  <button
+                    key={c.id}
+                    className={`quick-env ${on ? 'on' : ''} ${env && env.plan > 0 && env.left < 0 ? 'over' : ''}`}
+                    aria-pressed={on}
+                    disabled={pending}
+                    onMouseDown={keepFocus}
+                    onClick={() => {
+                      setSelId(c.id);
+                      setError('');
+                    }}
+                  >
+                    <CatIcon cat={c} size="sm" />
+                    <span className="quick-env-text">
+                      <span className="quick-env-name">{c.name}</span>
+                      <span className="quick-env-left num">{envelopeChipText(env?.plan ?? 0, env?.left ?? 0)}</span>
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -204,26 +252,27 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
         {bills.length > 0 && (
           <div role="group" aria-labelledby={billTitleId}>
             <div id={billTitleId} className="quick-title">Esedékes számlák</div>
-            <div className="chips">
+            <div className="quick-bills">
               {bills.map((b) => (
                 <button
                   key={b.cat.id}
-                  className={`chip chip-cat num ${b.overdue ? 'late' : ''}`}
+                  className={`quick-bill num ${b.overdue ? 'overdue' : ''}`}
                   disabled={pending}
-                  title={`${b.overdue ? 'Lejárt' : 'Esedékes'}: ${shortDate(b.due)}`}
                   aria-label={`${b.cat.name}: ${settleLabel(b.cat.type, b.partial).toLowerCase()}, ${
                     b.partial ? 'hátralék' : 'terv'
-                  } ${formatFt(b.amount)}, ${b.overdue ? 'lejárt' : 'esedékes'} ${shortDate(b.due)}`}
+                  } ${formatFt(b.amount)}, ${billWhenText(b, today)}`}
                   onMouseDown={keepFocus}
                   onClick={() => settleBill(b)}
                 >
-                  <CatIcon cat={b.cat} />
-                  <span className="chip-label">{billChipText(b.cat.name, b.amount)}</span>
+                  <span className="quick-bill-text">
+                    <strong>{b.cat.name}</strong> {billWhenText(b, today)}
+                  </span>
+                  <span className="quick-bill-amount">{formatFt(b.amount)}</span>
                 </button>
               ))}
             </div>
             <div className="tiny faint mt-1-5">
-              Koppintásra lezárja: üres mezőnél a látható összeggel, beírt összegnél azzal.
+              Koppintásra kifizetettnek jelöli: üres mezőnél a látható összeggel, beírt összegnél azzal.
             </div>
           </div>
         )}
@@ -249,11 +298,42 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
         <div className="quick-foot">
           <span className="small muted">
             {periodName(periodId)} hónap · {shortDate(date)}
-            {def && <span className="kbd-hint faint"> · Enter: {def.name}</span>}
           </span>
           <button className="btn sm ghost" onClick={unexpected}>
             <Icon name="alert-triangle" /> Váratlan kiadás
           </button>
+        </div>
+
+        {/* A hüvelykujj magasságában: a számbillentyűzet (érintőképernyőn) és a mentés, a lap aljához tapadva. */}
+        <div className="quick-pad">
+          {coarse && (
+            <div className="keypad" role="group" aria-label="Számbillentyűzet">
+              {KEYS.map((k) => (
+                <button
+                  key={k}
+                  className="key num"
+                  aria-label={k === 'del' ? 'Utolsó számjegy törlése' : undefined}
+                  disabled={pending}
+                  onMouseDown={keepFocus}
+                  onClick={() => press(k)}
+                >
+                  {k === 'del' ? <Icon name="backspace" /> : k}
+                </button>
+              ))}
+            </div>
+          )}
+          {def && (
+            <button
+              className="btn primary quick-save"
+              disabled={pending}
+              aria-busy={pending}
+              aria-keyshortcuts="Enter"
+              onMouseDown={keepFocus}
+              onClick={() => recordEnvelope(def)}
+            >
+              <Icon name="check" /> Rögzítés: {def.name}
+            </button>
+          )}
         </div>
       </div>
     </Sheet>

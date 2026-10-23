@@ -152,6 +152,10 @@
   /* Row: a listasorok közös elválasztója (korábban 10 külön szabály). A sorok belső rácsa képernyőnként a 6. fázisban egységesül. */
   :is(.todo, .list-row, .rec-row, .rec-env, .recent-row, .plan-row, .cat-row, .cat-edit, .goal-row, .cal-row) + :is(.todo, .list-row, .rec-row, .rec-env, .recent-row, .plan-row, .cat-row, .cat-edit, .goal-row, .cal-row, .rec-more),
   :is(.where-list, .dev-list) > li + li { box-shadow: 0 -1px 0 var(--color-border); }
+  /* A vonal a sor felső élén fut: ott nincs lekerekítés, különben a vonal a sarkokban elhajlik. */
+  :is(.todo, .list-row, .rec-row, .rec-env, .recent-row, .plan-row, .cat-row, .cat-edit, .goal-row, .cal-row) + :is(.todo, .list-row, .rec-row, .rec-env, .recent-row, .plan-row, .cat-row, .cat-edit, .goal-row, .cal-row, .rec-more) {
+    border-top-left-radius: 0; border-top-right-radius: 0;
+  }
 
   /* Chip: 40 px-es, lekerekített, választható vagy művelet (kategóriaválasztó, javasolt számla, #címke). */
   .chip {
@@ -502,6 +506,51 @@
   .quick-note-toggle { justify-self: start; }
   .quick-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-3); flex-wrap: wrap; }
   .quick .btn.sm { height: 36px; }
+  .quick-amount input[type='text'] { font-family: var(--font-display); font-weight: 700; }
+  .quick p.quick-after { margin: calc(var(--space-1) * -1) 0 0; font-size: var(--text-sm); color: var(--color-text-muted); text-align: right; }
+  /* A keretválasztó: név és maradék; a kiválasztottba rögzít a mentés gomb és az Enter. */
+  .quick-envs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-2); }
+  .quick-env {
+    display: flex; align-items: center; gap: var(--space-2); min-height: 52px; padding: var(--space-1-5) var(--space-2); text-align: left;
+    border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text);
+  }
+  @media (hover: hover) {
+    .quick-env:hover { border-color: var(--color-border-strong); }
+  }
+  .quick-env.on { border: 2px solid var(--color-accent); background: var(--color-accent-subtle); padding: calc(var(--space-1-5) - 1px) calc(var(--space-2) - 1px); }
+  .quick-env-text { min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }
+  .quick-env-name { font-weight: 600; font-size: var(--text-ui); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .quick-env-left { font-size: var(--text-xs); color: var(--color-text-muted); }
+  .quick-env.over .quick-env-left { color: var(--color-danger); }
+  /* Esedékes számla csekkként: a lejárt csekksárga. */
+  .quick-bills { display: grid; gap: var(--space-2); }
+  .quick-bill {
+    display: flex; align-items: center; gap: var(--space-3); min-height: 44px; padding: var(--space-1-5) var(--space-3); text-align: left;
+    border-radius: var(--radius-bill); border: 1px dashed var(--color-border-strong); background: var(--color-surface); color: var(--color-text);
+  }
+  .quick-bill.overdue { background: var(--color-bill); color: var(--color-on-bill); border-color: transparent; }
+  .quick-bill-text { flex: 1; min-width: 0; font-size: var(--text-ui); }
+  .quick-bill-text strong { font-weight: 600; }
+  .quick-bill-amount { font-weight: 600; }
+  /* A lap aljához tapad, a keretek fölötte görgethetők. A lap alsó belső margóját is kitakarja. */
+  .quick-pad {
+    position: sticky; bottom: calc(-18px - env(safe-area-inset-bottom)); display: grid; gap: var(--space-2);
+    margin: 0 -18px calc(-18px - env(safe-area-inset-bottom)); padding: var(--space-2) 18px calc(18px + env(safe-area-inset-bottom));
+    background: var(--color-surface); border-top: 1px solid var(--color-border);
+  }
+  .keypad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .key {
+    height: 48px; justify-content: center; border-radius: var(--radius-md); background: var(--color-surface-sunken); color: var(--color-text);
+    font-size: var(--text-xl); font-weight: 500;
+  }
+  .key:active { background: var(--color-border); }
+  .key .ti { font-size: var(--icon-lg); }
+  .quick .btn.quick-save { height: 52px; justify-content: center; font-size: var(--text-md); }
+  @media (max-width: 639px) {
+    /* A javasolt összegek egy sorban, oldalra görgethetően, hogy a keretek feljebb kerüljenek. */
+    .quick-sugg { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -18px; padding: 0 18px; }
+    .quick-sugg > * { flex-shrink: 0; }
+  }
   /* Átcsoportosítás (két keret között) */
   .cover { display: grid; gap: 14px; }
   .cover-target, .cover-opt { display: flex; align-items: center; gap: 10px; }
@@ -591,7 +640,10 @@
   }
 
   /* --- Rögzítés --- */
-  .rec-row { display: grid; grid-template-columns: 44px 30px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: var(--space-1-5) var(--space-1) var(--space-1-5) 0; border-radius: var(--radius-md); }
+  .rec-row { display: grid; grid-template-columns: 44px 30px minmax(0, 1fr) auto; gap: 0 10px; align-items: center; padding: var(--space-1-5) var(--space-1) var(--space-1-5) 0; border-radius: var(--radius-md); }
+  .rec-row > .rec-actions { grid-column: 4; grid-row: 1; }
+  .rec-extra { grid-column: 3 / -1; grid-row: 2; min-width: 0; }
+  .rec-extra:empty { display: none; }
   .rec-row.done .rec-name { color: var(--color-text-muted); }
   /* Fix tétel pipája: egy koppintás kifizeti (a hátralékot), kifizetettnél visszavonja. */
   .check-btn { width: 44px; height: 44px; padding: 0; justify-content: center; border-radius: 50%; }
@@ -668,6 +720,7 @@
     .fee-actions > button { height: 36px; min-width: 56px; justify-content: center; }
     .rec-actions .menu-wrap > button { width: 40px; height: 40px; }
     .rec-env-body { padding-left: var(--space-1-5); }
+    .rec-extra { grid-column: 1 / -1; padding-left: var(--space-1-5); }
     /* Mobilon nagyobb célfelület, és 16 px-es mező, hogy az iOS ne nagyítson rá a fókuszkor. */
     .rec-env-body input[type='text'] { height: 36px; font-size: var(--text-md); }
     .rec-env-body .btn.sm { height: 36px; }
@@ -743,6 +796,7 @@
   .check-field { display: inline-flex; align-items: center; gap: var(--space-2); align-self: flex-start; min-height: 36px; font-size: var(--text-ui); cursor: pointer; }
   .check-field input { width: 18px; height: 18px; margin: 0; accent-color: var(--color-accent); flex-shrink: 0; }
   .goal-inline { margin-top: var(--space-2); padding: var(--space-2) 10px; border-radius: var(--radius-md); background: var(--color-surface-sunken); }
+  .goal-inline .meter { background: color-mix(in srgb, var(--color-text) 14%, transparent); }
   .unexpected { border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-border)); }
   .impact { display: flex; gap: var(--space-1-5); align-items: flex-start; }
   .impact .ti { margin-top: var(--space-0-5); }

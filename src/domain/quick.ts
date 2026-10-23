@@ -1,5 +1,6 @@
 import { addDays, differenceInCalendarDays } from 'date-fns';
 import { formatFt } from './money';
+import { article, perDayAmount } from './pace';
 import { fromISO, shiftPeriod, shortDate, toISO } from './periods';
 import type { Category, Entry, ISODate, PeriodId } from './types';
 
@@ -77,6 +78,26 @@ export function offersPreviousPeriod(start: ISODate, today: ISODate): boolean {
 /** Az esedékes számla chipje: „Áram · 18 000 Ft” (részben fizetettnél a hátralék). */
 export function billChipText(name: string, amount: number): string {
   return `${name} · ${formatFt(amount)}`;
+}
+
+/** A keret állása a gyorsrögzítő chipjén: „maradt 32 750 Ft”, „túllépve 5 480 Ft”, terv nélkül „nincs terv”. */
+export function envelopeChipText(plan: number, left: number): string {
+  if (!(plan > 0)) return 'nincs terv';
+  return left >= 0 ? `maradt ${formatFt(left)}` : `túllépve ${formatFt(-left)}`;
+}
+
+/**
+ * A rögzítés előtt kimondott következmény (a Borítékok irányból): „Utána 28 250 Ft marad az Élelmiszer keretben,
+ * naponta kb. 2 000 Ft.” A napi összeg csak akkor, ha a keret a napi összegbe számít (remainingDays nem null) és
+ * van még hátra nap; túllépésnél a túllépés összege, terv nélkül ennek kimondása.
+ */
+export function afterEntryText(name: string, plan: number, left: number, amount: number, remainingDays: number | null): string {
+  const a = article(name).toLowerCase();
+  if (!(plan > 0)) return `${article(name)} ${name} keretnek ebben a hónapban nincs terve.`;
+  const after = left - amount;
+  if (after < 0) return `Ezzel ${formatFt(-after)}-tal túllépi ${a} ${name} keretet.`;
+  const perDay = remainingDays !== null && remainingDays > 1 && after > 0 ? perDayAmount(after, remainingDays) : null;
+  return `Utána ${formatFt(after)} marad ${a} ${name} keretben${perDay ? `, naponta kb. ${formatFt(perDay)}` : ''}.`;
 }
 
 /** A legutóbbi rögzítések (minden kategóriából és időszakból), a rögzítés ideje szerint csökkenő sorrendben. */
