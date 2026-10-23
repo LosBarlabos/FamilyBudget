@@ -316,7 +316,7 @@ export function SettleButton({
 }
 
 export function Delta({
-  pct, goodWhenUp = false, title = 'Változás az előző időszakhoz képest',
+  pct, goodWhenUp = false, title = 'Változás az előző hónaphoz képest',
 }: { pct: number | null; goodWhenUp?: boolean; title?: string }) {
   if (pct === null || Math.abs(pct) < 3) return null;
   return (

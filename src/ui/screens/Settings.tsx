@@ -68,19 +68,19 @@ function BasicSettings() {
           {message('payday')}
         </label>
         <label className="field">
-          Nyitó egyenleg (az első időszak elején)
+          Nyitó egyenleg (az első hónap elején)
           <input type="text" inputMode="numeric" className="num" value={opening} onChange={(e) => setOpening(e.target.value)} {...field('opening')} />
           {message('opening')}
         </label>
         <label className="field">
-          Előrejelzés (időszak előre)
+          Előrejelzés (hónap előre)
           <input type="number" min={1} max={24} value={forecast} onChange={(e) => setForecast(e.target.value)} {...field('forecast')} />
           {message('forecast')}
         </label>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 14, flexWrap: 'wrap' }}>
         <span className="tiny faint" style={{ flex: 1, minWidth: 220 }}>
-          A fizetésnap módosításakor a meglévő rögzítések abban az időszakban maradnak, ahová korábban kerültek.
+          A fizetésnap módosításakor a meglévő rögzítések abban a hónapban maradnak, ahová korábban kerültek.
         </span>
         <button className="primary" onClick={save}>Mentés</button>
       </div>
@@ -156,7 +156,7 @@ function Backup() {
   return (
     <div className="card">
       <div className="card-head">
-        <h2>Adatmentés</h2>
+        <h2>Biztonsági mentés</h2>
         <span className={`small ${days === null || days >= 30 ? 'neg' : 'faint'}`}>{backupLabel(days)}</span>
       </div>
       <p className="small muted" style={{ marginTop: 0 }}>
@@ -210,9 +210,9 @@ export function ImportPanel({ onDone }: { onDone?: () => void }) {
         <div className="import-preview">
           <div style={{ fontWeight: 500, marginBottom: 6 }}>{file.name}</div>
           <div className="small muted num">
-            {file.preview.periods} időszak · {file.preview.categories} kategória · {file.preview.entries} rögzítés
+            {file.preview.periods} hónap · {file.preview.categories} kategória · {file.preview.entries} rögzítés
             <br />
-            Mentve: {dt(file.preview.exportedAt)} · utolsó rögzítés: {dt(file.preview.lastChange)}
+            Készült: {dt(file.preview.exportedAt)} · utolsó rögzítés: {dt(file.preview.lastChange)}
           </div>
           <div className="small" style={{ margin: '10px 0', color: 'var(--warn)' }}>
             <Icon name="alert-triangle" /> A betöltés felülírja a jelenlegi adatokat.

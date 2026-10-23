@@ -125,7 +125,7 @@ export function BalanceChart({
     <div>
       <div className="tiny muted" style={{ display: 'flex', gap: 16, marginBottom: 8, flexWrap: 'wrap' }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ width: 16, height: 2, background: t.accent }} /> Tény (időszak végén)
+          <span style={{ width: 16, height: 2, background: t.accent }} /> Tény (hónap végén)
         </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ width: 16, borderTop: `2px dashed ${t.accent}` }} /> Előrejelzés a terv alapján
@@ -137,7 +137,7 @@ export function BalanceChart({
         )}
       </div>
       <div style={{ position: 'relative', height }}>
-        <Line data={data} options={options} aria-label="Futó egyenleg időszakonként" role="img" />
+        <Line data={data} options={options} aria-label="Futó egyenleg hónaponként" role="img" />
       </div>
     </div>
   );
@@ -263,7 +263,7 @@ export function SpendingChart({
         )}
       </div>
       <div style={{ position: 'relative', height }}>
-        <BarChart data={data} options={options} aria-label="Kiadások kategóriánként, időszakonként" role="img" />
+        <BarChart data={data} options={options} aria-label="Kiadások kategóriánként, hónaponként" role="img" />
       </div>
     </div>
   );
@@ -358,7 +358,7 @@ export function TrendChart({ points, refId, height = 220 }: { points: TrendPoint
         )}
       </div>
       <div style={{ position: 'relative', height }}>
-        <Line data={data} options={options} aria-label="Kiadás időszakonként a tervvel és az átlaggal" role="img" />
+        <Line data={data} options={options} aria-label="Kiadás hónaponként a tervvel és az átlaggal" role="img" />
       </div>
     </div>
   );

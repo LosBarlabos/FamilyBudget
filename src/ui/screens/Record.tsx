@@ -133,7 +133,7 @@ export function Record() {
   const envUnplanned = pace.unplanned.length;
   const envNotes = [
     envOver > 0 && <span className="neg">{envOver} keret túllépve</span>,
-    envUnplanned > 0 && <span className="warn-text">{envUnplanned} keretből terv nélkül költöttetek</span>,
+    envUnplanned > 0 && <span className="warn-text">{envUnplanned} keretben terv nélküli költés</span>,
     envFast > 0 && <span className="warn-text">{envFast} keret gyorsan fogy</span>,
   ].filter(Boolean);
   // A folyamatban lévő időszakban ugyanaz a szám, mint az Áttekintés „Még elkölthető” értéke.
@@ -201,13 +201,13 @@ export function Record() {
       {p.status === 'future' && (
         <div className="banner info">
           <Icon name="calendar-event" />
-          <span className="grow">Ez egy jövőbeli időszak. Előre is rögzíthetsz, például ha egy számlát már most kifizettél.</span>
+          <span className="grow">Ez egy jövőbeli hónap. Előre is rögzíthetsz, például ha egy számlát már most kifizettél.</span>
         </div>
       )}
       {p.status === 'closed' && (
         <div className="banner info">
           <Icon name="lock-open" />
-          <span className="grow">Lezárt időszak. A módosítás a futó egyenleget is megváltoztatja.</span>
+          <span className="grow">Lezárt hónap. A módosítás a futó egyenleget is megváltoztatja.</span>
         </div>
       )}
 
@@ -678,13 +678,13 @@ function EnvelopeRow({
               {showCover && (
                 <button
                   className="sm"
-                  aria-label={`${cat.name}: fedezet áthozása másik keretből`}
+                  aria-label={`${cat.name}: átcsoportosítás másik keretből`}
                   onClick={() => {
                     coverFocus.current = true;
                     openCover(cat.id);
                   }}
                 >
-                  <Icon name="arrows-exchange" /> Fedezet áthozása
+                  <Icon name="arrows-exchange" /> Átcsoportosítás
                 </button>
               )}
               <MenuButton
@@ -790,7 +790,7 @@ function RecentEntries() {
                     {e.createdBy && ` · ${e.createdBy}`}
                     {e.kind === 'withdrawal' && ' · felhasználás'}
                     {e.settles && ' · lezárva'}
-                    {e.periodId !== summaries.currentId && ` · ${periodName(e.periodId)} időszak`}
+                    {e.periodId !== summaries.currentId && ` · ${periodName(e.periodId)} hónap`}
                   </div>
                 </div>
                 <span className={`small num ${sign === '+' ? 'pos' : ''}`}>

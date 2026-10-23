@@ -223,7 +223,7 @@ export async function restorePlansOf(categoryId: string, plans: Plan[]) {
 }
 
 /**
- * Fedezet áthozása egyik keretből a másikba: két „csak erre a hónapra” tervmódosítás egy tranzakcióban. A forrás
+ * Átcsoportosítás egyik keretből a másikba: két „csak erre a hónapra” tervmódosítás egy tranzakcióban. A forrás
  * maradékát a tárolt adatokból számolja, hogy a forrás ne kerülhessen túllépésbe. Visszaadja a művelet leírását
  * a visszavonáshoz (undoMoveCover).
  */

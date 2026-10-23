@@ -144,7 +144,7 @@ export interface PaceOverview {
   /** A tempó szerint gyorsan fogyó vagy túllépett keretek, a várható túllépés szerint csökkenő sorrendben. */
   flagged: EnvelopeStatus[];
   /**
-   * Terv nélküli, napi összegbe számító keretek, amelyekből mégis költöttetek (a kiadás szerint csökkenő
+   * Terv nélküli, napi összegbe számító keretek, amelyekből mégis volt költés (a kiadás szerint csökkenő
    * sorrendben). A tempójuk 'ok', de a napi összeget csökkentik, ezért külön figyelmet kérnek. Üres, ha nincs
    * napi keretterv: akkor minden költés terv nélküli lenne.
    */
@@ -187,7 +187,7 @@ export interface PaceStatus {
 
 /**
  * A hero állapotmondata: a leginkább túlfutó keret, ennek híján a terv nélküli költés, és csak ha egyik sincs,
- * „A terv szerint haladtok” – különben a túllépett napi összeg mellett zöld pipa állna.
+ * „Minden keret a terv szerint halad” – különben a túllépett napi összeg mellett zöld pipa állna.
  */
 export function paceStatus(o: Pick<PaceOverview, 'flagged' | 'unplanned'>): PaceStatus {
   const more = Math.max(0, o.flagged.length + o.unplanned.length - 1);
@@ -233,18 +233,18 @@ export function untilDate(d: ISODate): string {
 
 /** „12 nap van fizetésig (okt. 9-ig)”; az utolsó napon „Ma van az időszak utolsó napja”. */
 export function daysLeftText(days: PeriodDays, end: ISODate): string {
-  if (days.remaining <= 1) return 'Ma van az időszak utolsó napja';
+  if (days.remaining <= 1) return 'Ma van a hónap utolsó napja';
   return `${days.remaining} nap van fizetésig (${untilDate(end)})`;
 }
 
 const roundTo100 = (n: number) => Math.round(n / 100) * 100;
 
 /**
- * A hero állapotmondata a leginkább túlfutó keretről, vagy „A terv szerint haladtok”. A „keret” szó a név után
+ * A hero állapotmondata a leginkább túlfutó keretről, vagy „Minden keret a terv szerint halad”. A „keret” szó a név után
  * a többes számú neveknél (pl. Gyerekek) is helyes mondatot ad.
  */
 export function paceSentence(e: EnvelopeStatus | null | undefined): string {
-  if (!e) return 'A terv szerint haladtok';
+  if (!e) return 'Minden keret a terv szerint halad';
   const who = `${article(e.cat.name)} ${e.cat.name} keret`;
   if (e.pace === 'over') return `${who} már ${formatFt(e.actual - e.plan)}-tal túllépte a tervet`;
   // Az időszak első napjaiban nincs vetítés (projected = tény), ilyenkor az eddig elfogyott arány áll a mondatban.
@@ -257,14 +257,14 @@ export function usedPct(e: Pick<EnvelopeStatus, 'plan' | 'actual'>): number {
   return e.plan > 0 ? Math.round((e.actual / e.plan) * 100) : 0;
 }
 
-/** „Az Ajándék keretből terv nélkül 80 000 Ft-ot költöttetek” */
+/** „Ajándék: 80 000 Ft terv nélkül” */
 export function unplannedSentence(e: Pick<EnvelopeStatus, 'cat' | 'actual'>): string {
-  return `${article(e.cat.name)} ${e.cat.name} keretből terv nélkül ${formatFt(e.actual)}-ot költöttetek`;
+  return `${e.cat.name}: ${formatFt(e.actual)} terv nélkül`;
 }
 
 /** Miért nincs napi összeg: nincs keretterv, nincs napi összegbe számító keret, vagy annak nincs terve. */
 export function noDailyPlanText(o: Pick<PaceOverview, 'hasPlan' | 'envelopes'>): string {
-  if (!o.hasPlan) return 'ebben az időszakban nincs tervezett keret';
+  if (!o.hasPlan) return 'ebben a hónapban nincs tervezett keret';
   return o.envelopes.some((e) => countsInDaily(e.cat) && !e.cat.archived)
     ? 'a napi összegbe számító kereteknek nincs terve'
     : 'egyik keret sem számít a napi elkölthető összegbe';
@@ -283,9 +283,9 @@ export function overspentText(left: number): string {
 
 /** Lezárt időszak hero-mondata: „Az időszak +45 000 Ft-tal zárult”. */
 export function closingSentence(net: number): string {
-  if (net > 0) return `Az időszak ${formatSigned(net)}-tal zárult`;
-  if (net < 0) return `Az időszak ${formatFt(-net)} mínusszal zárult`;
-  return 'Az időszak nullszaldóval zárult';
+  if (net > 0) return `A hónap ${formatSigned(net)}-tal zárult`;
+  if (net < 0) return `A hónap ${formatFt(-net)} mínusszal zárult`;
+  return 'A hónap nullszaldóval zárult';
 }
 
 /** Jövőbeli időszak: „33 nap múlva kezdődik (nov. 10.)”. */

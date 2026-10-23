@@ -166,12 +166,12 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
         {canPickPrev && (
           <div className="quick-period">
             <Segmented
-              label="Melyik időszakba"
+              label="Melyik hónapba"
               options={[currentId, prevId].map((id) => ({ id, label: `${periodShortName(id)}.` }))}
               value={periodId}
               onChange={(id) => setPrevChosen(id === prevId)}
             />
-            <span className="tiny faint">Az új időszak első napjaiban az előzőbe is rögzíthetsz.</span>
+            <span className="tiny faint">Az új hónap első napjaiban az előzőbe is rögzíthetsz.</span>
           </div>
         )}
 
@@ -248,7 +248,7 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
 
         <div className="quick-foot">
           <span className="small muted">
-            {periodName(periodId)} időszak · {shortDate(date)}
+            {periodName(periodId)} hónap · {shortDate(date)}
             {def && <span className="kbd-hint faint"> · Enter: {def.name}</span>}
           </span>
           <button className="sm ghost" onClick={unexpected}>

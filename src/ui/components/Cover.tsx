@@ -34,7 +34,7 @@ const fallbackFocus = (categoryId: string) => () =>
   document.getElementById('todos-ok');
 
 /**
- * „Fedezet áthozása”: egy túlfutó keret terve egy másik keret maradékából nő, csak erre az időszakra (két
+ * „Átcsoportosítás”: egy túlfutó keret terve egy másik keret maradékából nő, csak erre az időszakra (két
  * „csak erre a hónapra” tervmódosítás, egyetlen visszavonással). Nincs maradék-átvitel: a következő időszak
  * mindkét keretnél a korábbi tervvel folytatódik.
  */
@@ -97,9 +97,9 @@ export function CoverSheet({ periodId, categoryId, onClose }: { periodId: Period
   };
 
   return (
-    <Sheet title="Fedezet áthozása" onClose={onClose} fallbackFocus={fallbackFocus(categoryId)}>
+    <Sheet title="Átcsoportosítás" onClose={onClose} fallbackFocus={fallbackFocus(categoryId)}>
       {!target ? (
-        <p className="small muted cover-empty">Ehhez a kerethez ebben az időszakban nem hozható át fedezet.</p>
+        <p className="small muted cover-empty">Ehhez a kerethez ebben a hónapban nincs honnan átcsoportosítani.</p>
       ) : (
         <form
           className="cover"
@@ -120,7 +120,7 @@ export function CoverSheet({ periodId, categoryId, onClose }: { periodId: Period
           {sources.length === 0 ? (
             <div className="cover-empty">
               <p className="small muted">
-                Egyik keretben sem maradt pénz ebben az időszakban. A keret tervét a Tervezőben emelheted.
+                Egyik keretben sem maradt pénz ebben a hónapban. A keret tervét a Tervezőben emelheted.
               </p>
               <button type="button" className="sm" onClick={() => go('planner')}>
                 Tervező <Icon name="chevron-right" />
@@ -162,7 +162,7 @@ export function CoverSheet({ periodId, categoryId, onClose }: { periodId: Period
                     inputMode="decimal"
                     className="num"
                     placeholder="Összeg"
-                    aria-label={`Áthozott összeg ${target.cat.name} keretnek`}
+                    aria-label={`Átcsoportosítandó összeg: ${target.cat.name}`}
                     aria-invalid={!!error}
                     aria-describedby={error ? `${errorId} ${noteId}` : noteId}
                     value={text}
@@ -174,7 +174,7 @@ export function CoverSheet({ periodId, categoryId, onClose }: { periodId: Period
                   />
                   <span className="muted">Ft</span>
                   <button type="submit" className="primary" disabled={pending} aria-busy={pending}>
-                    <Icon name="arrows-exchange" /> Áthozás
+                    <Icon name="arrows-exchange" /> Átcsoportosítás
                   </button>
                 </div>
                 {error && (

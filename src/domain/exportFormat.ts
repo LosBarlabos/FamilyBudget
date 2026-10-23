@@ -319,7 +319,7 @@ export function buildCsv(data: BudgetData, s: Summaries): string {
     const t = String(v);
     return /[;"\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t;
   };
-  const rows: (string | number)[][] = [['Időszak', 'Kezdete', 'Vége', 'Csoport', 'Kategória', 'Típus', 'Terv', 'Tény']];
+  const rows: (string | number)[][] = [['Hónap', 'Kezdete', 'Vége', 'Csoport', 'Kategória', 'Típus', 'Terv', 'Tény']];
   const cats = [...data.categories].sort((a, b) => a.order - b.order);
   for (const p of s.periods) {
     if (p.status === 'future') continue;

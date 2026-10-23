@@ -7,9 +7,9 @@ import { fixStatus } from './status';
 import type { Category, PeriodId, Plan } from './types';
 
 // Rugalmas keretek, maradék-átvitel nélkül: a ki nem költött keret a futó egyenlegbe megy, de egy időszakon
-// belül a keretek terve átrendezhető („Fedezet áthozása”), és a megváltozott számladíj tervvé tehető.
+// belül a keretek terve átrendezhető („Átcsoportosítás”), és a megváltozott számladíj tervvé tehető.
 
-// --- Fedezet áthozása -------------------------------------------------------
+// --- Átcsoportosítás --------------------------------------------------------
 
 /**
  * Lezárt időszakban a terv már nem változtat semmin (a tény számít), ezért ott nincs átcsoportosítás. A költségvetés
@@ -20,7 +20,7 @@ export function coverAllowed(p: { id: PeriodId; status: PeriodStatus }, firstPer
 }
 
 /**
- * Kér-e fedezetet a keret: gyorsan fogy, túl van lépve, vagy terv nélkül költöttetek belőle. Az utóbbi csak
+ * Kér-e fedezetet a keret: gyorsan fogy, túl van lépve, vagy terv nélkül volt belőle költés. Az utóbbi csak
  * akkor, ha van egyáltalán tervezett keret: ha egyiknek sincs terve, nem lenne honnan áthozni.
  */
 export function needsCover(e: Pick<EnvelopeStatus, 'cat' | 'pace' | 'plan' | 'actual'>, o: Pick<PaceOverview, 'hasPlan'>): boolean {
@@ -80,7 +80,7 @@ export function coverOps(
   sourceActual: number,
   firstPeriodId?: PeriodId,
 ): { ops: PlanOps; fromPlan: number; toPlan: number; change: CoverChange } {
-  if (from.id === to.id) throw new Error('A keret önmagának nem adhat fedezetet.');
+  if (from.id === to.id) throw new Error('Egy keretből önmagába nem lehet átcsoportosítani.');
   const idx = indexPlans(plans);
   const fromBefore = effectivePlan(idx, from, periodId, firstPeriodId);
   const toBefore = effectivePlan(idx, to, periodId, firstPeriodId);
@@ -141,7 +141,7 @@ export function uncoverOps(plans: Plan[], from: Category, to: Category, change: 
     }
     const mine = plans.filter((p) => p.categoryId === cat.id);
     const amount = effectivePlan(indexPlans(mine), cat, change.periodId, firstPeriodId) + delta;
-    if (amount < 0) throw new Error(`${article(cat.name).toLowerCase()} ${cat.name} terve azóta kevesebb lett az áthozott összegnél`);
+    if (amount < 0) throw new Error(`${article(cat.name).toLowerCase()} ${cat.name} terve azóta kevesebb lett az átcsoportosított összegnél`);
     const ops = planChangeOps(mine, cat, change.periodId, amount, 'only');
     put.push(...ops.put);
     del.push(...ops.del);
@@ -188,9 +188,9 @@ export function coverTargetText(e: Pick<EnvelopeStatus, 'plan' | 'actual' | 'exp
   return `maradt ${formatFt(e.plan - e.actual)}`;
 }
 
-/** „5 000 Ft áthozva: Szabadidő → Élelmiszer · csak októberre” */
+/** „5 000 Ft átcsoportosítva: Szabadidő → Élelmiszer · csak októberre” */
 export function coverMessage(from: Pick<Category, 'name'>, to: Pick<Category, 'name'>, amount: number, periodId: PeriodId): string {
-  return `${formatFt(amount)} áthozva: ${from.name} → ${to.name} · csak ${periodForName(periodId)}`;
+  return `${formatFt(amount)} átcsoportosítva: ${from.name} → ${to.name} · csak ${periodForName(periodId)}`;
 }
 
 // --- Díjváltozás-javaslat ---------------------------------------------------

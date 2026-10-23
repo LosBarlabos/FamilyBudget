@@ -31,6 +31,11 @@ A `FEJLESZTESI_TERV.md` általános szabályai érvényesek (magyar, mondatkezd�
 - Minden felmérési és döntési anyag a `docs/design/` mappába kerül, számozva (lásd lent), hogy a későbbi munkamenetek is fel tudják venni a fonalat.
 - A képernyőképek nem kerülnek a repóba (`docs/design/kepek/` a `.gitignore`-ban), csak a megállapítások és a mért számok.
 - A `KONCEPCIO.md` 4. fejezete (Képernyők) a viselkedés változásával együtt frissül.
+- **Szóhasználat (a felhasználó döntése, 2026-10-23, lásd `docs/design/01-szovegek.md` Szójegyzék):**
+  - a fizetéstől fizetésig tartó egység a felületen **hónap**, „időszak” csak ott, ahol a dátumtartomány a lényeg (Beállítások → „Időszak kezdőnapja”);
+  - a megszólítás következetesen **te**, a közös pénzről személytelen mondatok („Minden keret a terv szerint halad”);
+  - két keret közti áthelyezés: **Átcsoportosítás**;
+  - a fájlba mentés gombja **Mentés letöltése**, az állapota „Letöltve …”, a puszta „Mentés” csak űrlap mentése.
 
 ---
 

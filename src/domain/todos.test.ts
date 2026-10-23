@@ -108,8 +108,8 @@ describe('teendők', () => {
     expect(idle.at(-1)).toEqual({ kind: 'idle', days: 7 });
     expect(todoText({ kind: 'idle', days: 7 }, '2026-10-25')).toBe('7 napja nem rögzítettél semmit');
     expect(setup('2026-10-22', base).some((t) => t.kind === 'idle')).toBe(false);
-    expect(todoText({ kind: 'backup', days: 40 }, '2026-10-20')).toBe('40 napja nem mentetted le az adatokat');
-    expect(todoText({ kind: 'backup', days: null }, '2026-10-20')).toBe('Még nem mentetted le az adatokat');
+    expect(todoText({ kind: 'backup', days: 40 }, '2026-10-20')).toBe('40 napja nem töltöttél le mentést');
+    expect(todoText({ kind: 'backup', days: null }, '2026-10-20')).toBe('Még nem töltöttél le mentést');
   });
 
   it('rögzítés nélkül a létrehozástól számol', () => {

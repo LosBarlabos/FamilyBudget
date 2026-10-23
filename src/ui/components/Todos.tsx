@@ -135,14 +135,14 @@ export function Todos({ p, pace, goals }: { p: PeriodSummary; pace: PaceOverview
             {cover && (
               <button
                 className="sm"
-                aria-label={`${t.env.cat.name}: fedezet áthozása másik keretből`}
+                aria-label={`${t.env.cat.name}: átcsoportosítás másik keretből`}
                 onClick={() => {
                   // Ha a fedezettel a teendő megszűnik, a fókusz a helyére lépőre kerül (mint a lezárásnál).
                   pendingFocus.current = { key: todoKey(t), index };
                   openCover(t.env.cat.id);
                 }}
               >
-                <Icon name="arrows-exchange" /> Fedezet áthozása
+                <Icon name="arrows-exchange" /> Átcsoportosítás
               </button>
             )}
             <button className="sm" aria-label={`${t.env.cat.name} megnyitása a Rögzítésben`} onClick={() => go('record', t.env.cat.id)}>
@@ -166,7 +166,7 @@ export function Todos({ p, pace, goals }: { p: PeriodSummary; pace: PaceOverview
       case 'backup':
         return (
           <button className="sm" onClick={() => safe(() => exportBackup(data))}>
-            <Icon name="download" /> Mentés
+            <Icon name="download" /> Mentés letöltése
           </button>
         );
     }

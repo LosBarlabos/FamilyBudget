@@ -83,7 +83,7 @@ export interface Deviation {
   /** Tény − terv; túllépésnél pozitív. */
   diff: number;
   kind: 'over' | 'under' | 'unplanned';
-  /** Hány időszakban volt a terv fölött (terv nélkülinél: hányban költöttetek belőle). */
+  /** Hány időszakban volt a terv fölött (terv nélkülinél: hányban volt belőle költés). */
   periodsOver: number;
 }
 

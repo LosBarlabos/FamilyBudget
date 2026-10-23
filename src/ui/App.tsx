@@ -195,7 +195,7 @@ function Main({ data }: { data: BudgetData }) {
       aria-label={`Mentés letöltése fájlba · ${backupLabel(days)}`}
       onClick={() => safe(() => exportBackup(data))}
     >
-      <Icon name={stale ? 'alert-triangle' : 'cloud-download'} /> <span className="backup-label">{stale ? 'Mentés most' : backupLabel(days)}</span>
+      <Icon name={stale ? 'alert-triangle' : 'cloud-download'} /> <span className="backup-label">{stale ? 'Mentés letöltése' : backupLabel(days)}</span>
     </button>
   );
 
@@ -247,7 +247,7 @@ function Main({ data }: { data: BudgetData }) {
           <div className="banner info">
             <Icon name="sparkles" />
             <span className="grow">
-              Új időszak kezdődött: <strong>{periodName(cur.id)}</strong> ({formatRange(cur.start, cur.end)}). Jó alkalom az adatok mentésére.
+              Új hónap kezdődött: <strong>{periodName(cur.id)}</strong> ({formatRange(cur.start, cur.end)}). Jó alkalom egy mentés letöltésére.
             </span>
             <button
               className="sm primary"
@@ -259,7 +259,7 @@ function Main({ data }: { data: BudgetData }) {
                 })
               }
             >
-              <Icon name="download" /> Mentés most
+              <Icon name="download" /> Mentés letöltése
             </button>
             <button
               className="sm ghost"
@@ -280,7 +280,7 @@ function Main({ data }: { data: BudgetData }) {
             <Icon name="calendar-time" />
             {/* A „következő fizetéssel” indulásnál és egy későbbre tett fizetésnap után is igaz. */}
             <span className="grow">
-              Az első költségvetési időszak ({periodName(s.firstPeriodId)}, {shortDate(periodStart(s.firstPeriodId, cfg))}) még nem
+              Az első költségvetési hónap ({periodName(s.firstPeriodId)}, {shortDate(periodStart(s.firstPeriodId, cfg))}) még nem
               kezdődött el. Addig a havi terv nem számít, a futó egyenleget csak a rögzített tételek változtatják.
             </span>
           </div>

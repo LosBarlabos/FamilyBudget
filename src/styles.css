@@ -449,7 +449,7 @@ button.side-add .ti { font-size: 20px; }
 .quick-note-toggle { justify-self: start; }
 .quick-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; }
 .quick button.sm { height: 36px; }
-/* Fedezet áthozása */
+/* Átcsoportosítás (két keret között) */
 .cover { display: grid; gap: 14px; }
 .cover-target, .cover-opt { display: flex; align-items: center; gap: 10px; }
 .cover-main { min-width: 0; }

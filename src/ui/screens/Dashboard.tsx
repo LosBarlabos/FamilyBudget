@@ -111,7 +111,7 @@ export function Dashboard() {
                 {reserve && (
                   <span
                     className="kpi-line"
-                    title="Tartalék: az utolsó lezárt időszak végi egyenlege, az utolsó legfeljebb 3 lezárt időszak átlagos kiadásához mérve"
+                    title="Tartalék: az utolsó lezárt hónap végi egyenlege, az utolsó legfeljebb 3 lezárt hónap átlagos kiadásához mérve"
                   >
                     {reserve}
                   </span>
@@ -260,7 +260,7 @@ function Row({
     ? sameDay.pct
     : prevFigs && prevFigs.counted > 0 ? Math.round(((figs.counted - prevFigs.counted) / prevFigs.counted) * 100) : null;
   const changeTitle = sameDay
-    ? `Eddig ${formatFt(sameDay.current)}, az előző időszakban ugyaneddig ${formatFt(sameDay.previous)}`
+    ? `Eddig ${formatFt(sameDay.current)}, az előző hónapban ugyaneddig ${formatFt(sameDay.previous)}`
     : undefined;
 
   return (

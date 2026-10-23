@@ -44,7 +44,7 @@ export function TrendSheet({ unitKey, onClose }: { unitKey: string; onClose: () 
           <dl className="sumlist">
             {avg !== null && (
               <>
-                <dt>Átlag ({closed.length} lezárt időszak)</dt>
+                <dt>Átlag ({closed.length} lezárt hónap)</dt>
                 <dd className="num">{formatFt(avg)}</dd>
               </>
             )}
@@ -64,7 +64,7 @@ export function TrendSheet({ unitKey, onClose }: { unitKey: string; onClose: () 
             <dd className="total num">{lastPlan ? formatFt(lastPlan) : 'nincs'}</dd>
           </dl>
           {closed.length < 2 && (
-            <p className="tiny faint" style={{ margin: 0 }}>A trend néhány lezárt időszak után lesz beszédes.</p>
+            <p className="tiny faint" style={{ margin: 0 }}>A trend néhány lezárt hónap után lesz beszédes.</p>
           )}
         </div>
       )}

@@ -28,7 +28,7 @@ export interface BudgetCtx {
   go: (screen: Screen, focusCategoryId?: string) => void;
   /** A gyorsrögzítő megnyitása (mint a + gomb). */
   openQuick: () => void;
-  /** A „Fedezet áthozása” lap megnyitása a kiválasztott időszakban, a megadott kerethez. */
+  /** Az „Átcsoportosítás” lap megnyitása a kiválasztott időszakban, a megadott kerethez. */
   openCover: (categoryId: string) => void;
   /** Az Elemzés trendlapja egy kategóriához („c:<id>”) vagy csoporthoz („g:<név>”). */
   openTrend: (key: string) => void;

@@ -138,7 +138,7 @@ export function Planner() {
             <button
               className="sm"
               disabled={!lastClosed}
-              title={lastClosed ? `${periodName(lastClosed.id)} tényleges összegei` : 'Még nincs lezárt időszak'}
+              title={lastClosed ? `${periodName(lastClosed.id)} tényleges összegei` : 'Még nincs lezárt hónap'}
               onClick={() => lastClosed && bulk('Előző hónap alapján', (c) => quickFillAmount(summaries, data.entries, c, [lastClosed.id]))}
             >
               <Icon name="history" /> Előző hónap tényei alapján
@@ -146,7 +146,7 @@ export function Planner() {
             <button
               className="sm"
               disabled={!lastClosed}
-              title={lastClosed ? 'Az utolsó legfeljebb 3 lezárt időszak átlaga' : 'Még nincs lezárt időszak'}
+              title={lastClosed ? 'Az utolsó legfeljebb 3 lezárt hónap átlaga' : 'Még nincs lezárt hónap'}
               onClick={() => bulk('3 havi átlag alapján', (c) => quickFillAmount(summaries, data.entries, c, last3))}
             >
               <Icon name="chart-line" /> 3 havi átlag alapján
@@ -211,7 +211,7 @@ export function Planner() {
             {totals.plannedNet < 0 && (
               <div className="banner warn" style={{ margin: '12px 0 0', padding: '8px 12px' }}>
                 <Icon name="alert-triangle" />
-                <span className="grow small">A terv szerint ebben a hónapban többet költötök, mint amennyi bejön.</span>
+                <span className="grow small">A terv szerint ebben a hónapban több megy el, mint amennyi bejön.</span>
               </div>
             )}
           </div>
@@ -224,7 +224,7 @@ export function Planner() {
             {changed && (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, gap: 8 }}>
                 <span className="small muted">
-                  Utolsó időszak végén:{' '}
+                  Az utolsó hónap végén:{' '}
                   <span className={`num ${preview.periods.at(-1)!.endBalance - (baseline?.get(preview.periods.at(-1)!.id) ?? 0) < 0 ? 'neg' : 'pos'}`}>
                     {formatSigned(preview.periods.at(-1)!.endBalance - (baseline?.get(preview.periods.at(-1)!.id) ?? 0))}
                   </span>
@@ -394,7 +394,7 @@ function PlanRow({
           {goal.requiredMonthly !== null && (goal.state === 'behind' || goal.requiredMonthly !== currentPlan) && (
             <button
               className="sm ghost"
-              title={`A mostani időszaktól (${periodName(currentId).toLowerCase()}) minden hónapra`}
+              title={`A mostani hónaptól (${periodName(currentId).toLowerCase()}) minden hónapra`}
               onClick={() => onApplyGoal(goal.requiredMonthly!)}
             >
               Terv: havi {formatFt(goal.requiredMonthly)}

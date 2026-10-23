@@ -14,7 +14,7 @@ import { PeriodSwitcher } from '../components/PeriodSwitcher';
 
 export const RANGE_KEY = 'analysis-range';
 const RANGES: { id: AnalysisRange; label: string }[] = [
-  { id: 'period', label: 'Ez az időszak' },
+  { id: 'period', label: 'Ez a hónap' },
   { id: 'last12', label: 'Utolsó 12' },
   { id: 'year', label: 'Naptári év' },
 ];
@@ -32,8 +32,8 @@ export function Analysis() {
     range === 'period'
       ? `${periodName(anchor.id, anchor.id.slice(0, 4) !== summaries.currentId.slice(0, 4))}${anchor.status === 'current' ? ', eddig' : ''}`
       : range === 'last12'
-        ? `${periods.length} időszak: ${periodName(periods[0].id, true)} – ${periodName(anchor.id, true)}`
-        : `${anchor.id.slice(0, 4)}, ${periods.length} időszak`;
+        ? `${periods.length} hónap: ${periodName(periods[0].id, true)} – ${periodName(anchor.id, true)}`
+        : `${anchor.id.slice(0, 4)}, ${periods.length} hónap`;
   // A folyamatban lévő időszakból csak az eddigi tény van meg, a terve viszont teljes: ezt jelezni kell.
   const partial = range !== 'period' && anchor.status === 'current' ? ` (${periodName(anchor.id).toLowerCase()} eddig)` : '';
 
@@ -47,7 +47,7 @@ export function Analysis() {
       {anchor.id !== periodId && (
         <div className="banner info">
           <Icon name="info-circle" />
-          <span className="grow">Jövőbeli időszaknak még nincs ténye, ezért az Elemzés a mostani időszakig mutatja az adatokat.</span>
+          <span className="grow">Jövőbeli hónapnak még nincs ténye, ezért az Elemzés a mostani hónapig mutatja az adatokat.</span>
         </div>
       )}
       <WhereMoneyWent periods={periods} spend={spend} rangeText={rangeText + partial} />
@@ -142,17 +142,17 @@ function Deviations({ periods, hasClosed, onWiden }: { periods: PeriodSummary[];
     <section className="card" aria-labelledby="dev-title">
       <div className="card-head">
         <h2 id="dev-title">Legnagyobb eltérések a tervtől</h2>
-        {closed > 0 && <span className="small faint">{closed} lezárt időszak alapján</span>}
+        {closed > 0 && <span className="small faint">{closed} lezárt hónap alapján</span>}
       </div>
       {closed === 0 && hasClosed ? (
         // Van lezárt időszak, csak a választott időablakban nincs (pl. „Ez az időszak”): ne állítsa, hogy még nincs.
         <div className="small muted" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <span>A folyamatban lévő időszakot még nincs mihez mérni, az eltérések a lezárt időszakokból számolódnak.</span>
-          <button className="sm" onClick={onWiden}>Utolsó 12 időszak</button>
+          <span>A folyamatban lévő hónapot még nincs mihez mérni, az eltérések a lezárt hónapokból számolódnak.</span>
+          <button className="sm" onClick={onWiden}>Utolsó 12 hónap</button>
         </div>
       ) : closed === 0 ? (
         <p className="small muted" style={{ margin: 0 }}>
-          Az első lezárt időszak után jelenik meg: a folyamatban lévő hónapot még nincs mihez mérni. Addig az Áttekintés jelzi a gyorsan fogyó kereteket.
+          Az első lezárt hónap után jelenik meg: a folyamatban lévő hónapot még nincs mihez mérni. Addig az Áttekintés jelzi a gyorsan fogyó kereteket.
         </p>
       ) : list.length === 0 ? (
         <p className="small pos" style={{ margin: 0 }}>
@@ -168,9 +168,9 @@ function Deviations({ periods, hasClosed, onWiden }: { periods: PeriodSummary[];
                   <span className="dev-name">{d.cat.name}</span>
                   <span className="tiny muted num">
                     {d.kind === 'unplanned'
-                      ? `nincs rá terv · ${d.periodsOver} időszakban költöttetek belőle`
+                      ? `terv nélkül · ${d.periodsOver} hónapban volt költés`
                       : d.kind === 'over'
-                        ? `${d.periodsOver} időszakban a terv fölött · ${shortAmount(d.actual)} / ${shortAmount(d.plan)}`
+                        ? `${d.periodsOver} hónapban a terv fölött · ${shortAmount(d.actual)} / ${shortAmount(d.plan)}`
                         : `kevesebb ment el · ${shortAmount(d.actual)} / ${shortAmount(d.plan)}`}
                   </span>
                 </span>
@@ -268,10 +268,10 @@ function Heatmap({ periods, spend, anchorId }: { periods: PeriodSummary[]; spend
   return (
     <section className="card" aria-labelledby="heat-title">
       <div className="card-head">
-        <h2 id="heat-title">Időszakonként</h2>
+        <h2 id="heat-title">Hónaponként</h2>
         <span className="small faint">koppints egy sorra a trendért</span>
       </div>
-      <div className="heat-scroll" ref={scrollRef} tabIndex={0} aria-label="Kategóriák időszakonként, görgethető táblázat">
+      <div className="heat-scroll" ref={scrollRef} tabIndex={0} aria-label="Kategóriák hónaponként, görgethető táblázat">
         <table className="heat">
           <thead>
             <tr>

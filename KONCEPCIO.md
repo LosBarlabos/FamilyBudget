@@ -26,6 +26,7 @@ Egyfelhasználós, böngészőben futó webapp a család havi költségvetésén
 ## 3. Fogalmak
 
 ### Időszak
+- **A felületen „hónap” a neve** (a 2026-10-23-i szövegdöntés): a család így gondol rá, és az első indítás is így vezeti be („A hónap fizetéstől fizetésig tart”). A dokumentum és a kód az „időszak” szót használja, a felület csak ott, ahol a dátumtartomány a lényeg (Beállítások → „Időszak kezdőnapja”).
 - A fizetésnaptól a következő fizetésnap előtti napig tart. Például 10-i fizetésnapnál az „Október” időszak 2026.10.10-től 2026.11.09-ig.
 - A neve annak a hónapnak a neve, amelyikben kezdődik. Azonosító: `2026-10`.
 - Egy adott időszak kezdőnapja kézzel felülírható (pl. ha a fizetés hétvége miatt korábban jön). Az előző időszak vége ehhez igazodik.
@@ -125,11 +126,11 @@ megtakarítás összesen(i) = Σ megtakarítás(első időszak … i)
 
 ### Rugalmas keretek (maradék-átvitel nélkül)
 - **Nincs maradék-átvitel:** a ki nem költött keret nem viszi át a maradékát a következő időszakra, hanem a futó egyenlegbe megy (a lezárt időszak a tényt számolja).
-- **Fedezet áthozása (átcsoportosítás):** egy időszakon belül a keretek terve átrendezhető. Ha egy keret gyorsan fogy, túl van lépve, vagy terv nélkül költöttetek belőle, a „Fedezet áthozása” egy másik keret maradékából emeli a tervét.
-  - Csak a folyamatban lévő és a jövőbeli időszakban érhető el; a lezártban a terv már nem változtat semmin. A költségvetés első időszaka előtt sem (ott szándékosan minden terv 0, csak a tény számít), és a terv nélküli költés sem kér fedezetet, ha egyik keretnek sincs terve.
+- **Átcsoportosítás:** egy hónapon belül a keretek terve átrendezhető. Ha egy keret gyorsan fogy, túl van lépve, vagy terv nélkül volt belőle költés, az „Átcsoportosítás” egy másik keret maradékából emeli a tervét.
+  - Csak a folyamatban lévő és a jövőbeli időszakban érhető el; a lezártban a terv már nem változtat semmin. A költségvetés első időszaka előtt sem (ott szándékosan minden terv 0, csak a tény számít), és a terv nélküli költésnél sem kínálja fel, ha egyik keretnek sincs terve.
   - Forrás az a (nem archivált) keret lehet, amelyben maradt pénz (terv − tény > 0), a maradék szerint csökkenő sorrendben („Szabadidő · maradt 18 000 Ft”).
   - Az összeg előre ki van töltve a túllépéssel (gyors fogyásnál a tempó szerint várható túllépéssel, 100 Ft-ra felfelé kerekítve), vagy ha a forrás maradéka kisebb, azzal. Az időszak első napjaiban, amikor még nincs vetítés, üres. A forrás maradékánál több nem hozható át, így a forrás nem kerül túllépésbe.
-  - A háttérben két „csak erre a hónapra” tervmódosítás fut (a forrás terve csökken, a célé ugyanennyivel nő), egyetlen visszavonással. A következő időszak mindkét keretnél a korábbi tervvel folytatódik. A visszavonás csak azt az egy áthozást vonja vissza: ha közben egy másik módosítás is érintette a keretet (pl. két forrásból hoztatok át ugyanabba), az megmarad, és csak ennek az összege megy vissza.
+  - A háttérben két „csak erre a hónapra” tervmódosítás fut (a forrás terve csökken, a célé ugyanennyivel nő), egyetlen visszavonással. A következő időszak mindkét keretnél a korábbi tervvel folytatódik. A visszavonás csak azt az egy átcsoportosítást vonja vissza: ha közben egy másik módosítás is érintette a keretet (pl. két forrásból ment át ugyanabba), az megmarad, és csak ennek az összege megy vissza.
   - A tervek összege nem változik, ezért gyors fogyásnál a futó egyenleg sem: a lap kimondja, hogy „A futó egyenleg nem változik, csak átrendeződik.” A túllépett keret viszont eddig is a tényével számított (max(tény, terv)), így ami a túllépést fedezi, azt a forrásból már nem számolja kétszer: ilyenkor a lap azt mondja, hogy a tervek összege nem változik, de a futó egyenleg ennyivel javul. A „Még elkölthető” összeg akkor változik, ha a forrás és a cél közül csak az egyik számít a napi összegbe.
 - **Díjváltozás-javaslat:** ha egy fix számla a tervtől eltérő összeggel lezárult (vagy a tervnél többel kifizették), a Rögzítésen a sora alatt megjelenik: „Új díj: 8 350 Ft. Legyen ez a terv ettől a hónaptól?” [Igen] [Nem].
   - Az „Igen” „ettől a hónaptól” tervmódosítás a számla időszakától, a Tervezőhöz hasonló üzenettel és visszavonással.
@@ -157,26 +158,26 @@ A rögzítő képernyő és az irányítópult tervezésekor készült két inte
 
 ### 4.1 Első indítás (varázsló)
 1. **Időszak:** fizetésnap (1–31) és „Mennyi pénz van most a számlán?” (negatív is lehet).
-   - Ha a mostani időszak több mint fele eltelt, a varázsló felajánlja: „Kezdjük a következő fizetéssel (okt. 10.)” (ez az alapértelmezett), vagy „a mostani időszakkal”. Így nem indul az app egy szinte lejárt időszakkal, ahol minden számla „lejárt”.
+   - Ha a mostani időszak több mint fele eltelt, a varázsló felajánlja: „Kezdjük a következő fizetéssel (okt. 10.)” (ez az alapértelmezett), vagy „a mostani hónappal”. Így nem indul az app egy szinte lejárt időszakkal, ahol minden számla „lejárt”.
 2. **Kategóriák:** kiinduló lista (lásd 7. fejezet), amelyből törölni, átnevezni és alapértelmezett összeget megadni lehet. A tervek az első időszakra íródnak.
 3. **Ebben az időszakban már megtörtént** (csak ha a mostani időszakkal kezdünk): a fix tételek (számla, egyösszegű bevétel, megtakarítás) egy jelölővel kifizetettként rögzíthetők a terv összegével, lezárva. A keretekhez az eddig elköltött, a részletekben érkező bevételhez az eddig megérkezett összeg is beírható. Ezekből számolódik a nyitó egyenleg.
 4. **Kész:** összegzés, a nyitó egyenleggel.
 
 ### 4.2 Irányítópult (kezdőképernyő)
-- **Fejléc:** időszakváltó (lapozás + időszakok listája, a folyamatban lévő jelölve), az időszak dátumai („Október · 10.10–11.09.”), Mentés gomb az utolsó mentés idejével.
+- **Fejléc:** időszakváltó (lapozás + időszakok listája, a folyamatban lévő jelölve), az időszak dátumai („Október · 10.10–11.09.”), „Mentés letöltése” gomb az utolsó letöltés idejével („Letöltve 3 napja”).
 - **„Jól állunk-e?” kártya** az oldal tetején:
-  - A folyamatban lévő időszakban nagy számmal: „Még elkölthető: 182 000 Ft” (a napi összegbe számító keretek maradéka, lásd Tempó). Alatta: „12 nap van fizetésig (okt. 9-ig) · naponta ~15 000 Ft”, az utolsó napon „Ma van az időszak utolsó napja”.
+  - A folyamatban lévő időszakban nagy számmal: „Még elkölthető: 182 000 Ft” (a napi összegbe számító keretek maradéka, lásd Tempó). Alatta: „12 nap van fizetésig (okt. 9-ig) · naponta ~15 000 Ft”, az utolsó napon „Ma van a hónap utolsó napja”.
   - Ha a keretek összesen túl vannak lépve: „Kereteken túl: 12 000 Ft”, és kimondva: „A keretek összesen 12 000 Ft-tal túl vannak lépve”.
-  - Mellette egy állapotmondat a leginkább túlfutó keretről (a várható túllépés szerint): „Az Élelmiszer keret gyorsabban fogy a tervezettnél, ezzel a tempóval ~18 000 Ft-tal lépi túl”, vagy „A Szabadidő keret már 5 000 Ft-tal túllépte a tervet”, ennek híján a terv nélküli költés („Az Ajándék keretből terv nélkül 80 000 Ft-ot költöttetek”), különben „A terv szerint haladtok”. Ha több keret is figyelmet kér, a számuk alatta látszik.
-  - Napi keretterv nélkül az eddigi keretköltés látszik, és az ok: „ebben az időszakban nincs tervezett keret”, „egyik keret sem számít a napi elkölthető összegbe” vagy „a napi összegbe számító kereteknek nincs terve”. Állapotmondat ilyenkor csak túllépésnél van.
-  - Lezárt időszakban a zárómondat („Az időszak +45 000 Ft-tal zárult”, illetve „… 12 000 Ft mínusszal zárult”), alatta a bevétel, a kiadás és a félretétel. Jövőbeli időszakban a terv összegzése: tervezett havi egyenleg, bevétel, kiadás, félretétel, és hogy hány nap múlva kezdődik.
+  - Mellette egy állapotmondat a leginkább túlfutó keretről (a várható túllépés szerint): „Az Élelmiszer keret gyorsabban fogy a tervezettnél, ezzel a tempóval ~18 000 Ft-tal lépi túl”, vagy „A Szabadidő keret már 5 000 Ft-tal túllépte a tervet”, ennek híján a terv nélküli költés („Ajándék: 80 000 Ft terv nélkül”), különben „Minden keret a terv szerint halad”. Ha több keret is figyelmet kér, a számuk alatta látszik.
+  - Napi keretterv nélkül az eddigi keretköltés látszik, és az ok: „ebben a hónapban nincs tervezett keret”, „egyik keret sem számít a napi elkölthető összegbe” vagy „a napi összegbe számító kereteknek nincs terve”. Állapotmondat ilyenkor csak túllépésnél van.
+  - Lezárt időszakban a zárómondat („A hónap +45 000 Ft-tal zárult”, illetve „A hónap 12 000 Ft mínusszal zárult”), alatta a bevétel, a kiadás és a félretétel. Jövőbeli időszakban a terv összegzése: tervezett havi egyenleg, bevétel, kiadás, félretétel, és hogy hány nap múlva kezdődik.
 - **Teendők** (csak a folyamatban lévő időszakban, a kártya alatt, legfeljebb 5 elem, fontossági sorrendben):
   - lejárt vagy 5 napon belül esedékes, még le nem zárt fix számla (terv nélküli és esedékességi nap nélküli nem), „Kifizetve” gombbal, részlegesnél „Maradék”-kal; ez ugyanaz a lezáró rögzítés és visszavonás, mint a Rögzítésen;
   - egyösszegű bevétel, ami az időszak 3. napja után sem (vagy csak részben) érkezett meg, „Megérkezett” gombbal;
-  - gyorsan fogyó vagy túllépett keret, utánuk a terv nélkül költött napi keret (összesen legfeljebb 2), ami a Rögzítés sorára visz; ha van keret, amelyben maradt pénz, mellette a „Fedezet áthozása” gomb is (lásd Rugalmas keretek);
+  - gyorsan fogyó vagy túllépett keret, utánuk a terv nélkül költött napi keret (összesen legfeljebb 2), ami a Rögzítés sorára visz; ha van keret, amelyben maradt pénz, mellette a „Átcsoportosítás” gomb is (lásd Rugalmas keretek);
   - lemaradó cél, ami a Tervezőbe visz;
   - „N napja nem rögzítettél semmit” (4 nap felett, a legutóbbi rögzítés ideje szerint), ami a gyorsrögzítőt nyitja meg;
-  - elavult mentés, mentés gombbal.
+  - elavult mentés, „Mentés letöltése” gombbal.
   - Ha nincs teendő, egy sor jelenik meg: „Minden rendben”. Ha 5-nél több van, alul látszik, hány maradt ki.
   - Lezárás után a fókusz a helyére lépő teendő gombjára kerül, ha nincs ilyen, a címre vagy a „Minden rendben” sorra.
 - **Összesítő kártyák:**
@@ -196,7 +197,7 @@ A rögzítő képernyő és az irányítópult tervezésekor készült két inte
 - A szakaszok sorrendje: **Keretek, Fix számlák, Megtakarítás, Bevételek** (a gyakoribb rögzítés elöl).
 - **Keretek:** kompakt sorok (ikon, név, „maradt 27 000 Ft · ~2 200 Ft/nap”, sáv a tempó színével és „ma” jelölővel; gyors fogyásnál „gyorsan fogy”, terv nélküli költésnél „nem tervezett · összeg”). Koppintásra nyílnak ki, egyszerre csak egy:
   - „Eddig 45 000 Ft · keret: 60 000 Ft”, és egy ⋯ menü „Havi összeg megadása” ponttal (az eddigi részletek helyére egyetlen havi összeg kerül; Esc vagy × visszavált).
-  - Gyorsan fogyó, túllépett vagy terv nélkül költött keretnél (a folyamatban lévő és a jövőbeli időszakban) „Fedezet áthozása” gomb: alsó lapon (asztalon panelen) a maradékos keretek közül lehet választani, az előtöltött összeggel (lásd Rugalmas keretek).
+  - Gyorsan fogyó, túllépett vagy terv nélkül költött keretnél (a folyamatban lévő és a jövőbeli időszakban) „Átcsoportosítás” gomb: alsó lapon (asztalon panelen) a maradékos keretek közül lehet választani, az előtöltött összeggel (lásd Rugalmas keretek).
   - Javasolt gyorsgombok: az utolsó 3 időszak rögzítéseiből a 3 leggyakoribb, 100 Ft-ra kerekített összeg, és a legutóbbi, ha nincs köztük (egyenlő gyakoriságnál a frissebb nyer). A „Havi összeg megadása” egész hónapos összege nem számít bele (a rögzítés meg van jelölve). Ha nincs adat: +5 000, +10 000, +20 000 Ft. Mentés közben a gombok zárolva vannak, így a dupla koppintás nem rögzít kétszer.
   - Összegmező „Hozzáad” gombbal, „Megjegyzés” kapcsolóval; a részletek egyenként törölhető pillekként.
   - Ha a képernyő egy kategóriára irányítva nyílik meg (`#/rogzites/<kategóriaId>`, pl. a teendőkből), a sor kinyílik, odagördül, és az összegmező kapja a fókuszt.
@@ -215,7 +216,7 @@ A rögzítő képernyő és az irányítópult tervezésekor készült két inte
   - **„Melyik keretből?”** – a keretek chipjei az elmúlt 60 nap rögzítéseinek száma szerint (azonos számnál a megszokott sorrendben). Egy chipre koppintás a beírt összeget rögzíti; üres mezőnél hibaüzenet, és a fókusz visszakerül a mezőre. Az Enter az utoljára itt használt keretbe rögzít (billentyűzetes eszközön ez a chip kiemelt, és a panel alján látszik: „Enter: Élelmiszer”).
   - **„Esedékes számlák”** – a lejárt vagy 5 napon belül esedékes, még le nem zárt fix számlák chipjei („Áram · 18 000 Ft”, részben fizetettnél a hátralék; a lejárt piros keretes). Üres mezővel a koppintás a látható összeggel zár („Kifizetve” / „Maradék”), beírt összeggel azzal (mint a „Más összeg”).
   - „Megjegyzés” kapcsoló: a megjegyzés a rögzítéshez kerül.
-  - Mindig a folyamatban lévő időszakba, a mai napra rögzít, akármelyik időszak van kiválasztva. Az új időszak első 3 napjában (a kezdőnappal együtt) időszakválasztó is megjelenik („Okt. | Szep.”): az előzőbe annak utolsó napjára kerül. A panel alján látszik, hová kerül („Szeptember időszak · okt. 7.”).
+  - Mindig a folyamatban lévő időszakba, a mai napra rögzít, akármelyik időszak van kiválasztva. Az új időszak első 3 napjában (a kezdőnappal együtt) időszakválasztó is megjelenik („Okt. | Szep.”): az előzőbe annak utolsó napjára kerül. A panel alján látszik, hová kerül („Szeptember hónap · okt. 7.”).
   - „Váratlan kiadás” link: a Rögzítés képernyőn a Váratlan kiadás panelt nyitja meg (havi pénzből vagy megtakarításból), a gyorsrögzítő időszakára váltva, a már beírt összeggel és megjegyzéssel.
   - Rögzítés után a panel bezárul, az üzenet visszavonást kínál. Ha a mentés nem sikerül, a beírt összeg megmarad.
 
@@ -240,7 +241,7 @@ A rögzítő képernyő és az irányítópult tervezésekor készült két inte
 ### 4.6 Beállítások és mentés
 - Fizetésnap, nyitó egyenleg, előrejelzési távolság. A mentés visszavonható.
 - Egy időszak kezdőnapjának felülírása. Ha a fizetésnap módosítása után egy felülírás érvénytelenné válik (két időszak összecsúszna), törlődik, és erről üzenet jelenik meg.
-- **Mentés (JSON export):** fájlnév `csaladi-koltsegvetes-ÉÉÉÉ-HH-NN.json`. Az utolsó mentés ideje is tárolódik.
+- **Biztonsági mentés (JSON export, „Mentés letöltése”):** fájlnév `csaladi-koltsegvetes-ÉÉÉÉ-HH-NN.json`. Az utolsó mentés ideje is tárolódik.
 - **Visszatöltés:** fájl kiválasztása után előnézet (időszakok száma, kategóriák száma, legutóbbi módosítás), majd megerősítés után felülírja a jelenlegi adatokat.
   - A fájl rekordonként ellenőrződik. A hiányzó, de pótolható mezők alapértéket kapnak (előrejelzés 6, nyitó egyenleg 0, archivált: nem, sorrend a helye szerint), az összegek egész forintra kerekednek.
   - Érvénytelen rekordnál magyar hibaüzenet mondja meg, mi és hol hibás (pl. „3. rögzítés: ismeretlen kategóriára hivatkozik”), és semmi nem töltődik be.
@@ -250,10 +251,10 @@ A rögzítő képernyő és az irányítópult tervezésekor készült két inte
 - Az összes adat törlése (megerősítéssel).
 
 ### 4.7 Elemzés
-- **Időablak:** „Ez az időszak / Utolsó 12 / Naptári év”, a felső időszakváltóval együtt. Csak a lezárt és a folyamatban lévő időszakok számítanak (jövőbelinél a mostaniig mutat). A folyamatban lévőből az eddigi tény látszik, ezt a felirat jelzi.
+- **Időablak:** „Ez a hónap / Utolsó 12 / Naptári év”, a felső időszakváltóval együtt. Csak a lezárt és a folyamatban lévő időszakok számítanak (jövőbelinél a mostaniig mutat). A folyamatban lévőből az eddigi tény látszik, ezt a felirat jelzi.
 - **Hova ment a pénz:** kiadási kategóriánként a tény a terv mellett, közös léptékű sávokkal és a terv jelölőjével, költés szerint csökkenőn (alapból 8 sor). A megtakarításból fizetett rész sraffozva, külön összeggel. Sorra koppintva megnyílik a trend.
 - **Legnagyobb eltérések a tervtől:** legfeljebb 5 kategória, **csak lezárt időszakokból** (a folyamatban lévőben a „terv alatt” csak annyit jelentene, hogy a hónap még tart). Túllépés, kevesebb költés, illetve terv nélküli költés; hány időszakban volt a terv fölött. A megtakarításból fizetett költés nem számít bele. Mellette gomb a Tervezőhöz.
-- **Időszakonként (hőtérkép):** sorok a kiadási kategóriák (csoportonként összecsukhatók), oszlopok az időszakok („Ez az időszak” módban az utolsó 6). A cellában a tény („112e”), a színe a tény/terv arány: ≤ 90%, 90–100%, 100–115%, > 115%; külön jelölés a terv nélküli és a folyamatban lévő cellának. Telefonon a táblázat a saját dobozában görgethető, a legfrissebb időszaknál indul.
+- **Időszakonként (hőtérkép):** sorok a kiadási kategóriák (csoportonként összecsukhatók), oszlopok az időszakok („Ez a hónap” módban az utolsó 6). A cellában a tény („112e”), a színe a tény/terv arány: ≤ 90%, 90–100%, 100–115%, > 115%; külön jelölés a terv nélküli és a folyamatban lévő cellának. Telefonon a táblázat a saját dobozában görgethető, a legfrissebb időszaknál indul.
 - **Trend** (alsó lap): a tény vonalként, a terv lépcsőként, a 3 havi átlag (az utolsó legfeljebb 3 lezárt időszakból) szaggatottan; ha volt megtakarításból fizetett rész, az is. Alatta átlag, legtöbb, az idei eddigi és a jelenlegi terv.
 - **Keresés és címkék:** a megjegyzésekben írt `#címkék` összesítése (összeg, darab); koppintásra a címke tételei. A kereső a megjegyzésben, a kategória nevében és a rögzítő nevében keres, „#címke” alakban pontos címkére. A megjegyzésmezők a korábbi címkéket felajánlják.
 - **Megtakarításból fizetett költés:** a felhasználás (Váratlan kiadás „Megtakarításból” ága, illetve a megtakarítás „Felhasználás” művelete) kiadási kategóriát kaphat („Mire ment?”). Az Elemzés és az Áttekintés havi kiadás-grafikonja ezt az adott kategória kiadásaként mutatja, halványan, „megtakarításból” jelöléssel. A futó egyenleget nem érinti.
@@ -264,7 +265,7 @@ A rögzítő képernyő és az irányítópult tervezésekor készült két inte
 - **Hibaképernyő:** megjelenítési hibánál „Hiba történt” oldal jelenik meg három lehetőséggel: nyers adatmentés letöltése (az adatbázis táblái közvetlenül, számolás nélkül, az export formátumában, így a Beállításokban visszatölthető), újratöltés, és a hiba részletei. Egy képernyőn belüli hibánál a fejléc és a navigáció megmarad, másik képernyőre lépve újra próbálkozik.
 
 - Indításkor az app tartós tárolást kér a böngészőtől (`navigator.storage.persist()`).
-- Az utolsó mentés ideje a fejlécben látszik. 30 nap után sárga figyelmeztetés jelenik meg.
+- Az utolsó letöltés ideje a fejlécben látszik („Letöltve ma”, „Letöltve 3 napja”). A puszta „Mentés” szó csak az űrlapok mentése (Beállítások, Kategóriák). 30 nap után sárga figyelmeztetés jelenik meg.
 - Új időszak első megnyitásakor egy sáv felajánlja az előző időszak mentését, egy kattintással.
 - Ajánlott használat: Safariban „Hozzáadás a Dockhoz”, vagy Chrome-ban telepítve. Safariban a sima weboldal adatai 7 nap használaton kívül törlődhetnek. A mentések helye legyen egy szinkronizált mappa (OneDrive vagy iCloud).
 

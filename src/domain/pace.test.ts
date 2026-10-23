@@ -130,7 +130,7 @@ describe('áttekintés: keretek állása', () => {
       'Az Élelmiszer keret gyorsabban fogy a tervezettnél, ezzel a tempóval ~138 200 Ft-tal lépi túl',
     );
     expect(sp(paceSentence(o.byId.get('szabad')))).toBe('A Szabadidő keret már 5 000 Ft-tal túllépte a tervet');
-    expect(paceSentence(null)).toBe('A terv szerint haladtok');
+    expect(paceSentence(null)).toBe('Minden keret a terv szerint halad');
   });
 
   it('lezárt időszakban nincs tempó és napi összeg', () => {
@@ -165,7 +165,7 @@ describe('áttekintés: terv nélküli és archivált keret', () => {
     expect(o.unplanned.map((e) => e.cat.id)).toEqual(['ajandek']);
     const st = paceStatus(o);
     expect(st.tone).toBe('fast');
-    expect(sp(st.text)).toBe('Az Ajándék keretből terv nélkül 80 000 Ft-ot költöttetek');
+    expect(sp(st.text)).toBe('Ajándék: 80 000 Ft terv nélkül');
     expect(st.more).toBe(0);
   });
 
@@ -173,15 +173,15 @@ describe('áttekintés: terv nélküli és archivált keret', () => {
     const categories = [cat('kaja', 'keret', 100_000, { name: 'Élelmiszer' }), cat('ajandek', 'keret', 0, { name: 'Ajándék' })];
     const o = overview(categories, [entry('2026-10', 'kaja', 110_000), entry('2026-10', 'ajandek', 5_000)]);
     expect(paceStatus(o)).toMatchObject({ tone: 'over', more: 1 });
-    expect(sp(unplannedSentence(o.unplanned[0]))).toBe('Az Ajándék keretből terv nélkül 5 000 Ft-ot költöttetek');
+    expect(sp(unplannedSentence(o.unplanned[0]))).toBe('Ajándék: 5 000 Ft terv nélkül');
   });
 
-  it('napi keretterv nélkül nincs „terv nélküli” figyelmeztetés, és nincs „terv szerint haladtok” sem', () => {
+  it('napi keretterv nélkül nincs „terv nélküli” figyelmeztetés, és nincs „minden keret a terv szerint halad” sem', () => {
     const categories = [cat('kaja', 'keret', 0, { name: 'Élelmiszer' })];
     const o = overview(categories, [entry('2026-10', 'kaja', 30_000)]);
     expect(o.hasDailyPlan).toBe(false);
     expect(o.unplanned).toEqual([]);
-    expect(paceStatus(o)).toEqual({ tone: 'ok', text: 'A terv szerint haladtok', more: 0 });
+    expect(paceStatus(o)).toEqual({ tone: 'ok', text: 'Minden keret a terv szerint halad', more: 0 });
   });
 
   it('a folyamatban lévő időszakban archivált keret kimarad a napi összegből', () => {
@@ -195,7 +195,7 @@ describe('áttekintés: terv nélküli és archivált keret', () => {
 
   it('a napi összeg hiányának oka', () => {
     const none = overview([cat('kaja', 'keret', 0)], []);
-    expect(noDailyPlanText(none)).toBe('ebben az időszakban nincs tervezett keret');
+    expect(noDailyPlanText(none)).toBe('ebben a hónapban nincs tervezett keret');
     const excluded = overview([cat('kaja', 'keret', 50_000, { excludeFromDaily: true }), cat('v', 'keret', 20_000, { role: 'unexpected' })], []);
     expect(excluded.hasDailyPlan).toBe(false);
     expect(noDailyPlanText(excluded)).toBe('egyik keret sem számít a napi elkölthető összegbe');
@@ -292,7 +292,7 @@ describe('áttekintés szövegei', () => {
   it('napok fizetésig', () => {
     expect(untilDate('2026-10-09')).toBe('okt. 9-ig');
     expect(daysLeftText(periodDays('2026-10-10', '2026-11-09', TODAY), '2026-11-09')).toBe('21 nap van fizetésig (nov. 9-ig)');
-    expect(daysLeftText(periodDays('2026-10-10', '2026-11-09', '2026-11-09'), '2026-11-09')).toBe('Ma van az időszak utolsó napja');
+    expect(daysLeftText(periodDays('2026-10-10', '2026-11-09', '2026-11-09'), '2026-11-09')).toBe('Ma van a hónap utolsó napja');
     expect(startsInText('2026-11-10', TODAY)).toBe('21 nap múlva kezdődik (nov. 10.)');
     expect(startsInText('2026-10-21', TODAY)).toBe('Holnap kezdődik (okt. 21.)');
   });
@@ -302,9 +302,9 @@ describe('áttekintés szövegei', () => {
     expect(sp(envelopeLeftText({ left: 27_000, perDay: null }))).toBe('maradt 27 000 Ft');
     expect(sp(envelopeLeftText({ left: -4_000, perDay: null }))).toBe('túllépés 4 000 Ft');
     expect(sp(overspentText(-12_000))).toBe('A keretek összesen 12 000 Ft-tal túl vannak lépve');
-    expect(sp(closingSentence(45_000))).toBe('Az időszak +45 000 Ft-tal zárult');
-    expect(sp(closingSentence(-12_000))).toBe('Az időszak 12 000 Ft mínusszal zárult');
-    expect(closingSentence(0)).toBe('Az időszak nullszaldóval zárult');
+    expect(sp(closingSentence(45_000))).toBe('A hónap +45 000 Ft-tal zárult');
+    expect(sp(closingSentence(-12_000))).toBe('A hónap 12 000 Ft mínusszal zárult');
+    expect(closingSentence(0)).toBe('A hónap nullszaldóval zárult');
   });
 });
 

@@ -17,10 +17,10 @@ export function daysSince(iso: string | undefined, now = new Date()): number | n
 }
 
 export function backupLabel(days: number | null): string {
-  if (days === null) return 'Még nincs mentés';
-  if (days === 0) return 'Mentve ma';
-  if (days === 1) return 'Mentve tegnap';
-  return `Mentve ${days} napja`;
+  if (days === null) return 'Még nincs letöltött mentés';
+  if (days === 0) return 'Letöltve ma';
+  if (days === 1) return 'Letöltve tegnap';
+  return `Letöltve ${days} napja`;
 }
 
 /** Figyelmeztetés: ha 30 napnál régebbi a mentés, vagy még nincs, de az app már egy hete használatban van. */

@@ -215,7 +215,7 @@ describe('fedezet áthozása: szövegek', () => {
     expect(sp(coverTargetText({ plan: 100_000, actual: 50_000, expectedOver: 40_909 }))).toBe('~40 900 Ft túllépés várható');
     expect(sp(coverTargetText({ plan: 0, actual: 8_000, expectedOver: 8_000 }))).toBe('terv nélkül 8 000 Ft');
     expect(sp(coverTargetText({ plan: 100_000, actual: 30_000, expectedOver: -70_000 }))).toBe('maradt 70 000 Ft');
-    expect(sp(coverMessage(c('ruha'), c('szabad'), 5_000, '2026-10'))).toBe('5 000 Ft áthozva: Ruházat → Szabadidő · csak októberre');
+    expect(sp(coverMessage(c('ruha'), c('szabad'), 5_000, '2026-10'))).toBe('5 000 Ft átcsoportosítva: Ruházat → Szabadidő · csak októberre');
   });
 });
 

@@ -2,7 +2,7 @@ import { formatRange, periodName } from '../../domain/periods';
 import { useBudget } from '../context';
 import { Icon } from './common';
 
-const STATUS_LABEL = { closed: 'Lezárt', current: 'Folyamatban', future: 'Terv' } as const;
+const STATUS_LABEL = { closed: 'Lezárt', current: 'Folyamatban', future: 'Jövőbeli' } as const;
 
 export function PeriodSwitcher() {
   const { summaries, periodId, setPeriodId } = useBudget();
@@ -13,10 +13,10 @@ export function PeriodSwitcher() {
 
   return (
     <div className="period-switch">
-      <button className="icon" aria-label="Előző időszak" disabled={i <= 0} onClick={() => setPeriodId(list[i - 1].id)}>
+      <button className="icon" aria-label="Előző hónap" disabled={i <= 0} onClick={() => setPeriodId(list[i - 1].id)}>
         <Icon name="chevron-left" />
       </button>
-      <select aria-label="Időszak" value={periodId} onChange={(e) => setPeriodId(e.target.value)}>
+      <select aria-label="Hónap" value={periodId} onChange={(e) => setPeriodId(e.target.value)}>
         {list.map((x) => (
           <option key={x.id} value={x.id}>
             {periodName(x.id, x.id.slice(0, 4) !== thisYear)}
@@ -24,7 +24,7 @@ export function PeriodSwitcher() {
           </option>
         ))}
       </select>
-      <button className="icon" aria-label="Következő időszak" disabled={i >= list.length - 1} onClick={() => setPeriodId(list[i + 1].id)}>
+      <button className="icon" aria-label="Következő hónap" disabled={i >= list.length - 1} onClick={() => setPeriodId(list[i + 1].id)}>
         <Icon name="chevron-right" />
       </button>
       {p && (

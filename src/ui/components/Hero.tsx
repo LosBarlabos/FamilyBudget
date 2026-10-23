@@ -34,8 +34,8 @@ export function Hero({ p, pace, stats = [] }: { p: PeriodSummary; pace: PaceOver
   if (p.status !== 'current') {
     const closed = p.status === 'closed';
     return (
-      <section className="hero" aria-label={closed ? 'Az időszak zárása' : 'Az időszak terve'}>
-        <p className="hero-label">{closed ? 'Lezárt időszak' : 'Terv'}</p>
+      <section className="hero" aria-label={closed ? 'A hónap zárása' : 'A hónap terve'}>
+        <p className="hero-label">{closed ? 'Lezárt hónap' : 'Előre tervezett hónap'}</p>
         <p className="hero-title num">
           {closed ? closingSentence(p.net) : `Tervezett havi egyenleg: ${formatSigned(p.net)}`}
         </p>
@@ -95,7 +95,7 @@ export function Hero({ p, pace, stats = [] }: { p: PeriodSummary; pace: PaceOver
 
   return (
     <>
-      <section className="hero" aria-label="Az időszak állása">
+      <section className="hero" aria-label="A hónap állása">
         {main}
         {hasDailyPlan && (
           <div className="hero-meter">
@@ -107,7 +107,7 @@ export function Hero({ p, pace, stats = [] }: { p: PeriodSummary; pace: PaceOver
             />
             <p className="hero-meter-text num">
               <span>keretekből {spentPct}% elment</span>
-              <span>az időszak {Math.round(days.ratio * 100)}%-ánál</span>
+              <span>a hónap {Math.round(days.ratio * 100)}%-ánál</span>
             </p>
           </div>
         )}
@@ -128,7 +128,7 @@ export function Hero({ p, pace, stats = [] }: { p: PeriodSummary; pace: PaceOver
           </dl>
         )}
       </section>
-      {/* Keretterv nélkül a „terv szerint haladtok” félrevezető lenne; csak a túllépés jelenik meg. */}
+      {/* Keretterv nélkül a „minden keret a terv szerint halad” félrevezető lenne; csak a túllépés jelenik meg. */}
       {status.tone !== 'ok' && (
         <button
           className={`hero-alert ${status.tone}`}

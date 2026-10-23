@@ -12,7 +12,7 @@ export type Todo =
   | { kind: 'bill'; cat: Category; amount: number; partial: boolean; due: ISODate; overdue: boolean }
   /** Egyösszegű bevétel, ami az időszak elején még nem (vagy nem teljesen) érkezett meg. */
   | { kind: 'income'; cat: Category; amount: number; partial: boolean }
-  /** Túlfutó keret, vagy terv nélküli keret, amelyből mégis költöttetek (pace: 'ok', plan: 0). */
+  /** Túlfutó keret, vagy terv nélküli keret, amelyből mégis volt költés (pace: 'ok', plan: 0). */
   | { kind: 'envelope'; env: EnvelopeStatus }
   | { kind: 'goal'; cat: Category; goal: GoalProgress }
   | { kind: 'idle'; days: number }
@@ -180,6 +180,6 @@ export function todoText(t: Todo, today: ISODate): string {
     case 'idle':
       return `${t.days} napja nem rögzítettél semmit`;
     case 'backup':
-      return t.days === null ? 'Még nem mentetted le az adatokat' : `${t.days} napja nem mentetted le az adatokat`;
+      return t.days === null ? 'Még nem töltöttél le mentést' : `${t.days} napja nem töltöttél le mentést`;
   }
 }

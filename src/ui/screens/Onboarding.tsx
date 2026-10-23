@@ -54,7 +54,7 @@ export function Onboarding() {
   const firstId = next ? choice.nextId : choice.currentId;
   const daysLeft = differenceInCalendarDays(fromISO(periodEnd(choice.currentId, cfg)), fromISO(today)) + 1;
   const steps: Step[] = next ? ['period', 'cats', 'finish'] : ['period', 'cats', 'past', 'finish'];
-  const STEP_LABEL: Record<Step, string> = { period: 'Időszak', cats: 'Kategóriák', past: 'Már megtörtént', finish: 'Kész' };
+  const STEP_LABEL: Record<Step, string> = { period: 'Fizetésnap', cats: 'Kategóriák', past: 'Már megtörtént', finish: 'Kész' };
   const stepIndex = steps.indexOf(step);
   const goNext = () => setStep(steps[stepIndex + 1]);
   const goBack = () => setStep(steps[stepIndex - 1]);
@@ -160,7 +160,7 @@ export function Onboarding() {
         <div className="card">
           <h1 style={{ marginBottom: 6 }}>Állítsuk be a költségvetést</h1>
           <p className="muted" style={{ marginTop: 0 }}>
-            A hónap nálatok fizetéstől fizetésig tart. Add meg, hányadikán érkezik a fizetés.
+            A hónap fizetéstől fizetésig tart. Add meg, hányadikán érkezik a fizetés.
           </p>
           <div className="form-grid">
             <label className="field">
@@ -183,15 +183,15 @@ export function Onboarding() {
                 <span>
                   <strong>Kezdjük a következő fizetéssel ({shortDate(choice.nextStart)})</strong>
                   <span className="tiny muted">
-                    A mostani időszakból már csak {daysLeft} nap van hátra. Addig a rögzített kiadások a mostani egyenlegből fogynak.
+                    A mostani hónapból már csak {daysLeft} nap van hátra. Addig a rögzített kiadások a mostani egyenlegből fogynak.
                   </span>
                 </span>
               </button>
               <button role="radio" aria-checked={!next} className={`choice ${!next ? 'on' : ''}`} onClick={() => setStartNext(false)}>
                 <Icon name={!next ? 'circle-check' : 'circle'} />
                 <span>
-                  <strong>A mostani időszakkal ({formatRange(periodStart(choice.currentId, cfg), periodEnd(choice.currentId, cfg))})</strong>
-                  <span className="tiny muted">Az ebben az időszakban már kifizetett tételeket egy későbbi lépésben jelölheted.</span>
+                  <strong>A mostani hónappal ({formatRange(periodStart(choice.currentId, cfg), periodEnd(choice.currentId, cfg))})</strong>
+                  <span className="tiny muted">Az ebben a hónapban már kifizetett tételeket egy későbbi lépésben jelölheted.</span>
                 </span>
               </button>
             </div>
@@ -200,7 +200,7 @@ export function Onboarding() {
             <div className="banner info" style={{ marginTop: 16, marginBottom: 0 }}>
               <Icon name="calendar" />
               <span className="grow">
-                Az első időszak: <strong>{periodName(firstId)}</strong> ({formatRange(periodStart(firstId, cfg), periodEnd(firstId, cfg))})
+                Az első hónap: <strong>{periodName(firstId)}</strong> ({formatRange(periodStart(firstId, cfg), periodEnd(firstId, cfg))})
               </span>
             </div>
           )}
@@ -233,7 +233,7 @@ export function Onboarding() {
         <div className="card">
           <h1 style={{ marginBottom: 6 }}>Kategóriák és havi összegek</h1>
           <p className="muted" style={{ marginTop: 0 }}>
-            Ez a kiinduló terv. Kapcsold ki, ami nálatok nincs, és írd be a szokásos havi összeget. Később bármikor módosíthatod.
+            Ez a kiinduló terv. Kapcsold ki, amire nincs szükséged, és írd be a szokásos havi összeget. Később bármikor módosíthatod.
           </p>
           {TYPE_ORDER.map((t) => (
             <div key={t}>
@@ -265,10 +265,10 @@ export function Onboarding() {
 
       {step === 'past' && (
         <div className="card">
-          <h1 style={{ marginBottom: 6 }}>Ebben az időszakban már megtörtént</h1>
+          <h1 style={{ marginBottom: 6 }}>Ebben a hónapban már megtörtént</h1>
           <p className="muted" style={{ marginTop: 0 }}>
-            Jelöld, ami a mostani időszakban már ki van fizetve vagy megérkezett. A terv összegével rögzül, később módosítható.
-            Ezekből és a mostani egyenlegből számoljuk ki, mennyi pénz volt az időszak elején.
+            Jelöld, ami a mostani hónapban már ki van fizetve vagy megérkezett. A terv összegével rögzül, később módosítható.
+            Ezekből és a mostani egyenlegből számolja ki az app, mennyi pénz volt a hónap elején.
           </p>
           {fixRows.length === 0 && envRows.length === 0 && incRows.length === 0 && (
             <p className="small faint">Nincs olyan tétel, amit itt jelölni lehetne.</p>
@@ -328,7 +328,7 @@ export function Onboarding() {
           <p className="small muted num" style={{ marginBottom: 0 }}>
             {next
               ? `A költségvetés a következő fizetéssel indul (${shortDate(choice.nextStart)}), ${formatFt(signedOf(opening) ?? 0)} kezdő egyenleggel.`
-              : `Nyitó egyenleg az időszak elején (${shortDate(periodStart(firstId, cfg))}): ${formatFt(openingFromNow(signedOf(opening) ?? 0, pastItems()))}.`}
+              : `Nyitó egyenleg a hónap elején (${shortDate(periodStart(firstId, cfg))}): ${formatFt(openingFromNow(signedOf(opening) ?? 0, pastItems()))}.`}
           </p>
           <ul className="small muted" style={{ paddingLeft: 18, marginTop: 16 }}>
             <li>Az adatok ebben a böngészőben tárolódnak. Havonta érdemes menteni, és az app emlékeztetni is fog rá.</li>
