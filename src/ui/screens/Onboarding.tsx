@@ -145,15 +145,37 @@ export function Onboarding() {
 
   return (
     <div className="onboarding">
-      <div className="brand mb-5">
-        <Icon name="wallet" /> Családi költségvetés
-      </div>
-      <div className="steps" aria-label="Lépések">
+      {/* Az első benyomás: a márka, egy mondat arról, mire jó, és a hónapcsík, az app fő eleme, díszként. */}
+      {step === 'period' ? (
+        <header className="ob-hero">
+          <p className="ob-brand">
+            <span className="tile tile-md side-logo" aria-hidden="true"><Icon name="wallet" /></span> Családi költségvetés
+          </p>
+          <p className="ob-promise">Fizetéstől fizetésig: mennyi költhető még ma, mi vár befizetésre, és mennyi marad a hónap végén.</p>
+          <div className="ob-strip" aria-hidden="true">
+            {Array.from({ length: 31 }, (_, i) => (
+              <span key={i} className={i < 17 ? 'past' : i === 17 ? 'today' : ''} />
+            ))}
+          </div>
+        </header>
+      ) : (
+        <p className="ob-brand small">
+          <span className="tile tile-sm side-logo" aria-hidden="true"><Icon name="wallet" /></span> Családi költségvetés
+        </p>
+      )}
+      <ol className="steps" aria-label="Lépések">
         {steps.map((s, i) => (
-          <span key={s} className={`step ${i === stepIndex ? 'on' : i < stepIndex ? 'done' : ''}`}>
+          <li key={s} className={`step ${i === stepIndex ? 'on' : i < stepIndex ? 'done' : ''}`} aria-current={i === stepIndex ? 'step' : undefined}>
             <span className="dot">{i < stepIndex ? <Icon name="check" /> : i + 1}</span> {STEP_LABEL[s]}
-          </span>
+          </li>
         ))}
+      </ol>
+      {/* Telefonon a négy címke két sorba törne: egy mondat és egy sáv helyettük. */}
+      <div className="steps-compact" aria-hidden="true">
+        <span className="small">
+          <strong>{stepIndex + 1}. lépés a {steps.length}-ből:</strong> {STEP_LABEL[step]}
+        </span>
+        <span className="meter"><span className="meter-fill" style={{ width: `${((stepIndex + 1) / steps.length) * 100}%` }} /></span>
       </div>
 
       {step === 'period' && (
@@ -172,7 +194,7 @@ export function Onboarding() {
               Mennyi pénz van most a számlán?
               {/* Szöveges billentyűzet, hogy a mínuszjel is beírható legyen. */}
               <input type="text" className="num" placeholder="0" value={opening} aria-describedby="opening-hint" onChange={(e) => setOpening(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && next1()} />
-              <span id="opening-hint" className="tiny faint">Ha a számla mínuszban van, negatív is lehet (pl. -20 000).</span>
+              <span id="opening-hint" className="tiny faint">Ha a számla mínuszban van, negatív is lehet (pl.&nbsp;−20&nbsp;000).</span>
               {errors.opening && <span className="error">{errors.opening}</span>}
             </label>
           </div>
@@ -200,18 +222,28 @@ export function Onboarding() {
             <div className="callout tone-accent" style={{ marginTop: 16, marginBottom: 0 }}>
               <Icon name="calendar" />
               <span className="callout-text">
-                Az első hónap: <strong>{periodName(firstId)}</strong> ({formatRange(periodStart(firstId, cfg), periodEnd(firstId, cfg))})
+                Az első hónap: <strong>{periodName(firstId)}</strong>{' '}
+                <span className="nowrap">({formatRange(periodStart(firstId, cfg), periodEnd(firstId, cfg))})</span>
               </span>
             </div>
           )}
           <div className="wizard-nav">
-            <button className="btn ghost" onClick={() => { setShowImport(!showImport); setShowJoin(false); }}>
+            <button className="btn primary" onClick={next1}>Tovább <Icon name="arrow-right" /></button>
+          </div>
+        </div>
+      )}
+
+      {/* Aki már használja (mentésből vagy a párja közös adataival), annak nem kell végigmennie a varázslón. */}
+      {step === 'period' && (
+        <section className="ob-other" aria-labelledby="ob-other-title">
+          <h2 id="ob-other-title">Már használod?</h2>
+          <div className="cluster wrap gap-2">
+            <button className="btn" aria-expanded={showImport} onClick={() => { setShowImport(!showImport); setShowJoin(false); }}>
               <Icon name="upload" /> Van már mentésem
             </button>
-            <button className="btn ghost" onClick={() => { setShowJoin(!showJoin); setShowImport(false); }}>
+            <button className="btn" aria-expanded={showJoin} onClick={() => { setShowJoin(!showJoin); setShowImport(false); }}>
               <Icon name="users" /> Csatlakozom egy közöshöz
             </button>
-            <button className="btn primary" onClick={next1}>Tovább <Icon name="arrow-right" /></button>
           </div>
           {showImport && (
             <div className="import-preview">
@@ -226,7 +258,7 @@ export function Onboarding() {
               <SyncPanel join />
             </div>
           )}
-        </div>
+        </section>
       )}
 
       {step === 'cats' && (
@@ -245,7 +277,7 @@ export function Onboarding() {
                   <input type="text" className="sm" value={r.cat.name} disabled={!r.include} aria-label="Név" onChange={(e) => update(r.cat.id, { name: e.target.value })} />
                   <span className="tiny faint ob-group">{r.cat.group ?? ''}</span>
                   <div>
-                    <input type="text" inputMode="numeric" className="sm num" style={{ width: 120, textAlign: 'right' }} placeholder="0 Ft" disabled={!r.include} value={r.amountText} aria-label={`${r.cat.name} havi összege`} onChange={(e) => update(r.cat.id, { amountText: e.target.value })} />
+                    <input type="text" inputMode="numeric" className="sm num" placeholder="0 Ft" disabled={!r.include} value={r.amountText} aria-label={`${r.cat.name} havi összege`} onChange={(e) => update(r.cat.id, { amountText: e.target.value })} />
                     {errors[r.cat.id] && <div className="error">{errors[r.cat.id]}</div>}
                   </div>
                 </div>
@@ -296,7 +328,7 @@ export function Onboarding() {
                       <span>{r.cat.name}</span>
                       <div>
                         <input
-                          type="text" inputMode="numeric" className="sm num" style={{ width: 120, textAlign: 'right' }} placeholder="0 Ft"
+                          type="text" inputMode="numeric" className="sm num" placeholder="0 Ft"
                           aria-label={`${r.cat.name}: ${sec.label}`} value={spentText[r.cat.id] ?? ''}
                           onChange={(e) => setSpentText({ ...spentText, [r.cat.id]: e.target.value })}
                         />

@@ -160,6 +160,11 @@ A rögzítő képernyő és az irányítópult tervezésekor készült két inte
 - **Rétegek** (gyorsrögzítő, alsó lap): kompakt elrendezésben alulról nyílnak, a fix alsó sáv és a képernyő-billentyűzet fölött; közepes és széles elrendezésben középre igazított panelként. Saját előzménybejegyzést kapnak, így a vissza gesztus őket zárja be. A parancsikonnal (`?gyors`) nyitott gyorsrögzítő is: alatta az útvonal képernyője (pl. az Áttekintés) marad, így a vissza gesztus nem lépteti ki az appot. A rétegből a már alatta látszó képernyőt választva csak a réteg zárul be. Az Esc, a bezárás gomb és a háttérre kattintás is bezárja őket; alsó lapként a fogantyú lefelé húzása is (a lap negyedénél, legfeljebb 120 px-nél tovább húzva; rövidebb húzásnál visszaugrik). A sötétítés a navigáció fölött van. Az üzenetek (és a visszavonás) a réteg fölött maradnak; kompakt elrendezésben ilyenkor a képernyő tetején jelennek meg, hogy ne takarják a lap gombjait.
 
 ### 4.1 Első indítás (varázsló)
+- **Nyitókép** (csak az első lépésen): a márka, egy mondat arról, mire jó („Fizetéstől fizetésig: mennyi költhető még ma, mi vár befizetésre, és mennyi marad a hónap végén.”), és díszként egy hónapcsík, az Áttekintés fő eleme. A további lépéseken csak a márka áll, kicsiben.
+- **Lépésjelző:** a lépések neve számozva, a mostani kiemelve; telefonon helyette „2. lépés a 4-ből: Kategóriák” és egy sáv.
+- **„Már használod?”** az első lépés kártyája alatt: „Van már mentésem” (visszatöltés) és „Csatlakozom egy közöshöz” (GitHub). A kártyában csak a „Tovább” van.
+- Telefonon a kategóriák és a „már megtörtént” sorai ikon nélkül állnak, hogy a név ne vágódjon le, és az összegmező kitölti a saját oszlopát.
+
 1. **Időszak:** fizetésnap (1–31) és „Mennyi pénz van most a számlán?” (negatív is lehet).
    - Ha a mostani időszak több mint fele eltelt, a varázsló felajánlja: „Kezdjük a következő fizetéssel (okt. 10.)” (ez az alapértelmezett), vagy „a mostani hónappal”. Így nem indul az app egy szinte lejárt időszakkal, ahol minden számla „lejárt”.
 2. **Kategóriák:** kiinduló lista (lásd 7. fejezet), amelyből törölni, átnevezni és alapértelmezett összeget megadni lehet. A tervek az első időszakra íródnak.
