@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<title>Pénzfolyam – Áttekintés, asztal</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.c{--bg:#F6F5FB;--surface:#FFFFFF;--ink:#1C1A3A;--ink2:#4A4769;--ink3:#5C597A;--line:#E1DFEE;--accent:#4B3FD6;--on-accent:#FFFFFF;--flow:#4B3FD6;--flow-soft:rgba(75,63,214,.14);--neg:#C2264B;--neg-soft:rgba(194,38,75,.16);--warn:#8A5200;--warn-fill:#E0941F;--ok:#19784F;--track:#E7E5F3}
+.c.dark{--bg:#14122A;--surface:#1E1B3B;--ink:#EFEDFB;--ink2:#C1BDE0;--ink3:#A39FCB;--line:#322E57;--accent:#A9A0FF;--on-accent:#14122A;--flow:#A9A0FF;--flow-soft:rgba(169,160,255,.18);--neg:#FF8DA6;--neg-soft:rgba(255,141,166,.2);--warn:#F2B35A;--warn-fill:#E0941F;--ok:#6FD6A4;--track:#2C2852}
+.c button{font:inherit;cursor:pointer}
+.num{font-variant-numeric:tabular-nums}
+.wrap{container-type:inline-size}
+.top{display:grid;grid-template-columns:minmax(0,1fr);gap:24px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 16px;padding:12px 0;border-bottom:1px solid var(--line);align-items:center}
+.row .bar{grid-column:1/-1}
+.row .col{display:none}
+@container (min-width: 900px){.top{grid-template-columns:minmax(0,2fr) minmax(300px,1fr)}.row{grid-template-columns:minmax(140px,1.2fr) repeat(3,minmax(0,.8fr)) minmax(160px,1.6fr)}.row .bar{grid-column:auto}.row .col{display:block;text-align:right}}
+</style>
+</helmet>
+<div class="c {{themeClass}}" style="min-height: 100vh; background: var(--bg); color: var(--ink); font-family: 'Schibsted Grotesk', system-ui, sans-serif; font-size: 15px; line-height: 1.5; display: flex; flex-wrap: wrap">
+  <nav aria-label="Fő navigáció" style="flex: 1 1 96px; max-width: 100%; background: var(--surface); border-right: 1px solid var(--line); padding: 16px 8px; display: flex; flex-wrap: wrap; flex-direction: row; gap: 4px; align-content: flex-start; box-sizing: border-box">
+    <button aria-label="Kiadás rögzítése" style="width: 64px; height: 64px; margin: 0 auto 12px; border-radius: 20px; border: none; background: var(--accent); color: var(--on-accent); display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"></path></svg></button>
+    <sc-for list="{{nav}}" as="n" hint-placeholder-count="6">
+      <a href="#" aria-current="{{n.current}}" style="{{n.style}}">{{n.label}}</a>
+    </sc-for>
+  </nav>
+
+  <main class="wrap" style="flex: 999 1 560px; min-width: 0; padding: 28px clamp(16px, 4vw, 48px) 48px; box-sizing: border-box">
+    <div style="max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px">
+      <div class="top">
+        <section aria-labelledby="fo-cd" style="padding: 24px; border-radius: 24px; background: var(--surface); border: 1px solid var(--line); min-width: 0">
+          <div style="display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: flex-end; justify-content: space-between">
+            <div>
+              <h1 id="fo-cd" style="margin: 0; font-size: 16px; font-weight: 500; color: var(--ink2)">{{headLabel}}</h1>
+              <p class="num" style="margin: 0; font-size: clamp(40px, 5vw, 64px); font-weight: 800; line-height: 1.05; letter-spacing: -1.5px; color: {{headColor}}">{{headValue}}</p>
+              <p style="margin: 4px 0 0; color: var(--ink2)">{{headSub}}</p>
+            </div>
+            <p style="margin: 0; font-size: 14px; color: var(--ink3)">Október, a 18. nap a 31-ből</p>
+          </div>
+          <svg role="img" aria-label="{{chartLabel}}" viewBox="0 0 800 260" preserveAspectRatio="none" style="display: block; width: 100%; height: 260px; margin-top: 20px; overflow: visible">
+            <path d="{{areaPos}}" fill="var(--flow-soft)"></path>
+            <path d="{{areaNeg}}" fill="var(--neg-soft)"></path>
+            <line x1="0" x2="800" y1="{{zeroY}}" y2="{{zeroY}}" stroke="var(--ink3)" stroke-width="1" vector-effect="non-scaling-stroke"></line>
+            <path d="{{pastLine}}" fill="none" stroke="var(--flow)" stroke-width="3" stroke-linejoin="round" vector-effect="non-scaling-stroke"></path>
+            <path d="{{futureLine}}" fill="none" stroke="var(--flow)" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+            <line x1="{{todayX}}" x2="{{todayX}}" y1="0" y2="240" stroke="var(--ink)" stroke-width="1.5" vector-effect="non-scaling-stroke"></line>
+          </svg>
+          <div aria-hidden="true" style="display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); margin-top: 6px; font-size: 13px; color: var(--ink3)">
+            <sc-for list="{{months}}" as="m" hint-placeholder-count="13">
+              <span style="{{m.style}}">{{m.text}}</span>
+            </sc-for>
+          </div>
+        </section>
+
+        <div style="display: flex; flex-direction: column; gap: 16px">
+          <section aria-label="Ebben a hónapban" style="padding: 20px; border-radius: 20px; background: var(--ink); color: var(--bg)">
+            <p style="margin: 0; font-size: 14px; opacity: .85">Még elkölthető a keretekből</p>
+            <p class="num" style="margin: 0; font-size: 40px; font-weight: 800; letter-spacing: -1px">112 320 Ft</p>
+            <p style="margin: 0; font-size: 15px">naponta kb. <strong class="num">8 000 Ft</strong>, még 14 napig</p>
+          </section>
+          <section aria-labelledby="ted-cd" style="padding: 8px 20px; border-radius: 20px; background: var(--surface); border: 1px solid var(--line)">
+            <h2 id="ted-cd" style="margin: 10px 0 2px; font-size: 18px; font-weight: 700">Teendők</h2>
+            <sc-for list="{{todos}}" as="t" hint-placeholder-count="3">
+              <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 0; border-top: 1px solid var(--line)">
+                <span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 4px; background: {{t.dot}}"></span>
+                <span style="flex: 1 1 160px">{{t.text}}</span>
+                <button style="height: 40px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-weight: 600">{{t.action}}</button>
+              </div>
+            </sc-for>
+          </section>
+        </div>
+      </div>
+
+      <section aria-labelledby="ker-cd">
+        <h2 id="ker-cd" style="margin: 0 0 4px; font-size: 22px; font-weight: 700">Keretek</h2>
+        <div class="row" style="font-size: 13px; color: var(--ink3); padding-bottom: 6px">
+          <span>Keret</span><span class="col">Elköltve</span><span class="col">Terv</span><span class="col">Maradt</span><span class="bar" style="text-align: right">Tempó a hónap 58%-ánál</span>
+        </div>
+        <sc-for list="{{envs}}" as="e" hint-placeholder-count="7">
+          <a href="#" class="row" style="color: var(--ink); text-decoration: none">
+            <span style="font-weight: 600">{{e.name}}</span>
+            <span class="col num">{{e.spent}}</span>
+            <span class="col num" style="color: var(--ink3)">{{e.plan}}</span>
+            <span class="col num" style="{{e.leftStyle}}">{{e.left}}</span>
+            <span class="bar" style="position: relative; display: block; height: 10px; border-radius: 5px; background: var(--track)">
+              <span style="{{e.barStyle}}"></span>
+              <span aria-hidden="true" style="position: absolute; left: 58%; top: -4px; bottom: -4px; width: 2px; background: var(--ink)"></span>
+            </span>
+          </a>
+        </sc-for>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"sotet":{"editor":"boolean","default":false,"section":"Megjelenés"},"helyzet":{"editor":"enum","options":["Átlagos hónap","Mínuszos futó egyenleg"],"default":"Átlagos hónap","section":"Helyzet"},"$preview":{"width":1440,"height":1080}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.sotet ?? false;
+    const negative = (this.props.helyzet ?? 'Átlagos hónap') === 'Mínuszos futó egyenleg';
+    const names = ['máj.', 'jún.', 'júl.', 'aug.', 'szep.', 'okt.', 'ma', 'dec.', 'jan.', 'febr.', 'márc.', 'ápr.', 'máj.'];
+    const normal = [1820, 1905, 2010, 2120, 2240, 2380, 2567, 2640, 2700, 2790, 2880, 2960, 3040];
+    const minus = [420, 380, 310, 260, 190, 120, 39, 12, -45, -20, 10, 40, 70];
+    const vals = negative ? minus : normal;
+    const W = 800, H = 240, pad = 10;
+    const max = Math.max(...vals, 0), min = Math.min(...vals, 0);
+    const x = (i) => pad + (i * (W - 2 * pad)) / (vals.length - 1);
+    const y = (v) => pad + ((max - v) * (H - 2 * pad)) / (max - min || 1);
+    const pts = vals.map((v, i) => [x(i), y(v)]);
+    const line = (a) => a.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+    const zeroY = y(0);
+    const area = (clip) => {
+      const p = pts.map(([px, py]) => [px, clip === 'pos' ? Math.min(py, zeroY) : Math.max(py, zeroY)]);
+      return `${line(p)} L${p[p.length - 1][0].toFixed(1)},${zeroY.toFixed(1)} L${p[0][0].toFixed(1)},${zeroY.toFixed(1)} Z`;
+    };
+    const months = names.map((text, i) => ({ text, style: `text-align:center; ${i === 6 ? 'color: var(--ink); font-weight: 700;' : ''}${i === 8 && negative ? 'color: var(--neg); font-weight: 700;' : ''}` }));
+    const navItems = ['Áttekintés', 'Keretek', 'Terv', 'Elemzés', 'Naptár', 'Beállítások'];
+    const nav = navItems.map((label, i) => ({
+      label,
+      current: i === 0 ? 'page' : 'false',
+      style: `display:block; flex: 1 1 72px; padding:10px 4px; border-radius:12px; text-align:center; font-size:13px; text-decoration:none; ${i === 0 ? 'background: var(--track); color: var(--ink); font-weight: 700;' : 'color: var(--ink2);'}`,
+    }));
+    const env = (name, spent, plan, left, state, pct) => ({
+      name, spent, plan, left,
+      leftStyle: `font-weight:600; color:${state === 'over' ? 'var(--neg)' : state === 'fast' ? 'var(--warn)' : 'var(--ink)'}`,
+      barStyle: `position:absolute; left:0; top:0; bottom:0; width:${Math.min(100, pct)}%; border-radius:5px; background:${state === 'over' ? 'var(--neg)' : state === 'fast' ? 'var(--warn-fill)' : 'var(--flow)'}`,
+    });
+    const envs = [
+      env('Élelmiszer', '127 250 Ft', '160 000 Ft', '32 750 Ft', 'fast', 80),
+      env('Közlekedés', '25 090 Ft', '48 000 Ft', '22 910 Ft', 'ok', 52),
+      env('Gyerekek', '13 930 Ft', '40 000 Ft', '26 070 Ft', 'ok', 35),
+      env('Háztartás', '12 190 Ft', '30 000 Ft', '17 810 Ft', 'ok', 41),
+      env('Szabadidő', '16 260 Ft', '35 000 Ft', '18 740 Ft', 'ok', 46),
+      env('Ruházat', '30 480 Ft', '25 000 Ft', '−5 480 Ft', 'over', 100),
+      env('Egészség', '3 480 Ft', '15 000 Ft', '11 520 Ft', 'ok', 23),
+    ];
+    const todos = [
+      { text: 'Áram: lejárt okt. 20-án, 14 500 Ft', action: 'Kifizetve', dot: 'var(--neg)' },
+      { text: 'Élelmiszer: kb. 59 200 Ft-tal lépi túl a tervet', action: 'Átcsoportosítás', dot: 'var(--warn-fill)' },
+      { text: 'Családi pótlék: még nem érkezett meg', action: 'Megérkezett', dot: 'var(--ink3)' },
+    ];
+    return {
+      themeClass: dark ? 'dark' : '',
+      nav, months, envs, todos,
+      zeroY: zeroY.toFixed(1),
+      pastLine: line(pts.slice(0, 7)),
+      futureLine: line(pts.slice(6)),
+      areaPos: area('pos'),
+      areaNeg: area('neg'),
+      todayX: pts[6][0].toFixed(1),
+      headLabel: negative ? 'A futó egyenleg mélypontja' : 'A bankszámlán a hónap végén',
+      headValue: negative ? '−45 000 Ft januárban' : '2 567 380 Ft',
+      headColor: negative ? 'var(--neg)' : 'var(--ink)',
+      headSub: negative ? 'Ha minden a terv szerint megy. A hónap végén még 38 600 Ft lesz.' : 'Kb. 4 hónapnyi kiadás. A terv szerint tavaszig tovább nő.',
+      chartLabel: negative
+        ? 'A futó egyenleg májustól csökken, januárban −45 000 Ft-tal nulla alá megy, utána lassan visszakapaszkodik.'
+        : 'A futó egyenleg májustól folyamatosan nő, most 2 567 380 Ft, a terv szerint jövő májusra kb. 3 millió Ft.',
+    };
+  }
+}
+</script>
+</body>
+</html>

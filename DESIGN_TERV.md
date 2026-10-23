@@ -110,6 +110,8 @@ Minden jelöltnél: mit old meg, mekkora munka, kell-e hozzá domain-változás 
 
 **Kimenet:** `docs/design/04-irany.md`, a választott irány leírásával és indoklással.
 
+**Állapot (2026-10-23):** három irány kész (Csekk, Borítékok, Pénzfolyam), vázlatok: [Családi költségvetés – vizuális irányok](https://claude.ai/artifact/95bWwAVufTsaTg3bc7BLHh), forrás: `docs/design/04-vazlatok/`. A felhasználó választására vár.
+
 ## 5. Design-rendszer 2.0 (`design:design-system`)
 
 - **Tokenek a `:root`-on:** szín (OKLCH, szemantikus nevekkel), térközskála (4 px alap), folyékony típusskála (`clamp()`), sugár, árnyék/mélység, mozgás (időtartam, görbe), z-rétegek.

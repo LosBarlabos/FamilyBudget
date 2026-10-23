@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<title>Csekk – Gyorsrögzítő, telefon</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.a{--bg:#F4F6F9;--surface:#FFFFFF;--ink:#15233F;--ink2:#46536A;--ink3:#5A6679;--line:#DCE2EB;--accent:#2346A8;--on-accent:#FFFFFF;--csekk:#F2DD5C;--csekk-ink:#2B2600;--warn:#8F5300;--key:#EEF1F6;--scrim:rgba(21,35,63,.45)}
+.a.dark{--bg:#0E1525;--surface:#172038;--ink:#EEF2F8;--ink2:#BAC3D3;--ink3:#9AA5B8;--line:#2B3656;--accent:#93B2FF;--on-accent:#0E1525;--csekk:#E6D25B;--csekk-ink:#2B2600;--warn:#F2B45A;--key:#212C48;--scrim:rgba(0,0,0,.6)}
+.a button{font:inherit;cursor:pointer}
+.a button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+</style>
+</helmet>
+<div class="a {{themeClass}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: var(--bg); color: var(--ink); font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.45">
+  <div aria-hidden="true" style="padding: 18px 20px">
+    <p style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 30px">Október</p>
+    <p style="margin: 18px 0 0; font-size: 14px; color: var(--ink2)">Még elkölthető a keretekből</p>
+    <p style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 64px; line-height: 1">112 320 Ft</p>
+  </div>
+  <div style="position: absolute; inset: 0; background: var(--scrim)"></div>
+
+  <section role="dialog" aria-modal="true" aria-labelledby="qa-title" style="position: absolute; left: 0; right: 0; bottom: 0; top: 64px; background: var(--surface); border-radius: 22px 22px 0 0; padding: 8px 16px 16px; display: flex; flex-direction: column; gap: 12px">
+    <span aria-hidden="true" style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: var(--line)"></span>
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <h2 id="qa-title" style="margin: 0; font-size: 17px; font-weight: 600">Új kiadás</h2>
+      <button aria-label="Bezárás" style="width: 44px; height: 44px; border-radius: 22px; border: none; background: var(--key); color: var(--ink); display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+    </div>
+
+    <div>
+      <p class="num" aria-live="polite" style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 60px; line-height: 1; color: {{amountColor}}">{{amountText}}<span style="font-size: 30px; font-weight: 600; margin-left: 6px">Ft</span></p>
+      <p style="margin: 4px 0 0; font-size: 13px; color: var(--ink3)">Október, ma, {{catName}} keretbe</p>
+    </div>
+
+    <div role="radiogroup" aria-label="Keret" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+      <sc-for list="{{cats}}" as="c" hint-placeholder-count="6">
+        <button role="radio" aria-checked="{{c.checked}}" onClick="{{c.pick}}" style="{{c.style}}">
+          <span style="display: block; font-weight: 600; font-size: 14px">{{c.name}}</span>
+          <span class="num" style="display: block; font-size: 12px; opacity: .85">maradt {{c.left}}</span>
+        </button>
+      </sc-for>
+    </div>
+
+    <div style="display: flex; gap: 8px; align-items: center; overflow-x: auto">
+      <span style="font-size: 13px; color: var(--ink3); white-space: nowrap">Szokásos:</span>
+      <sc-for list="{{suggest}}" as="s" hint-placeholder-count="3">
+        <button onClick="{{s.pick}}" class="num" style="height: 36px; padding: 0 12px; border-radius: 18px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 14px; white-space: nowrap">{{s.label}}</button>
+      </sc-for>
+    </div>
+
+    <button style="display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 12px; border-radius: 6px 12px 12px 6px; border: none; background: var(--csekk); color: var(--csekk-ink); font-size: 14px; text-align: left">
+      <span style="flex: 1"><strong style="font-weight: 600">Áram</strong> csekk, lejárt</span>
+      <span class="num" style="font-weight: 600">14 500 Ft kifizetése</span>
+    </button>
+
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: auto">
+      <sc-for list="{{keys}}" as="k" hint-placeholder-count="12">
+        <button onClick="{{k.press}}" aria-label="{{k.aria}}" class="num" style="height: 50px; border-radius: 12px; border: none; background: var(--key); color: var(--ink); font-size: 22px; font-weight: 500">{{k.label}}</button>
+      </sc-for>
+    </div>
+    <button onClick="{{save}}" style="height: 54px; border-radius: 14px; border: none; background: var(--accent); color: var(--on-accent); font-size: 16px; font-weight: 600">{{saveLabel}}</button>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"sotet":{"editor":"boolean","default":false,"section":"Megjelenés"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { amount: '4500', cat: 'elelmiszer', saved: false };
+  }
+  renderVals() {
+    const dark = this.props.sotet ?? false;
+    const { amount, cat, saved } = this.state;
+    const fmt = (s) => (s === '' ? '0' : Number(s).toLocaleString('hu-HU').replace(/,/g, ' '));
+    const list = [
+      { id: 'elelmiszer', name: 'Élelmiszer', left: '32 750 Ft' },
+      { id: 'haztartas', name: 'Háztartás', left: '17 810 Ft' },
+      { id: 'kozlekedes', name: 'Közlekedés', left: '22 910 Ft' },
+      { id: 'gyerekek', name: 'Gyerekek', left: '26 070 Ft' },
+      { id: 'szabadido', name: 'Szabadidő', left: '18 740 Ft' },
+      { id: 'egeszseg', name: 'Egészség', left: '11 520 Ft' },
+    ];
+    const cats = list.map((c) => {
+      const on = c.id === cat;
+      return {
+        ...c,
+        checked: on ? 'true' : 'false',
+        pick: () => this.setState({ cat: c.id, saved: false }),
+        style: `min-height:56px; padding:8px 10px; border-radius:12px; text-align:left; border:${on ? '2px solid var(--accent)' : '1px solid var(--line)'}; background:${on ? 'var(--accent)' : 'var(--surface)'}; color:${on ? 'var(--on-accent)' : 'var(--ink)'}`,
+      };
+    });
+    const suggest = ['6 480', '12 300', '23 500'].map((label) => ({ label: `${label} Ft`, pick: () => this.setState({ amount: label.replace(/\s/g, ''), saved: false }) }));
+    const press = (k) => () => {
+      if (k === 'del') return this.setState({ amount: amount.slice(0, -1), saved: false });
+      if (k === '000') return this.setState({ amount: amount === '' ? '' : (amount + '000').slice(0, 8), saved: false });
+      return this.setState({ amount: (amount === '0' ? '' : amount + k).slice(0, 8), saved: false });
+    };
+    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '000', '0', 'del'].map((k) => ({
+      label: k === 'del' ? '⌫' : k,
+      aria: k === 'del' ? 'Utolsó számjegy törlése' : k,
+      press: press(k),
+    }));
+    const catName = list.find((c) => c.id === cat).name;
+    return {
+      themeClass: dark ? 'dark' : '',
+      amountText: fmt(amount),
+      amountColor: amount === '' ? 'var(--ink3)' : 'var(--ink)',
+      catName,
+      cats,
+      suggest,
+      keys,
+      saveLabel: saved ? `Rögzítve: ${catName}, ${fmt(amount)} Ft` : `Rögzítés: ${catName}`,
+      save: () => this.setState({ saved: true }),
+    };
+  }
+}
+</script>
+</body>
+</html>

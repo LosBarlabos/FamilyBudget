@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<title>Borítékok – Áttekintés, telefon</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.b{--bg:#ECF0E8;--surface:#FAFBF7;--ink:#1D2A23;--ink2:#435249;--ink3:#53625A;--line:#D2DACE;--accent:#2E6A4E;--on-accent:#FFFFFF;--kraft:#E3D3B4;--kraft-flap:#D3BF98;--kraft-ink:#3A2E18;--fill:#2E6A4E;--fill-fast:#C9831A;--danger:#9C1F18;--warn:#764600;--ok:#2E6A4E}
+.b.dark{--bg:#111915;--surface:#19231E;--ink:#E8EEE9;--ink2:#B6C3BA;--ink3:#9AA99F;--line:#2B3931;--accent:#8CD0AC;--on-accent:#0F1A14;--kraft:#3A3324;--kraft-flap:#4A412D;--kraft-ink:#F1E6CF;--fill:#6FBF95;--fill-fast:#E7A23C;--danger:#FF8F85;--warn:#F0B35C;--ok:#8CD0AC}
+.b button{font:inherit}
+.num{font-variant-numeric:tabular-nums}
+</style>
+</helmet>
+<div class="b {{themeClass}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: var(--bg); color: var(--ink); font-family: 'Familjen Grotesk', system-ui, sans-serif; font-size: 15px; line-height: 1.45">
+  <div style="padding: 20px 18px 110px; display: flex; flex-direction: column; gap: 16px">
+    <header style="display: flex; justify-content: space-between; align-items: baseline">
+      <h1 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -.3px">Október</h1>
+      <span style="font-size: 14px; color: var(--ink3)">még 14 nap a fizetésig</span>
+    </header>
+
+    <sc-if value="{{negative}}" hint-placeholder-val="{{ false }}">
+      <a href="#" style="display: block; padding: 12px 14px; border-radius: 12px; border: 2px solid var(--danger); color: var(--danger); text-decoration: none; font-size: 14px">
+        <strong style="font-weight: 700">Januárban elfogy a pénz:</strong> a futó egyenleg −45 000 Ft-ig süllyed. Nézd meg a tervet.
+      </a>
+    </sc-if>
+
+    <section aria-label="A hónap állása" style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px">
+      <div>
+        <p style="margin: 0; color: var(--ink2); font-size: 14px">A borítékokban még</p>
+        <p class="num" style="margin: 0; font-size: 52px; font-weight: 700; line-height: 1; letter-spacing: -1.5px">112 320 Ft</p>
+      </div>
+      <p class="num" style="margin: 0 0 6px; text-align: right; font-size: 14px; color: var(--ink2)">naponta<br><strong style="font-size: 20px; color: var(--ink); font-weight: 700">~8 000 Ft</strong></p>
+    </section>
+
+    <section aria-label="Borítékok" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+      <sc-for list="{{envs}}" as="e" hint-placeholder-count="6">
+        <a href="#" style="position: relative; display: block; height: 128px; border-radius: 10px; overflow: hidden; background: var(--kraft); color: var(--kraft-ink); text-decoration: none">
+          <span aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 0; height: {{e.level}}; background: {{e.fillColor}}; opacity: .22"></span>
+          <span aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 34px; background: var(--kraft-flap); clip-path: polygon(0 0, 100% 0, 50% 100%)"></span>
+          <span style="position: absolute; left: 12px; right: 12px; bottom: 10px; display: flex; flex-direction: column">
+            <span style="font-weight: 700; font-size: 16px">{{e.name}}</span>
+            <span class="num" style="font-size: 14px; color: {{e.leftColor}}; font-weight: 600">{{e.left}}</span>
+            <span style="font-size: 12px">{{e.sub}}</span>
+          </span>
+        </a>
+      </sc-for>
+    </section>
+
+    <a href="#" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); text-decoration: none">
+      <span style="flex: 1"><strong style="font-weight: 700">2 számla vár</strong><br><span style="font-size: 14px; color: var(--ink3)">Áram lejárt okt. 20-án, Gáz okt. 25-én</span></span>
+      <span class="num" style="font-weight: 700">33 500 Ft</span>
+    </a>
+  </div>
+
+  <nav aria-label="Fő navigáció" style="position: absolute; left: 12px; right: 12px; bottom: 14px; height: 64px; border-radius: 20px; background: var(--ink); color: var(--bg); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center; font-size: 12px">
+    <a href="#" aria-current="page" style="display: flex; flex-direction: column; align-items: center; color: var(--bg); text-decoration: none; font-weight: 700">Áttekintés</a>
+    <a href="#" style="display: flex; flex-direction: column; align-items: center; color: var(--bg); opacity: .75; text-decoration: none">Borítékok</a>
+    <button aria-label="Kiadás rögzítése" style="justify-self: center; width: 52px; height: 52px; border-radius: 16px; border: none; background: var(--accent); color: var(--on-accent); display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"></path></svg></button>
+    <a href="#" style="display: flex; flex-direction: column; align-items: center; color: var(--bg); opacity: .75; text-decoration: none">Terv</a>
+    <a href="#" style="display: flex; flex-direction: column; align-items: center; color: var(--bg); opacity: .75; text-decoration: none">Több</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"sotet":{"editor":"boolean","default":false,"section":"Megjelenés"},"helyzet":{"editor":"enum","options":["Átlagos hónap","Mínuszos futó egyenleg"],"default":"Átlagos hónap","section":"Helyzet"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.sotet ?? false;
+    const negative = (this.props.helyzet ?? 'Átlagos hónap') === 'Mínuszos futó egyenleg';
+    // A boríték „töltöttsége” a benne maradt pénz: minél kevesebb, annál alacsonyabb a szint.
+    const env = (name, left, sub, remainingPct, state) => ({
+      name, left, sub,
+      level: `${Math.max(0, remainingPct)}%`,
+      fillColor: state === 'fast' ? 'var(--fill-fast)' : 'var(--fill)',
+      leftColor: state === 'over' ? 'var(--danger)' : state === 'fast' ? 'var(--warn)' : 'var(--kraft-ink)',
+    });
+    const envs = [
+      env('Élelmiszer', 'maradt 32 750 Ft', 'gyorsan fogy, ~59 200 Ft túllépés várható', 20, 'fast'),
+      env('Gyerekek', 'maradt 26 070 Ft', '~1 800 Ft naponta', 65, 'ok'),
+      env('Közlekedés', 'maradt 22 910 Ft', '~1 600 Ft naponta', 48, 'ok'),
+      env('Szabadidő', 'maradt 18 740 Ft', '~1 300 Ft naponta', 54, 'ok'),
+      env('Háztartás', 'maradt 17 810 Ft', '~1 200 Ft naponta', 59, 'ok'),
+      env('Ruházat', '5 480 Ft-tal túllépve', 'üres a boríték', 0, 'over'),
+    ];
+    return { themeClass: dark ? 'dark' : '', negative, envs };
+  }
+}
+</script>
+</body>
+</html>

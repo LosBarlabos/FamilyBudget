@@ -1,0 +1,33 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-10-23T10:00:00Z" },
+  "title": "Családi költségvetés – vizuális irányok",
+  "launch": { "view": "canvas", "page": "a" },
+  "pages": [
+    { "id": "a", "name": "1. Csekk" },
+    { "id": "b", "name": "2. Borítékok" },
+    { "id": "c", "name": "3. Pénzfolyam" }
+  ],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 390, "h": 844, "title": "Áttekintés, telefon", "page": "a" },
+    "A-gyors.dc.html": { "x": 470, "y": 0, "w": 390, "h": 844, "title": "Gyorsrögzítő, telefon", "page": "a", "is_interactive": true },
+    "A-asztal.dc.html": { "x": 940, "y": 0, "w": 1440, "h": 1080, "title": "Áttekintés, asztal (fluid)", "page": "a", "expand": "fill" },
+    "B-telefon.dc.html": { "x": 0, "y": 0, "w": 390, "h": 844, "title": "Áttekintés, telefon", "page": "b" },
+    "B-gyors.dc.html": { "x": 470, "y": 0, "w": 390, "h": 844, "title": "Gyorsrögzítő, telefon", "page": "b", "is_interactive": true },
+    "B-asztal.dc.html": { "x": 940, "y": 0, "w": 1440, "h": 1080, "title": "Áttekintés, asztal (fluid)", "page": "b", "expand": "fill" },
+    "C-telefon.dc.html": { "x": 0, "y": 0, "w": 390, "h": 844, "title": "Áttekintés, telefon", "page": "c" },
+    "C-gyors.dc.html": { "x": 470, "y": 0, "w": 390, "h": 844, "title": "Gyorsrögzítő, telefon", "page": "c", "is_interactive": true },
+    "C-asztal.dc.html": { "x": 940, "y": 0, "w": 1440, "h": 1080, "title": "Áttekintés, asztal (fluid)", "page": "c", "expand": "fill" }
+  },
+  "order": [
+    "Main.dc.html", "A-gyors.dc.html", "A-asztal.dc.html",
+    "B-telefon.dc.html", "B-gyors.dc.html", "B-asztal.dc.html",
+    "C-telefon.dc.html", "C-gyors.dc.html", "C-asztal.dc.html"
+  ],
+  "notes": {
+    "titleA": { "x": 0, "y": -300, "text": "1. Csekk: a hónap napjai és a sárga csekkek", "kind": "title1", "maxW": 2380, "page": "a" },
+    "titleB": { "x": 0, "y": -300, "text": "2. Borítékok: minden keret egy boríték", "kind": "title1", "maxW": 2380, "page": "b" },
+    "titleC": { "x": 0, "y": -300, "text": "3. Pénzfolyam: a futó egyenleg idővonala", "kind": "title1", "maxW": 2380, "page": "c" }
+  },
+  "designSystems": []
+}

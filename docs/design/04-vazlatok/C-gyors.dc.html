@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<title>Pénzfolyam – Gyorsrögzítő, telefon</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.c{--bg:#F6F5FB;--surface:#FFFFFF;--ink:#1C1A3A;--ink2:#4A4769;--ink3:#5C597A;--line:#E1DFEE;--accent:#4B3FD6;--on-accent:#FFFFFF;--chip:#EEECFA;--neg:#C2264B;--warn:#8A5200;--scrim:rgba(28,26,58,.5)}
+.c.dark{--bg:#14122A;--surface:#1E1B3B;--ink:#EFEDFB;--ink2:#C1BDE0;--ink3:#A39FCB;--line:#322E57;--accent:#A9A0FF;--on-accent:#14122A;--chip:#2A2650;--neg:#FF8DA6;--warn:#F2B35A;--scrim:rgba(0,0,0,.6)}
+.c button,.c input{font:inherit}
+.c button{cursor:pointer}
+.c button:focus-visible,.c input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+</style>
+</helmet>
+<div class="c {{themeClass}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: var(--bg); color: var(--ink); font-family: 'Schibsted Grotesk', system-ui, sans-serif; font-size: 15px; line-height: 1.45">
+  <div aria-hidden="true" style="padding: 20px">
+    <p style="margin: 0; font-size: 18px; font-weight: 600">Október</p>
+    <p style="margin: 16px 0 0; font-size: 44px; font-weight: 800">2 567 380 Ft</p>
+  </div>
+  <div style="position: absolute; inset: 0; background: var(--scrim)"></div>
+
+  <section role="dialog" aria-modal="true" aria-labelledby="qc-title" style="position: absolute; left: 0; right: 0; top: 150px; bottom: 0; background: var(--surface); border-radius: 24px 24px 0 0; padding: 10px 20px 20px; display: flex; flex-direction: column; gap: 16px">
+    <span aria-hidden="true" style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: var(--line)"></span>
+    <h2 id="qc-title" style="margin: 0; font-size: 20px; font-weight: 700">Mit vettél?</h2>
+
+    <label style="display: flex; flex-direction: column; gap: 6px">
+      <span style="font-size: 14px; color: var(--ink2)">Írd be egy sorban: keret, összeg, ha kell, megjegyzés</span>
+      <input value="{{text}}" onInput="{{onText}}" aria-describedby="qc-parsed" autocomplete="off" style="height: 56px; border-radius: 16px; border: 2px solid var(--accent); background: var(--surface); color: var(--ink); padding: 0 16px; font-size: 20px; font-weight: 600">
+    </label>
+
+    <dl id="qc-parsed" aria-live="polite" style="margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 16px; padding: 14px 16px; border-radius: 16px; background: var(--chip)">
+      <dt style="color: var(--ink2)">Keret</dt><dd style="margin: 0; font-weight: 700; color: {{catColor}}">{{catText}}</dd>
+      <dt style="color: var(--ink2)">Összeg</dt><dd class="num" style="margin: 0; font-weight: 700; color: {{amountColor}}">{{amountText}}</dd>
+      <dt style="color: var(--ink2)">Megjegyzés</dt><dd style="margin: 0">{{noteText}}</dd>
+      <dt style="color: var(--ink2)">Hónap</dt><dd style="margin: 0">október, ma</dd>
+    </dl>
+
+    <p class="num" style="margin: 0; font-size: 15px; color: var(--ink2)">{{effect}}</p>
+
+    <div>
+      <p style="margin: 0 0 8px; font-size: 14px; color: var(--ink2)">Gyakori rögzítéseid</p>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px">
+        <sc-for list="{{recent}}" as="r" hint-placeholder-count="4">
+          <button onClick="{{r.pick}}" class="num" style="height: 40px; padding: 0 14px; border-radius: 20px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 14px">{{r.label}}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <button onClick="{{save}}" disabled="{{saveDisabled}}" style="margin-top: auto; height: 56px; border-radius: 16px; border: none; background: var(--accent); color: var(--on-accent); font-size: 17px; font-weight: 700; opacity: {{saveOpacity}}">{{saveLabel}}</button>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"sotet":{"editor":"boolean","default":false,"section":"Megjelenés"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { text: 'élelmiszer 4500 kenyér, tej', saved: false };
+  }
+  renderVals() {
+    const dark = this.props.sotet ?? false;
+    const { text, saved } = this.state;
+    const cats = [
+      { name: 'Élelmiszer', left: 32750 }, { name: 'Gyerekek', left: 26070 }, { name: 'Közlekedés', left: 22910 },
+      { name: 'Szabadidő', left: 18740 }, { name: 'Háztartás', left: 17810 }, { name: 'Egészség', left: 11520 },
+    ];
+    const ft = (n) => `${Math.round(n).toLocaleString('hu-HU').replace(/,/g, ' ')} Ft`;
+    const norm = (s) => s.toLocaleLowerCase('hu-HU');
+    // Az első szó (vagy annak eleje) a keret, az első szám az összeg („12e” = 12 000), a többi a megjegyzés.
+    const words = text.trim().split(/\s+/).filter(Boolean);
+    const first = words[0] ? norm(words[0]) : '';
+    const cat = first.length >= 2 ? cats.find((c) => norm(c.name).startsWith(first)) : null;
+    const numIdx = words.findIndex((w) => /^\d+([.,]\d+)?e?$/i.test(w));
+    let amount = 0;
+    if (numIdx >= 0) {
+      const w = words[numIdx].toLowerCase().replace(',', '.');
+      amount = w.endsWith('e') ? Math.round(parseFloat(w) * 1000) : Math.round(parseFloat(w));
+    }
+    const note = words.filter((_, i) => i !== 0 && i !== numIdx).join(' ');
+    const ok = !!cat && amount > 0;
+    const daily = (left) => Math.round(left / 14 / 100) * 100;
+    const effect = ok
+      ? `Utána ${ft(cat.left - amount)} marad ebben a keretben. Az összes keretből napi kb. ${ft(daily(112320 - amount))} jut a mostani ${ft(daily(112320))} helyett.`
+      : 'Kezdd a keret nevével, például „élelmiszer 4500” vagy „közl 12e benzin”.';
+    const recent = [['Élelmiszer', 6480, 'pékség'], ['Közlekedés', 12300, 'benzin'], ['Gyerekek', 4000, 'úszás'], ['Szabadidő', 3500, 'mozi']].map(([c, a, n]) => ({
+      label: `${c} ${ft(a)}`,
+      pick: () => this.setState({ text: `${c.toLocaleLowerCase('hu-HU')} ${a} ${n}`, saved: false }),
+    }));
+    return {
+      themeClass: dark ? 'dark' : '',
+      text,
+      onText: (ev) => this.setState({ text: ev.target.value, saved: false }),
+      catText: cat ? cat.name : 'nem ismert fel kategóriát',
+      catColor: cat ? 'var(--ink)' : 'var(--warn)',
+      amountText: amount > 0 ? ft(amount) : 'hiányzik',
+      amountColor: amount > 0 ? 'var(--ink)' : 'var(--warn)',
+      noteText: note || 'nincs',
+      effect,
+      recent,
+      saveDisabled: !ok,
+      saveOpacity: ok ? 1 : 0.5,
+      saveLabel: saved && ok ? `Rögzítve: ${cat.name}, ${ft(amount)}` : ok ? `Rögzítés: ${cat.name}, ${ft(amount)}` : 'Rögzítés',
+      save: () => this.setState({ saved: true }),
+    };
+  }
+}
+</script>
+</body>
+</html>

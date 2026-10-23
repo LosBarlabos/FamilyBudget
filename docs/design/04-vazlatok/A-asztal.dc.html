@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<title>Csekk – Áttekintés, asztal</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.a{--bg:#F4F6F9;--surface:#FFFFFF;--ink:#15233F;--ink2:#46536A;--ink3:#5A6679;--line:#DCE2EB;--accent:#2346A8;--on-accent:#FFFFFF;--csekk:#F2DD5C;--csekk-ink:#2B2600;--warn:#8F5300;--warn-fill:#E39A1E;--danger:#B42318;--ok:#1E7448;--day:#C9D2E0;--weekend:#B4BFD1;--rail:#15233F;--rail-ink:#DCE4F2}
+.a.dark{--bg:#0E1525;--surface:#172038;--ink:#EEF2F8;--ink2:#BAC3D3;--ink3:#9AA5B8;--line:#2B3656;--accent:#93B2FF;--on-accent:#0E1525;--csekk:#E6D25B;--csekk-ink:#2B2600;--warn:#F2B45A;--warn-fill:#E39A1E;--danger:#FF8F85;--ok:#72D3A2;--day:#33405F;--weekend:#3E4C70;--rail:#0A101D;--rail-ink:#BAC3D3}
+.a button{font:inherit;cursor:pointer}
+.a a{color:inherit}
+.num{font-variant-numeric:tabular-nums}
+.wrap{container-type:inline-size}
+.top{display:grid;grid-template-columns:minmax(0,1fr);gap:24px}
+.envs{display:grid;grid-template-columns:minmax(0,1fr);column-gap:40px}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+@container (min-width: 880px){.top{grid-template-columns:minmax(0,7fr) minmax(0,5fr)}.envs{grid-template-columns:repeat(2,minmax(0,1fr))}.stats{grid-template-columns:repeat(4,minmax(0,1fr))}}
+</style>
+</helmet>
+<div class="a {{themeClass}}" style="min-height: 100vh; background: var(--bg); color: var(--ink); font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.5; display: flex; flex-wrap: wrap">
+  <nav aria-label="Fő navigáció" style="flex: 1 1 220px; max-width: 100%; background: var(--rail); color: var(--rail-ink); padding: 24px 16px; display: flex; flex-direction: column; gap: 6px; box-sizing: border-box">
+    <p style="margin: 0 8px 18px; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 22px; color: #FFFFFF">Családi költségvetés</p>
+    <button style="height: 48px; border-radius: 12px; border: none; background: var(--accent); color: var(--on-accent); font-size: 15px; font-weight: 600; margin-bottom: 14px">Kiadás rögzítése</button>
+    <a href="#" aria-current="page" style="padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,.1); color: #FFFFFF; font-weight: 600; text-decoration: none">Áttekintés</a>
+    <a href="#" style="padding: 10px 12px; border-radius: 10px; text-decoration: none">Keretek és számlák</a>
+    <a href="#" style="padding: 10px 12px; border-radius: 10px; text-decoration: none">Terv</a>
+    <a href="#" style="padding: 10px 12px; border-radius: 10px; text-decoration: none">Elemzés</a>
+    <a href="#" style="padding: 10px 12px; border-radius: 10px; text-decoration: none">Számlanaptár</a>
+    <a href="#" style="padding: 10px 12px; border-radius: 10px; text-decoration: none">Beállítások</a>
+  </nav>
+
+  <main class="wrap" style="flex: 999 1 560px; min-width: 0; padding: 28px clamp(16px, 4vw, 48px) 48px; box-sizing: border-box">
+    <div style="max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px">
+      <header style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; justify-content: space-between">
+        <div>
+          <h1 style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 40px; line-height: 1">Október</h1>
+          <p style="margin: 4px 0 0; color: var(--ink3)">okt. 6. – nov. 5., a 18. nap a 31-ből</p>
+        </div>
+        <div style="display: flex; gap: 8px">
+          <button style="height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink)">Szeptember</button>
+          <button style="height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink)">November</button>
+        </div>
+      </header>
+
+      <sc-if value="{{negative}}" hint-placeholder-val="{{ false }}">
+        <a href="#" style="display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; padding: 16px 20px; border-radius: 14px; background: var(--danger); color: var(--surface); text-decoration: none">
+          <strong style="font-weight: 600; font-size: 17px">Januárban mínuszba fordul a futó egyenleg.</strong>
+          <span>A mélypont −45 000 Ft. A tervben látszik, melyik hónap okozza.</span>
+        </a>
+      </sc-if>
+
+      <div class="top">
+        <section aria-label="A hónap állása" style="display: flex; flex-direction: column; gap: 16px">
+          <div>
+            <p style="margin: 0; color: var(--ink2)">Még elkölthető a keretekből</p>
+            <p class="num" style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: clamp(64px, 8vw, 112px); line-height: .95; letter-spacing: -1px">112 320<span style="font-size: .45em; font-weight: 600; margin-left: 8px">Ft</span></p>
+            <p style="margin: 8px 0 0; font-size: 17px">Naponta kb. <strong class="num" style="font-weight: 600">8 000 Ft</strong> jut, még 14 napig, a november 6-i fizetésig.</p>
+          </div>
+          <div role="img" aria-label="A hónap 31 napjából 18 telt el. A keretek 68 százaléka elfogyott, ami 21 napnak felel meg: a költés 3 nappal előrébb jár." style="display: grid; grid-template-columns: repeat(31, minmax(0, 1fr)); gap: 4px; height: 72px; align-items: end">
+            <sc-for list="{{days}}" as="d" hint-placeholder-count="31">
+              <span style="{{d.style}}"></span>
+            </sc-for>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(31, minmax(0, 1fr)); gap: 4px; font-size: 12px; color: var(--ink3); margin-top: -8px">
+            <sc-for list="{{dayLabels}}" as="l" hint-placeholder-count="31">
+              <span class="num" style="text-align: center">{{l.text}}</span>
+            </sc-for>
+          </div>
+          <p style="margin: 0; color: var(--warn)"><strong style="font-weight: 600">3 nappal előrébb jársz.</strong> A keretek 68%-a elfogyott, a hónap 58%-a telt el.</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; padding: 16px 18px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line)">
+            <span aria-hidden="true" style="width: 10px; align-self: stretch; border-radius: 5px; background: var(--warn-fill)"></span>
+            <p style="margin: 0; flex: 1 1 280px"><strong style="font-weight: 600">Élelmiszer:</strong> ezzel a tempóval kb. 59 200 Ft-tal lépi túl a tervet. A Szabadidőben 18 740 Ft maradt.</p>
+            <button style="height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font-weight: 500">Átcsoportosítás</button>
+          </div>
+        </section>
+
+        <section aria-labelledby="fiz-a" style="display: flex; flex-direction: column; gap: 10px">
+          <h2 id="fiz-a" style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 26px">Fizetendő és várható</h2>
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 6px 14px 14px 6px; background: var(--csekk); color: var(--csekk-ink)">
+            <div style="flex: 1 1 140px"><p style="margin: 0; font-weight: 600">Áram</p><p style="margin: 0; font-size: 14px">lejárt okt. 20-án</p></div>
+            <span class="num" style="font-weight: 600">14 500 Ft</span>
+            <button style="height: 44px; padding: 0 16px; border-radius: 12px; border: none; background: var(--csekk-ink); color: var(--csekk); font-weight: 600">Kifizetve</button>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 6px 14px 14px 6px; background: var(--surface); border: 1px dashed var(--line)">
+            <div style="flex: 1 1 140px"><p style="margin: 0; font-weight: 600">Gáz</p><p style="margin: 0; font-size: 14px; color: var(--ink3)">okt. 25-én esedékes</p></div>
+            <span class="num" style="font-weight: 600">19 000 Ft</span>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 6px 14px 14px 6px; background: var(--surface); border: 1px dashed var(--line)">
+            <div style="flex: 1 1 140px"><p style="margin: 0; font-weight: 600">Víz és csatorna</p><p style="margin: 0; font-size: 14px; color: var(--ink3)">okt. 31-én esedékes</p></div>
+            <span class="num" style="font-weight: 600">13 800 Ft</span>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line)">
+            <div style="flex: 1 1 140px"><p style="margin: 0; font-weight: 600">Családi pótlék</p><p style="margin: 0; font-size: 14px; color: var(--ink3)">még nem érkezett meg</p></div>
+            <span class="num" style="font-weight: 600; color: var(--ok)">+26 600 Ft</span>
+            <button style="height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font-weight: 500">Megérkezett</button>
+          </div>
+          <p style="margin: 4px 0 0; font-size: 14px; color: var(--ink3)">4 számla már kifizetve, 2 nem ebben a hónapban esedékes.</p>
+        </section>
+      </div>
+
+      <section aria-label="A hónap számai" class="stats" style="border-top: 2px solid var(--ink); padding-top: 16px">
+        <div><p style="margin: 0; font-size: 14px; color: var(--ink3)">Bejött</p><p class="num" style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 30px">865 000 Ft</p><p style="margin: 0; font-size: 14px; color: var(--ink3)">tervezve 891 600 Ft</p></div>
+        <div><p style="margin: 0; font-size: 14px; color: var(--ink3)">Elment eddig</p><p class="num" style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 30px">486 910 Ft</p><p style="margin: 0; font-size: 14px; color: var(--ink3)">a hónap végéig kb. 694 660 Ft</p></div>
+        <div><p style="margin: 0; font-size: 14px; color: var(--ink3)">Félretéve</p><p class="num" style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 30px">50 000 Ft</p><p style="margin: 0; font-size: 14px; color: var(--ink3)">tervezve 120 000 Ft</p></div>
+        <div><p style="margin: 0; font-size: 14px; color: var(--ink3)">A bankszámlán a hónap végén</p><p class="num" style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 30px; color: {{balanceColor}}">{{balance}}</p><p style="margin: 0; font-size: 14px; color: var(--ink3)">{{balanceSub}}</p></div>
+      </section>
+
+      <section aria-labelledby="ker-a">
+        <h2 id="ker-a" style="margin: 0 0 6px; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 26px">Keretek</h2>
+        <div class="envs">
+          <sc-for list="{{envs}}" as="e" hint-placeholder-count="8">
+            <a href="#" style="display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 12px 0; border-bottom: 1px solid var(--line); text-decoration: none">
+              <span style="font-weight: 600">{{e.name}}</span>
+              <span class="num" style="{{e.leftStyle}}">{{e.left}}</span>
+              <span style="grid-column: 1 / -1; position: relative; height: 8px; border-radius: 4px; background: var(--day)">
+                <span style="{{e.barStyle}}"></span>
+                <span aria-hidden="true" style="position: absolute; left: 58%; top: -3px; bottom: -3px; width: 2px; background: var(--ink)"></span>
+              </span>
+              <span class="num" style="grid-column: 1 / -1; font-size: 13px; color: var(--ink3)">{{e.sub}}</span>
+            </a>
+          </sc-for>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"sotet":{"editor":"boolean","default":false,"section":"Megjelenés"},"helyzet":{"editor":"enum","options":["Átlagos hónap","Mínuszos futó egyenleg"],"default":"Átlagos hónap","section":"Helyzet"},"$preview":{"width":1440,"height":1080}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.sotet ?? false;
+    const negative = (this.props.helyzet ?? 'Átlagos hónap') === 'Mínuszos futó egyenleg';
+    // okt. 6. hétfő; a hétvégék halványabb oszlopok, hogy a hétvégi bevásárlás is látsszon a ritmusban.
+    const start = new Date(2026, 9, 6);
+    const days = Array.from({ length: 31 }, (_, i) => {
+      const n = i + 1;
+      const d = new Date(start); d.setDate(start.getDate() + i);
+      const weekend = d.getDay() === 0 || d.getDay() === 6;
+      let bg = weekend ? 'var(--weekend)' : 'var(--day)';
+      let h = '40%';
+      if (n <= 18) { bg = 'var(--ink)'; h = '100%'; }
+      else if (n <= 21) { bg = 'repeating-linear-gradient(135deg, var(--warn-fill) 0 3px, transparent 3px 6px)'; h = '100%'; }
+      const ring = n === 18 ? 'outline: 2px solid var(--accent); outline-offset: 3px;' : '';
+      return { style: `display:block; height:${h}; border-radius:4px; background:${bg}; ${ring}` };
+    });
+    const dayLabels = Array.from({ length: 31 }, (_, i) => {
+      const d = new Date(start); d.setDate(start.getDate() + i);
+      const show = i === 0 || i === 17 || i === 30 || d.getDate() === 1;
+      return { text: show ? (i === 17 ? 'ma' : `${d.getMonth() === 9 ? 'okt.' : 'nov.'} ${d.getDate()}.`) : '' };
+    });
+    const env = (name, spent, plan, left, sub, state) => {
+      const pct = Math.min(100, Math.round((spent / plan) * 100));
+      const color = state === 'over' ? 'var(--danger)' : state === 'fast' ? 'var(--warn-fill)' : 'var(--accent)';
+      return {
+        name, left, sub,
+        leftStyle: `font-weight:600; color:${state === 'over' ? 'var(--danger)' : state === 'fast' ? 'var(--warn)' : 'var(--ink)'}`,
+        barStyle: `position:absolute; left:0; top:0; bottom:0; width:${pct}%; border-radius:4px; background:${color}`,
+      };
+    };
+    const envs = [
+      env('Élelmiszer', 127250, 160000, 'maradt 32 750 Ft', '127 250 Ft a 160 000 Ft-ból, gyorsan fogy', 'fast'),
+      env('Közlekedés', 25090, 48000, 'maradt 22 910 Ft', '25 090 Ft a 48 000 Ft-ból', 'ok'),
+      env('Gyerekek', 13930, 40000, 'maradt 26 070 Ft', '13 930 Ft a 40 000 Ft-ból', 'ok'),
+      env('Háztartás', 12190, 30000, 'maradt 17 810 Ft', '12 190 Ft a 30 000 Ft-ból', 'ok'),
+      env('Szabadidő', 16260, 35000, 'maradt 18 740 Ft', '16 260 Ft a 35 000 Ft-ból', 'ok'),
+      env('Ruházat', 30480, 25000, '5 480 Ft-tal túllépve', '30 480 Ft a 25 000 Ft-ból', 'over'),
+      env('Egészség', 3480, 15000, 'maradt 11 520 Ft', '3 480 Ft a 15 000 Ft-ból', 'ok'),
+      env('Ajándék', 12000, 12000, '12 000 Ft terv nélkül', 'nem volt rá terv', 'fast'),
+    ];
+    return {
+      themeClass: dark ? 'dark' : '',
+      negative, days, dayLabels, envs,
+      balance: negative ? '38 600 Ft' : '2 567 380 Ft',
+      balanceColor: negative ? 'var(--warn)' : 'var(--ink)',
+      balanceSub: negative ? 'januárban −45 000 Ft-ig süllyed' : 'kb. 4 hónapnyi kiadás tartalék',
+    };
+  }
+}
+</script>
+</body>
+</html>

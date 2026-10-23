@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<title>Borítékok – Gyorsrögzítő, telefon</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.b{--bg:#ECF0E8;--surface:#FAFBF7;--ink:#1D2A23;--ink2:#435249;--ink3:#53625A;--line:#D2DACE;--accent:#2E6A4E;--on-accent:#FFFFFF;--kraft:#E3D3B4;--kraft-flap:#D3BF98;--kraft-ink:#3A2E18;--danger:#9C1F18;--warn:#764600;--scrim:rgba(29,42,35,.5)}
+.b.dark{--bg:#111915;--surface:#19231E;--ink:#E8EEE9;--ink2:#B6C3BA;--ink3:#9AA99F;--line:#2B3931;--accent:#8CD0AC;--on-accent:#0F1A14;--kraft:#3A3324;--kraft-flap:#4A412D;--kraft-ink:#F1E6CF;--danger:#FF8F85;--warn:#F0B35C;--scrim:rgba(0,0,0,.6)}
+.b button,.b input{font:inherit}
+.b button{cursor:pointer}
+.b button:focus-visible,.b input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+</style>
+</helmet>
+<div class="b {{themeClass}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: var(--bg); color: var(--ink); font-family: 'Familjen Grotesk', system-ui, sans-serif; font-size: 15px; line-height: 1.45">
+  <div aria-hidden="true" style="padding: 20px 18px">
+    <p style="margin: 0; font-size: 26px; font-weight: 700">Október</p>
+    <p style="margin: 14px 0 0; font-size: 52px; font-weight: 700; letter-spacing: -1.5px">112 320 Ft</p>
+  </div>
+  <div style="position: absolute; inset: 0; background: var(--scrim)"></div>
+
+  <section role="dialog" aria-modal="true" aria-labelledby="qb-title" style="position: absolute; left: 0; right: 0; bottom: 0; top: 96px; background: var(--surface); border-radius: 24px 24px 0 0; padding: 10px 18px 18px; display: flex; flex-direction: column; gap: 14px">
+    <span aria-hidden="true" style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: var(--line)"></span>
+    <div style="display: flex; justify-content: space-between; align-items: center">
+      <h2 id="qb-title" style="margin: 0; font-size: 20px; font-weight: 700">Melyik borítékból?</h2>
+      <button aria-label="Bezárás" style="width: 44px; height: 44px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+    </div>
+
+    <div role="radiogroup" aria-label="Boríték" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+      <sc-for list="{{envs}}" as="e" hint-placeholder-count="6">
+        <button role="radio" aria-checked="{{e.checked}}" onClick="{{e.pick}}" style="{{e.style}}">
+          <span aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 18px; background: var(--kraft-flap); clip-path: polygon(0 0, 100% 0, 50% 100%)"></span>
+          <span style="position: relative; display: block; font-weight: 700; font-size: 14px">{{e.name}}</span>
+          <span class="num" style="position: relative; display: block; font-size: 12px">{{e.leftText}}</span>
+        </button>
+      </sc-for>
+    </div>
+
+    <label style="display: flex; flex-direction: column; gap: 6px">
+      <span style="font-size: 14px; color: var(--ink2)">Összeg</span>
+      <span style="display: flex; align-items: baseline; gap: 8px; border-bottom: 2px solid var(--ink); padding-bottom: 4px">
+        <input inputmode="decimal" value="{{amountText}}" onInput="{{onAmount}}" aria-describedby="qb-after" class="num" style="flex: 1; min-width: 0; border: none; background: transparent; color: var(--ink); font-size: 48px; font-weight: 700; letter-spacing: -1px; padding: 0">
+        <span style="font-size: 24px; font-weight: 600">Ft</span>
+      </span>
+    </label>
+
+    <div style="display: flex; gap: 8px; flex-wrap: wrap">
+      <sc-for list="{{suggest}}" as="s" hint-placeholder-count="3">
+        <button onClick="{{s.pick}}" class="num" style="height: 40px; padding: 0 14px; border-radius: 20px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font-size: 14px">{{s.label}}</button>
+      </sc-for>
+    </div>
+
+    <p id="qb-after" aria-live="polite" style="margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--bg); font-size: 15px">{{afterText}}</p>
+
+    <label style="display: flex; flex-direction: column; gap: 6px">
+      <span style="font-size: 14px; color: var(--ink2)">Megjegyzés (nem kötelező)</span>
+      <input placeholder="pl. heti nagybevásárlás" style="height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 0 12px; font-size: 16px">
+    </label>
+
+    <button onClick="{{save}}" style="margin-top: auto; height: 56px; border-radius: 16px; border: none; background: var(--accent); color: var(--on-accent); font-size: 17px; font-weight: 700">{{saveLabel}}</button>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"sotet":{"editor":"boolean","default":false,"section":"Megjelenés"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { env: 'elelmiszer', amount: '4500', saved: false };
+  }
+  renderVals() {
+    const dark = this.props.sotet ?? false;
+    const { env, amount, saved } = this.state;
+    const ft = (n) => `${Math.abs(Math.round(n)).toLocaleString('hu-HU').replace(/,/g, ' ')} Ft`;
+    const list = [
+      { id: 'elelmiszer', name: 'Élelmiszer', left: 32750 },
+      { id: 'gyerekek', name: 'Gyerekek', left: 26070 },
+      { id: 'kozlekedes', name: 'Közlekedés', left: 22910 },
+      { id: 'szabadido', name: 'Szabadidő', left: 18740 },
+      { id: 'haztartas', name: 'Háztartás', left: 17810 },
+      { id: 'egeszseg', name: 'Egészség', left: 11520 },
+    ];
+    const envs = list.map((e) => {
+      const on = e.id === env;
+      return {
+        ...e,
+        leftText: ft(e.left),
+        checked: on ? 'true' : 'false',
+        pick: () => this.setState({ env: e.id, saved: false }),
+        style: `position:relative; overflow:hidden; min-height:72px; padding:22px 8px 8px; border-radius:10px; text-align:left; background:var(--kraft); color:var(--kraft-ink); border:${on ? '3px solid var(--ink)' : '3px solid transparent'}`,
+      };
+    });
+    const n = Number(amount.replace(/\D/g, '')) || 0;
+    const cur = list.find((e) => e.id === env);
+    const after = cur.left - n;
+    // Névelő a név kezdőhangja szerint (az Élelmiszer, a Gyerekek), mint az app article() segédje.
+    const az = /^[aáeéiíoóöőuúüű5]/i.test(cur.name) ? 'az' : 'a';
+    const Az = az === 'az' ? 'Az' : 'A';
+    const afterText = n === 0
+      ? `${Az} ${cur.name} borítékban ${ft(cur.left)} van.`
+      : after >= 0
+        ? `Utána ${ft(after)} marad ${az} ${cur.name} borítékban, naponta kb. ${ft(Math.round(after / 14 / 100) * 100)}.`
+        : `Ezzel ${ft(after)}-tal túllépi ${az} ${cur.name} keretet.`;
+    return {
+      themeClass: dark ? 'dark' : '',
+      envs,
+      amountText: n === 0 ? '' : n.toLocaleString('hu-HU').replace(/,/g, ' '),
+      onAmount: (ev) => this.setState({ amount: ev.target.value, saved: false }),
+      suggest: [6480, 12300, 23500].map((v) => ({ label: ft(v), pick: () => this.setState({ amount: String(v), saved: false }) })),
+      afterText,
+      saveLabel: saved ? `Rögzítve: ${cur.name}, ${ft(n)}` : `Rögzítés: ${cur.name}`,
+      save: () => this.setState({ saved: true }),
+    };
+  }
+}
+</script>
+</body>
+</html>
