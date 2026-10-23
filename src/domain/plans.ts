@@ -155,6 +155,19 @@ export function initialPlans(categories: Category[], firstPeriodId: PeriodId, cu
   return out;
 }
 
+/**
+ * Újraindítás egy későbbi első időszakkal (a próbahasználat után): minden kategória ott érvényes terve lesz az
+ * új első időszak alapterve, a korábbi tervrekordok törlődnek, így az előtte lévő időszakokban 0 a terv. A
+ * későbbi egyedi tervek megmaradnak.
+ */
+export function restartPlanOps(categories: Category[], plans: Plan[], oldFirstId: PeriodId, newFirstId: PeriodId): PlanOps {
+  const idx = indexPlans(plans);
+  return {
+    put: categories.map((c) => ({ periodId: newFirstId, categoryId: c.id, amount: effectivePlan(idx, c, newFirstId, oldFirstId) })),
+    del: plans.filter((p) => p.periodId < newFirstId).map((p) => ({ periodId: p.periodId, categoryId: p.categoryId })),
+  };
+}
+
 /** A kategória az adott időszak utáni egyedi tervei, amelyek ténylegesen megváltoztatják az összeget. */
 export function laterPlanChanges(plans: Plan[], cat: Category, periodId: PeriodId): Plan[] {
   const own = indexPlans(plans.filter((p) => p.categoryId === cat.id)).get(cat.id) ?? [];

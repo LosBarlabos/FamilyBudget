@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   applyPlanOps, cycleOf, effectivePlan, indexPlans, isDuePeriod, missingBasePlans, newCategoryPlans, nextDuePeriod, planChangeOps, planChangeSummary,
-  planStartId, scheduledPlan,
+  planStartId, restartPlanOps, scheduledPlan,
 } from './plans';
 import type { Category, Plan } from './types';
 
@@ -125,6 +125,39 @@ describe('alapértelmezett összeg mint sablon', () => {
     const plans = newCategoryPlans(cat, '2026-10', '2026-09');
     expect(plans).toEqual([{ periodId: '2026-10', categoryId: 'c1', amount: 100_000 }]);
     expect(effectivePlan(indexPlans(plans), cat, '2026-09', '2026-10')).toBe(0);
+  });
+});
+
+describe('újraindítás a következő hónaptól', () => {
+  const other: Category = { ...cat, id: 'c2', defaultAmount: 30_000 };
+
+  it('az ott érvényes terv lesz az új alapterv, a korábbi rekordok törlődnek, a későbbiek maradnak', () => {
+    const plans: Plan[] = [
+      { periodId: '2026-10', categoryId: 'c1', amount: 120_000 },
+      { periodId: '2026-10', categoryId: 'c2', amount: 30_000 },
+      { periodId: '2027-01', categoryId: 'c2', amount: 35_000 },
+    ];
+    const ops = restartPlanOps([cat, other], plans, '2026-10', '2026-11');
+    expect(ops.put).toEqual([
+      { periodId: '2026-11', categoryId: 'c1', amount: 120_000 },
+      { periodId: '2026-11', categoryId: 'c2', amount: 30_000 },
+    ]);
+    const next = applyPlanOps(plans, ops);
+    const idx = indexPlans(next);
+    // Az új első időszak előtt 0 a terv, onnan a megtervezett összeg, a későbbi egyedi terv is megmarad.
+    expect(effectivePlan(idx, cat, '2026-10', '2026-11')).toBe(0);
+    expect(effectivePlan(idx, cat, '2026-11', '2026-11')).toBe(120_000);
+    expect(effectivePlan(idx, other, '2027-01', '2026-11')).toBe(35_000);
+    expect(missingBasePlans([cat, other], next, '2026-11')).toEqual([]);
+  });
+
+  it('a már megadott novemberi terv számít, nem az októberi', () => {
+    const plans: Plan[] = [
+      { periodId: '2026-10', categoryId: 'c1', amount: 120_000 },
+      { periodId: '2026-11', categoryId: 'c1', amount: 90_000 },
+    ];
+    const next = applyPlanOps(plans, restartPlanOps([cat], plans, '2026-10', '2026-11'));
+    expect(next).toEqual([{ periodId: '2026-11', categoryId: 'c1', amount: 90_000 }]);
   });
 });
 

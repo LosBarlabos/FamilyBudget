@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from './db';
 import {
   addCategory, addEntry, addSettlingEntry, changePlan, importAll, initialize, markSettled, migrateBasePlans, moveCover, rawDump,
-  restoreCategory, restoreEntries, restorePlansOf, restoreSettings, saveBasicSettings, setMonthlyTotal, setOverride, unsettle,
-  undoMoveCover, updateCategory, wipeAll,
+  restartFrom, restoreCategory, restoreEntries, restorePlansOf, restoreSettings, saveBasicSettings, setMonthlyTotal, setOverride, unsettle,
+  undoMoveCover, undoRestart, updateCategory, wipeAll,
 } from './repo';
 import { computeSummaries } from '../domain/balance';
 import { buildExport, parseImport } from '../domain/exportFormat';
@@ -340,6 +340,45 @@ describe('első indítás a következő fizetéssel', () => {
     const s = computeSummaries(await data(), '2026-10-07');
     expect(s.byId.get('2026-09')!.expense).toBe(0);
     expect(s.byId.get('2026-10')!.byCategory.get('uj')!.plan).toBe(40_000);
+  });
+});
+
+describe('újraindítás a következő hónaptól', () => {
+  const start = async () => {
+    const fiz = cat('fiz', 500_000, { type: 'bevetel' });
+    await initialize({ ...settings, openingBalance: 100_000, firstPeriodId: '2026-10' }, [fiz, cat('kaja', 100_000)]);
+    await changePlan(cat('kaja', 100_000), '2026-10', 120_000, 'from');
+    await addEntry('2026-10', 'kaja', 15_000, '2026-10-12');
+    await addEntry('2026-11', 'kaja', 5_000, '2026-11-12');
+  };
+
+  it('a korábbi rögzítések törlődnek, a terv az új első hónaptól érvényes, és visszavonható', async () => {
+    await start();
+    const before = await data();
+    const undo = await restartFrom('2026-11', 250_000);
+    expect(undo.entries.map((e) => e.amount)).toEqual([15_000]);
+
+    const after = await data();
+    expect(after.settings).toMatchObject({ firstPeriodId: '2026-11', openingBalance: 250_000 });
+    expect(after.entries.map((e) => e.periodId)).toEqual(['2026-11']);
+    const s = computeSummaries(after, '2026-10-23');
+    // Az új első hónapig sem terv, sem rögzítés: az egyenleg a megadott nyitó egyenleg.
+    expect(s.byId.get('2026-10')!.expense).toBe(0);
+    expect(s.byId.get('2026-10')!.endBalance).toBe(250_000);
+    expect(s.byId.get('2026-11')!.byCategory.get('kaja')!.plan).toBe(120_000);
+    expect(s.byId.get('2026-11')!.byCategory.get('fiz')!.plan).toBe(500_000);
+    // Novembertől az október már nem látszik.
+    expect(computeSummaries(after, '2026-11-12').periods[0].id).toBe('2026-11');
+
+    await undoRestart(undo);
+    const restored = await data();
+    const key = (p: { periodId: string; categoryId: string }) => `${p.periodId}|${p.categoryId}`;
+    const sorted = (d: BudgetData) => ({
+      ...d,
+      plans: [...d.plans].sort((a, b) => key(a).localeCompare(key(b))),
+      entries: [...d.entries].sort((a, b) => a.id.localeCompare(b.id)),
+    });
+    expect(sorted(restored)).toEqual(sorted(before));
   });
 });
 

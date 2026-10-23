@@ -1,13 +1,15 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { buildCsv, parseImport, previewImport, type ExportFile, type ImportPreview } from '../../domain/exportFormat';
 import { parseSignedAmount } from '../../domain/money';
-import { formatRange, periodName, periodStart, validateOverride } from '../../domain/periods';
-import { clearOverride, importAll, requestPersistence, restoreSettings, saveBasicSettings, setOverride, wipeAll } from '../../db/repo';
+import { formatRange, periodFromName, periodName, periodStart, shiftPeriod, shortDate, validateOverride } from '../../domain/periods';
+import {
+  clearOverride, importAll, requestPersistence, restartFrom, restoreSettings, saveBasicSettings, setOverride, undoRestart, wipeAll,
+} from '../../db/repo';
 import { backupLabel, daysSince, exportBackup } from '../backup';
 import { useBudget, useSafe, useToast } from '../context';
 import { downloadFile, Icon, Segmented, useFieldErrors, useThemePref, type ThemePref } from '../components/common';
 import { SyncPanel } from '../components/SyncPanel';
-import { disconnect } from '../../sync/engine';
+import { disconnect, useSyncConfig } from '../../sync/engine';
 
 export function Settings() {
   const s = useBudget().data.settings;
@@ -26,6 +28,7 @@ export function Settings() {
       </div>
       <Backup />
       <Storage />
+      <RestartNext />
       <DangerZone />
     </div>
   );
@@ -268,6 +271,71 @@ function Storage() {
         <li>Chrome-ban: a címsor jobb oldalán a „Telepítés” ikon.</li>
         <li>Más böngészőben vagy gépen az app üresen indul. Ott a mentésből tudod visszatölteni az adatokat.</li>
       </ul>
+    </div>
+  );
+}
+
+/**
+ * Próbahasználat után: a költségvetés tisztán a következő fizetéssel indul. A kategóriák és a tervek maradnak
+ * (onnantól érvényesek), az addigi rögzítések törlődnek. Csak akkor látszik, ha az első hónap már elkezdődött.
+ */
+function RestartNext() {
+  const { data, summaries, cfg } = useBudget();
+  const toast = useToast();
+  const safe = useSafe();
+  const syncCfg = useSyncConfig();
+  const [armed, setArmed] = useState(false);
+  const [opening, setOpening] = useState(String(data.settings.openingBalance));
+  const { field, message, check } = useFieldErrors<'opening'>();
+  if (summaries.currentId < data.settings.firstPeriodId) return null;
+
+  const nextId = shiftPeriod(summaries.currentId, 1);
+  const start = shortDate(periodStart(nextId, cfg));
+  const removed = data.entries.filter((e) => e.periodId < nextId).length;
+
+  const run = async () => {
+    const ob = parseSignedAmount(opening);
+    if (!check(ob === null ? { opening: 'Ez nem érvényes összeg' } : {})) return;
+    await safe(async () => {
+      // Közös használatnál a GitHub őrzi az előzményeket, egyébként előbb mentés készül fájlba.
+      if (!syncCfg) await exportBackup(data);
+      const undo = await restartFrom(nextId, ob!);
+      setArmed(false);
+      const gone = undo.entries.length > 0 ? ` ${undo.entries.length} rögzítés törölve.` : '';
+      toast(`A költségvetés ${periodFromName(nextId)} indul (${start}).${gone}`, () => undoRestart(undo));
+    });
+  };
+
+  return (
+    <div className="card">
+      <div className="card-head">
+        <h2>Indítás a következő hónaptól</h2>
+        <span className="small faint">ha eddig csak kipróbáltad</span>
+      </div>
+      <p className="small muted mt-0">
+        A költségvetés tisztán a következő fizetéssel indul ({start}). A kategóriák és a tervek
+        megmaradnak, és {periodFromName(nextId)} érvényesek. {removed > 0 && `Az addigi ${removed} rögzítés törlődik, `}a korábbi
+        hónapok nem jelennek meg.
+      </p>
+      {!armed ? (
+        <button className="btn" onClick={() => setArmed(true)}><Icon name="calendar-time" /> Indítás {periodFromName(nextId)}…</button>
+      ) : (
+        <div>
+          <label className="field">
+            Nyitó egyenleg ({start}, a fizetés előtt)
+            <input type="text" inputMode="numeric" className="num" value={opening} onChange={(e) => setOpening(e.target.value)} {...field('opening')} />
+            {message('opening')}
+          </label>
+          <p className="tiny faint mt-1-5">
+            Ha még nem tudod pontosan, becsüld meg: a fizetésnapon az Alapbeállításokban pontosíthatod.
+            {!syncCfg && ' Indítás előtt a mostani adatokról mentés töltődik le.'}
+          </p>
+          <div className="cluster wrap gap-2 mt-2">
+            <button className="btn danger" onClick={run}>Indítás {periodFromName(nextId)}</button>
+            <button className="btn ghost" onClick={() => setArmed(false)}>Mégse</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

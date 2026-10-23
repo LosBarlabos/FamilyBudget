@@ -3,7 +3,7 @@ import { newId, unexpectedCategory } from '../domain/defaults';
 import { rawExport, type ExportFile } from '../domain/exportFormat';
 import { coverOps, uncoverOps, type CoverChange } from '../domain/flex';
 import { invalidOverrides } from '../domain/periods';
-import { initialPlans, missingBasePlans, newCategoryPlans, planChangeOps, planStartId, type PlanMode } from '../domain/plans';
+import { initialPlans, missingBasePlans, newCategoryPlans, planChangeOps, planStartId, restartPlanOps, type PlanMode } from '../domain/plans';
 import { allowedTypes, type Category, type Entry, type ISODate, type PeriodId, type PeriodOverride, type Plan, type Settings } from '../domain/types';
 
 export async function loadAll() {
@@ -83,6 +83,42 @@ export async function restoreSettings(before: Settings, overrides: PeriodOverrid
   await db.transaction('rw', db.settings, db.periodOverrides, async () => {
     await db.settings.put(before);
     await db.periodOverrides.bulkPut(overrides);
+  });
+}
+
+/** Az újraindítás előtti állapot a visszavonáshoz. */
+export interface RestartUndo {
+  before: Settings;
+  plans: Plan[];
+  entries: Entry[];
+}
+
+/**
+ * Újraindítás egy későbbi első időszakkal (a próbahasználat után): az előtte lévő rögzítések törlődnek, a
+ * tervek az új első időszaktól érvényesek, a nyitó egyenleg az ő elejére vonatkozik. A kategóriák maradnak.
+ */
+export async function restartFrom(firstPeriodId: PeriodId, openingBalance: number): Promise<RestartUndo> {
+  return db.transaction('rw', [db.settings, db.categories, db.plans, db.entries], async () => {
+    const before = await db.settings.get('settings');
+    if (!before) throw new Error('Hiányoznak a beállítások.');
+    const [categories, plans] = await Promise.all([db.categories.toArray(), db.plans.toArray()]);
+    const entries = await db.entries.where('periodId').below(firstPeriodId).toArray();
+    const ops = restartPlanOps(categories, plans, before.firstPeriodId, firstPeriodId);
+    await db.entries.bulkDelete(entries.map((e) => e.id));
+    await db.plans.bulkDelete(ops.del.map((d) => [d.periodId, d.categoryId] as [string, string]));
+    await db.plans.bulkPut(ops.put);
+    await db.settings.update('settings', { firstPeriodId, openingBalance });
+    return { before, plans, entries };
+  });
+}
+
+/** Visszavonás: a beállítások, a tervek és a törölt rögzítések visszakerülnek. */
+export async function undoRestart(u: RestartUndo) {
+  await db.transaction('rw', [db.settings, db.plans, db.entries], async () => {
+    await db.settings.put(u.before);
+    await db.plans.clear();
+    await db.plans.bulkPut(u.plans);
+    await db.entries.bulkPut(u.entries);
   });
 }
 
