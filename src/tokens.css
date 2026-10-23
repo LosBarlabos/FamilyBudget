@@ -104,6 +104,14 @@
   --dur-base: 180ms;
   --dur-slow: 250ms;
 
+  /* --- Elrendezés --- */
+  --sidebar-w: 240px;
+  --rail-w: 88px;
+  --content-max: 1180px;
+  --gutter: clamp(16px, 3vw, 40px);
+  /* Kompakt elrendezésben az alsó dokk magassága: „Kiadás rögzítése” sáv és a fülek. */
+  --dock-h: 124px;
+
   /* --- Z-rétegek (a menü a fejléc fölött, a navigáció a menü fölött, a réteg és a toast legfelül) --- */
   --z-sticky: 1;
   --z-header: 10;

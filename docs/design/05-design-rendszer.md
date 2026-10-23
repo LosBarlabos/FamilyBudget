@@ -225,9 +225,24 @@ Minden lépés után: `npx tsc`, `npx vitest run`, `npm run build`, és a képer
   - a `probe-core` újramérése: 32 cellában (2 téma × 375/1440 px × 8 képernyő) 0 kontraszthiba;
   - a fókusz 213 Tab-lépésből egyszer sem kerül az alsó sáv alá.
 
+### Az 5.C eredménye (2026-10-23)
+
+- **Három elrendezési osztály** egy helyen (`styles.css`, „Keret” szakasz), új tokenekkel: `--sidebar-w`, `--rail-w`, `--content-max`, `--gutter`, `--dock-h`.
+  - **Széles (≥ 1024 px):** 240 px-es oldalsáv „Kiadás rögzítése” gombbal (`N`), a kijelölt menüpont accent jelölővel.
+  - **Közepes (640–1023 px):** ugyanaz a navigáció 88 px-es sínként, ikonnal és rövid felirattal. A rögzítés 56 px-es négyzetes gomb. A 768 px-es „nyúlt telefon” (K4) megszűnt: a hero három száma egy sorban áll, alsó sáv nincs.
+  - **Kompakt (< 640 px):** a fejléc a képernyő címét mutatja (K17). Alul a „Kiadás rögzítése” sáv és négy fül (Áttekintés, Keretek, Tervező, Több), 12 px-es felirattal (A15). A lejárt számla jelvénye a fülön is látszik (K36).
+- **Átnevezés:** a Rögzítés képernyő neve „Keretek és számlák” lett (a fülön „Keretek”). A Továbbiak neve Több lett.
+- **Egy határ a rétegeknek is:** a toast és az alsó lap ugyanannál a 640 px-es határnál vált, mint a navigáció (DR8). A 720 és 900 px-es keret-töréspontok megszűntek. A tartalmi 720 px-es szabályokat az 5.D konténer-lekérdezései váltják ki.
+- **A képernyők saját látható címe** (Számlanaptár, Kategóriák, Beállítások) kompakt elrendezésben csak a felolvasónak marad, hogy ne ismétlődjön a fejléc alatt.
+- **Ellenőrzés:**
+  - a böngészőben 375, 800 és 1440 px-en átnézve;
+  - a `probe-core` 32 cellában 0 kontraszthibát talál;
+  - a fókusz 213 Tab-lépésből egyszer sem kerül a magasabb alsó dokk alá;
+  - 102 képernyőkép (`kepek/5c`). A Több lap csak kompakt elrendezésben létezik, ezért 2-vel kevesebb.
+
 A képernyők tartalmi átalakítása a 6. fázisban jön: a MonthStrip és a Bill az Áttekintésen, az „utána marad” előnézet a gyorsrögzítőben, az idővonal a Tervezőben.
 
 ## Nyitott kérdések
 
 - **Ikonok:** a teljes Tabler ikonfont (507 kB) marad, vagy részhalmaz/SVG (DR19)? A Csekk vázlatai kevés ikont használnak. Az 5.D-ben érdemes eldönteni, amikor a komponensek ikonigénye már látszik.
-- **„Keretek” fül:** a vázlat alsó sávjában a „Rögzítés” helyett „Keretek” szerepel, mert a rögzítést a külön sáv vette át. Ez a navigáció tartalmát is megváltoztatja, és az 5.C-ben dől el.
+- **„Keretek” fül (eldőlt az 5.C-ben):** a Rögzítés képernyő neve „Keretek és számlák” lett (röviden „Keretek”), mert a rögzítés saját sávot és gombot kapott, és a „Rögzítés” menüpont kétféle jelentése (K36) így megszűnik. Az útvonal (`#/rogzites`) nem változott.

@@ -14,7 +14,7 @@ export function Settings() {
   return (
     <>
       <div className="page-head">
-        <h1>Beállítások</h1>
+        <h1 className="page-title">Beállítások</h1>
       </div>
       {/* A kulcs miatt az űrlap újraindul, ha a beállítások máshonnan (pl. visszatöltésből) változnak. */}
       <BasicSettings key={`${s.payday}|${s.openingBalance}|${s.forecastPeriods}`} />

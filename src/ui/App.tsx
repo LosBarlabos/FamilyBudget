@@ -29,18 +29,19 @@ import { Planner } from './screens/Planner';
 import { Record } from './screens/Record';
 import { Settings } from './screens/Settings';
 
-const NAV: { id: Screen; label: string; icon: string }[] = [
-  { id: 'dashboard', label: 'Áttekintés', icon: 'layout-dashboard' },
-  { id: 'record', label: 'Rögzítés', icon: 'pencil-plus' },
-  { id: 'planner', label: 'Tervező', icon: 'adjustments-horizontal' },
-  { id: 'analysis', label: 'Elemzés', icon: 'chart-histogram' },
-  { id: 'calendar', label: 'Számlanaptár', icon: 'calendar-due' },
-  { id: 'categories', label: 'Kategóriák', icon: 'tags' },
-  { id: 'settings', label: 'Beállítások', icon: 'settings' },
+/** A képernyők neve (oldalsáv, fejléc, oldalcím) és rövid neve (navigációs sín, alsó fülek). */
+const NAV: { id: Screen; label: string; short: string; icon: string }[] = [
+  { id: 'dashboard', label: 'Áttekintés', short: 'Áttekintés', icon: 'layout-dashboard' },
+  { id: 'record', label: 'Keretek és számlák', short: 'Keretek', icon: 'wallet' },
+  { id: 'planner', label: 'Tervező', short: 'Tervező', icon: 'adjustments-horizontal' },
+  { id: 'analysis', label: 'Elemzés', short: 'Elemzés', icon: 'chart-histogram' },
+  { id: 'calendar', label: 'Számlanaptár', short: 'Naptár', icon: 'calendar-due' },
+  { id: 'categories', label: 'Kategóriák', short: 'Kategóriák', icon: 'tags' },
+  { id: 'settings', label: 'Beállítások', short: 'Beállítások', icon: 'settings' },
 ];
 const nav = (id: Screen) => NAV.find((n) => n.id === id)!;
 
-/** Mobilon a ritkábban használt képernyők a Továbbiak alsó lapra kerülnek, hogy középen elférjen a + gomb. */
+/** Kompakt elrendezésben a ritkábban használt képernyők a Több lapra kerülnek, hogy négy fül maradjon. */
 const MORE: Screen[] = ['analysis', 'calendar', 'categories', 'settings'];
 
 /** Indításkori adatmigráció; a felület csak utána jelenik meg, hogy ne számoljon a régi adatokkal. */
@@ -208,19 +209,15 @@ function Main({ data }: { data: BudgetData }) {
             <span className="side-logo"><Icon name="wallet" /></span>
             <span>Családi<br />költségvetés</span>
           </div>
-          <button className="primary side-add" title="Gyors rögzítés (N)" aria-label="Gyors rögzítés" aria-keyshortcuts="N" onClick={openQuick}>
-            <Icon name="plus" /> Rögzítés <kbd aria-hidden="true">N</kbd>
+          <button className="primary side-add" title="Kiadás rögzítése (N)" aria-label="Kiadás rögzítése" aria-keyshortcuts="N" onClick={openQuick}>
+            <Icon name="plus" /> <span className="side-add-label">Kiadás rögzítése</span> <kbd aria-hidden="true">N</kbd>
           </button>
           <nav className="side-nav" aria-label="Fő navigáció">
             {NAV.map((n) => (
               <button key={n.id} className={screen === n.id ? 'on' : ''} aria-current={screen === n.id ? 'page' : undefined} onClick={() => tab(n.id)}>
-                <Icon name={n.icon} /> {n.label}
-                {n.id === 'record' && overdue > 0 && (
-                  <span className="side-badge" title={`${overdue} lejárt számla`}>
-                    {overdue}
-                    <span className="sr-only"> lejárt számla</span>
-                  </span>
-                )}
+                <Icon name={n.icon} /> <span className="nav-full">{n.label}</span>
+                <span className="nav-short">{n.short}</span>
+                {n.id === 'record' && <OverdueBadge count={overdue} />}
               </button>
             ))}
           </nav>
@@ -236,10 +233,9 @@ function Main({ data }: { data: BudgetData }) {
         </aside>
 
         <div className="app-main">
+        {/* Kompakt elrendezésben a képernyő címe. A képernyő saját h1-e a felolvasóé, így ez nem ismétli meg. */}
         <header className="topbar">
-          <div className="brand">
-            <Icon name="wallet" /> <span>Családi költségvetés</span>
-          </div>
+          <p className="topbar-title" aria-hidden="true">{nav(screen).label}</p>
           {saveStatus}
         </header>
 
@@ -298,28 +294,30 @@ function Main({ data }: { data: BudgetData }) {
           </ErrorBoundary>
         </main>
 
-        {/* Mobilon a fejléc helyett; a fejlécen kívül van, hogy a fix pozíció ne a fejléchez igazodjon. */}
-        <nav className="tabbar" aria-label="Fő navigáció">
-          {(['dashboard', 'record'] as const).map((id) => (
-            <TabButton key={id} id={id} on={screen === id} onClick={() => tab(id)} />
-          ))}
-          <button className="tab-plus" aria-label="Gyors rögzítés" onClick={openQuick}>
-            <Icon name="plus" />
+        {/* Kompakt elrendezésben alul, a hüvelykujj közelében: a fő művelet és a négy fül. A fejlécen kívül van, hogy
+            a fix pozíció ne a fejléchez igazodjon. */}
+        <div className="dock">
+          <button className="dock-add" aria-keyshortcuts="N" onClick={openQuick}>
+            <Icon name="plus" /> Kiadás rögzítése
           </button>
-          <TabButton id="planner" on={screen === 'planner'} onClick={() => tab('planner')} />
-          <button
-            className={MORE.includes(screen) ? 'on' : ''}
-            aria-haspopup="dialog"
-            aria-expanded={router.sheet === 'more'}
-            onClick={() => openSheet('more')}
-          >
-            <Icon name="dots" />
-            <span>Továbbiak</span>
-          </button>
-        </nav>
+          <nav className="tabbar" aria-label="Fő navigáció">
+            {(['dashboard', 'record', 'planner'] as const).map((id) => (
+              <TabButton key={id} id={id} on={screen === id} onClick={() => tab(id)} badge={id === 'record' ? overdue : 0} />
+            ))}
+            <button
+              className={MORE.includes(screen) ? 'on' : ''}
+              aria-haspopup="dialog"
+              aria-expanded={router.sheet === 'more'}
+              onClick={() => openSheet('more')}
+            >
+              <Icon name="dots" />
+              <span>Több</span>
+            </button>
+          </nav>
+        </div>
 
         {router.sheet === 'more' && (
-          <Sheet title="Továbbiak" onClose={closeLayer}>
+          <Sheet title="Több" onClose={closeLayer}>
             <div className="sheet-menu">
               {MORE.map((id) => (
                 <button
@@ -347,12 +345,24 @@ function Main({ data }: { data: BudgetData }) {
   );
 }
 
-function TabButton({ id, on, onClick }: { id: Screen; on: boolean; onClick: () => void }) {
+function TabButton({ id, on, onClick, badge }: { id: Screen; on: boolean; onClick: () => void; badge: number }) {
   const n = nav(id);
   return (
     <button className={on ? 'on' : ''} aria-current={on ? 'page' : undefined} onClick={onClick}>
       <Icon name={n.icon} />
-      <span>{n.label}</span>
+      <span>{n.short}</span>
+      <OverdueBadge count={badge} />
     </button>
+  );
+}
+
+/** A lejárt számlák száma a „Keretek és számlák” menüpontján, a felolvasónak kiírva. */
+function OverdueBadge({ count }: { count: number }) {
+  if (count === 0) return null;
+  return (
+    <span className="side-badge" title={`${count} lejárt számla`}>
+      {count}
+      <span className="sr-only"> lejárt számla</span>
+    </span>
   );
 }

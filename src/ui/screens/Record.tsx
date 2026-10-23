@@ -186,7 +186,7 @@ export function Record() {
 
   return (
     <>
-      <h1 className="sr-only">Rögzítés</h1>
+      <h1 className="sr-only">Keretek és számlák</h1>
       <div className="page-head">
         <PeriodSwitcher />
         {!unexpectedOpen && (

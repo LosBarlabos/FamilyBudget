@@ -62,7 +62,7 @@ export function Categories() {
   return (
     <>
       <div className="page-head">
-        <h1>Kategóriák</h1>
+        <h1 className="page-title">Kategóriák</h1>
         <button className="primary" onClick={() => edit('new')}>
           <Icon name="plus" /> Új kategória
         </button>

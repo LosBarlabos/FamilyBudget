@@ -22,7 +22,7 @@ const LAYERS = [
   ['10-gyorsrogzito', '#/attekintes?gyors'],
   ['11-varatlan-kiadas', '#/rogzites/varatlan'],
   ['12-uj-cel', '#/kategoriak/uj-cel'],
-  ['13-tovabbiak', '#/attekintes', `[...document.querySelectorAll('.tabbar button')].find((b) => b.textContent.includes('Továbbiak'))?.click()`],
+  ['13-tobb', '#/attekintes', `[...document.querySelectorAll('.tabbar button')].find((b) => b.textContent.trim() === 'Több')?.click()`],
 ];
 const PLAN = [
   { sample: 'teljes', viewports: VIEWPORTS, screens: SCREENS, layers: LAYERS },
@@ -62,7 +62,7 @@ async function main() {
             await capture(dir, name);
           }
           for (const [name, hash, open] of p.layers) {
-            if (name === '13-tovabbiak' && vp.width >= 900) continue;
+            if (name === '13-tobb' && vp.width >= 640) continue;
             await load(`${BASE}${hash}`);
             if (open) {
               await evaluate(open);

@@ -66,7 +66,7 @@ describe('útvonalak', () => {
     expect(historyMode(r('dashboard'), r('dashboard', null, true), off)).toBe('push');
     expect(historyMode(r('record'), r('record'), off)).toBe('replace');
     expect(historyMode(r('record'), r('record', 'a'), { ...off, replace: true })).toBe('replace');
-    // A gyorsrögzítőből vagy a Továbbiak lapról induló képernyőváltás a réteg bejegyzésének helyére lép.
+    // A gyorsrögzítőből vagy a Több lapról induló képernyőváltás a réteg bejegyzésének helyére lép.
     expect(historyMode(r('dashboard', null, true), r('categories'), { onLayer: true })).toBe('replace');
   });
 
@@ -82,7 +82,7 @@ describe('útvonalak', () => {
     // Gyorsrögzítő a Kategóriákon: a „Kategóriák” gomb (ugyanarra a képernyőre: csere kérésével) csak bezárja.
     expect(historyMode(r('categories', null, true), r('categories'), { onLayer: true, replace: true })).toBe('back');
     expect(historyMode(r('record', 'a', true), r('record', 'a'), { onLayer: true })).toBe('back');
-    // A Továbbiak lap nem látszik az útvonalban: a már látott képernyő választása is csak bezárja.
+    // A Több lap nem látszik az útvonalban: a már látott képernyő választása is csak bezárja.
     expect(historyMode(r('planner'), r('planner'), { onLayer: true, replace: true })).toBe('back');
     // Réteg nélkül nincs hova visszalépni.
     expect(historyMode(r('categories'), r('categories'), { onLayer: false, replace: true })).toBe('replace');

@@ -68,7 +68,7 @@ export function BillCalendar() {
   return (
     <>
       <div className="page-head">
-        <h1>Számlanaptár</h1>
+        <h1 className="page-title">Számlanaptár</h1>
         <div className="cal-nav">
           <button className="icon" aria-label="Előző hónap" disabled={month <= minMonth} onClick={() => shift(-1)}>
             <Icon name="chevron-left" />
