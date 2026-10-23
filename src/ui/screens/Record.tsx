@@ -241,7 +241,12 @@ export function Record() {
         />
       </section>
 
-      {envelopes.length > 0 && <Section title="Keretek" icon="wallet" hint="koppints a sorra a rögzítéshez">{envelopes.map(renderCat)}</Section>}
+      {envelopes.length > 0 && (
+        <Section title="Keretek" icon="wallet" hint="koppints a sorra a rögzítéshez">
+          {/* Széles helyen két hasábban, mint az Áttekintés kategóriái; a kinyitott keret egyben marad. */}
+          <div className="units">{envelopes.map(renderCat)}</div>
+        </Section>
+      )}
       {fixed.length > 0 && (
         <Section title="Fix számlák" icon="receipt" hint="esedékesség szerint">
           {fixed.filter((c) => !hiddenIds.has(c.id)).map(renderCat)}

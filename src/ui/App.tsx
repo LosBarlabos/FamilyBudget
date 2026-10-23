@@ -287,13 +287,16 @@ function Main({ data }: { data: BudgetData }) {
 
         <main>
           <ErrorBoundary resetKey={`${screen}|${periodId}`}>
-            {screen === 'dashboard' && <Dashboard />}
-            {screen === 'record' && <Record />}
-            {screen === 'planner' && <Planner />}
-            {screen === 'analysis' && <Analysis />}
-            {screen === 'calendar' && <BillCalendar />}
-            {screen === 'categories' && <Categories />}
-            {screen === 'settings' && <Settings />}
+            {/* A kulcs miatt képernyőváltáskor újra lefut a belépő áttűnés (csökkentett mozgásnál nincs). */}
+            <div key={screen} className="screen">
+              {screen === 'dashboard' && <Dashboard />}
+              {screen === 'record' && <Record />}
+              {screen === 'planner' && <Planner />}
+              {screen === 'analysis' && <Analysis />}
+              {screen === 'calendar' && <BillCalendar />}
+              {screen === 'categories' && <Categories />}
+              {screen === 'settings' && <Settings />}
+            </div>
           </ErrorBoundary>
         </main>
 

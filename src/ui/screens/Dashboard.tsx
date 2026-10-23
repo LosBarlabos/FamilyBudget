@@ -186,17 +186,19 @@ export function Dashboard() {
           return (
             <div key={s.title}>
               <div className="section-title">{s.title}</div>
-              {units.map((u) => (
-                <UnitRows
-                  key={u.key}
-                  unit={u}
-                  p={p}
-                  pace={pace}
-                  prev={prev}
-                  open={expanded.includes(u.key)}
-                  toggle={() => setExpanded(expanded.includes(u.key) ? expanded.filter((k) => k !== u.key) : [...expanded, u.key])}
-                />
-              ))}
+              <div className="units">
+                {units.map((u) => (
+                  <UnitRows
+                    key={u.key}
+                    unit={u}
+                    p={p}
+                    pace={pace}
+                    prev={prev}
+                    open={expanded.includes(u.key)}
+                    toggle={() => setExpanded(expanded.includes(u.key) ? expanded.filter((k) => k !== u.key) : [...expanded, u.key])}
+                  />
+                ))}
+              </div>
             </div>
           );
         })}
@@ -210,12 +212,17 @@ function UnitRows({
 }: { unit: Unit; p: PeriodSummary; pace: PaceOverview; prev?: PeriodSummary; open: boolean; toggle: () => void }) {
   const { go } = useBudget();
   const row = { p, pace };
+  // Egy egység (egy kategória, vagy egy csoport a tagjaival) egy cella: széles helyen két oszlopban is együtt marad.
   if (unit.categories.length === 1 && unit.key.startsWith('c:')) {
     const c = unit.categories[0];
-    return <Row {...row} cats={[c]} label={c.name} figs={sumFigs([c], p)!} prevFigs={sumFigs([c], prev)} onClick={() => go('record', c.id)} />;
+    return (
+      <div className="unit">
+        <Row {...row} cats={[c]} label={c.name} figs={sumFigs([c], p)!} prevFigs={sumFigs([c], prev)} onClick={() => go('record', c.id)} />
+      </div>
+    );
   }
   return (
-    <>
+    <div className="unit">
       <Row
         {...row}
         cats={unit.categories}
@@ -230,7 +237,7 @@ function UnitRows({
         unit.categories.map((c) => (
           <Row key={c.id} {...row} cats={[c]} label={c.name} figs={sumFigs([c], p)!} prevFigs={sumFigs([c], prev)} child onClick={() => go('record', c.id)} />
         ))}
-    </>
+    </div>
   );
 }
 
@@ -286,44 +293,48 @@ function Row({
       onClick={onClick}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onClick())}
     >
-      <div className="name">
-        {count !== undefined && <Icon name="chevron-right" className={`chev ${open ? 'open' : ''}`} />}
-        <CatIcon cat={cat} />
-        <span className="t">{label}</span>
-        {count !== undefined && <span className="count">{count}</span>}
-        {!future && <Delta pct={change} goodWhenUp={income} title={changeTitle} />}
-      </div>
-      <div className="barcell">
+      {/* Ugyanaz a rács, mint a Rögzítés keretsora: ikon, középen a név és az összeg, alatta a sáv és a maradék. */}
+      <CatIcon cat={cat} />
+      <div className="row-main">
+        <div className="row-line">
+          <span className="row-name">
+            <span className="t">{label}</span>
+            {count !== undefined && <span className="count">{count}</span>}
+            {!future && <Delta pct={change} goodWhenUp={income} title={changeTitle} />}
+          </span>
+          <span className="row-amounts num">
+            {nextDue ? (
+              <span className="faint">legközelebb {periodName(nextDue).toLowerCase()}</span>
+            ) : planOnly ? (
+              <span className="muted">terv {formatFt(figs.plan)}</span>
+            ) : (
+              <>
+                <span className={!income && view.pace === 'over' ? 'neg' : ''} style={{ fontWeight: 500 }}>{formatFt(figs.actual)}</span>
+                <span className="faint">{unplanned ? ' · nem tervezett' : ` / ${formatFt(figs.plan)}`}</span>
+              </>
+            )}
+          </span>
+        </div>
         {/* Terv és költés nélkül a sáv és a „ma” jelölő csak zaj lenne. */}
         {notDue ? null : planOnly ? (
           <Bar value={figs.plan} max={figs.plan} tone="plan" />
         ) : unplanned && figs.actual === 0 ? null : (
           <Bar value={figs.actual} max={unplanned ? figs.actual : figs.plan} tone={tone} marker={income ? null : view.marker} />
         )}
-      </div>
-      <div className="amounts num">
-        {nextDue ? (
-          <span className="faint">nem esedékes · legközelebb {periodName(nextDue).toLowerCase()}</span>
-        ) : planOnly ? (
-          <span className="muted">terv {formatFt(figs.plan)}</span>
-        ) : (
-          <>
-            <span className={!income && view.pace === 'over' ? 'neg' : ''} style={{ fontWeight: 500 }}>{formatFt(figs.actual)}</span>
-            <span className="faint">{unplanned ? ' · nem tervezett' : ` / ${formatFt(figs.plan)}`}</span>
-            {envelopeRow && (
-              <span className={`row-left ${view.pace === 'over' ? 'neg' : view.pace === 'fast' ? 'warn-text' : 'faint'}`}>
-                {/* A szín mellett ikon és felolvasott szöveg is jelzi a gyors fogyást. */}
-                {view.pace === 'fast' && (
-                  <>
-                    <Icon name="trending-up" /> <span className="sr-only">gyorsan fogy, </span>
-                  </>
-                )}
-                {envelopeLeftText(view)}
-              </span>
+        {notDue && <span className="row-left faint">ebben a hónapban nem esedékes</span>}
+        {envelopeRow && !planOnly && (
+          <span className={`row-left num ${view.pace === 'over' ? 'neg' : view.pace === 'fast' ? 'warn-text' : 'muted'}`}>
+            {/* A szín mellett ikon és felolvasott szöveg is jelzi a gyors fogyást. */}
+            {view.pace === 'fast' && (
+              <>
+                <Icon name="trending-up" /> <span className="sr-only">gyorsan fogy, </span>
+              </>
             )}
-          </>
+            {envelopeLeftText(view)}
+          </span>
         )}
       </div>
+      <Icon name={count !== undefined ? 'chevron-down' : 'chevron-right'} className={`chev ${open ? 'open-down' : ''}`} />
     </div>
   );
 }
