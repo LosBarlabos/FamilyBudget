@@ -125,7 +125,7 @@ Minden jelöltnél: mit old meg, mekkora munka, kell-e hozzá domain-változás 
 
 **Kimenet:** `docs/design/05-design-rendszer.md`, és a tokenek a kódban, a vizuális megjelenés változtatása nélkül (első lépésként csak csere tokenekre, hogy a későbbi különbség tiszta legyen).
 
-**Állapot (2026-10-23):** a specifikáció kész, az 5.A (tokenek, 0 látható változás, képkülönbséggel igazolva) kész. Az 5.B (a Csekk palettája és saját tárhelyes betűi) kész. Az 5.C (a keret: három elrendezési osztály, képernyőcímek) kész. Az 5.D (rétegek, komponensek, konténer-lekérdezések) kész. Következik az 5.E (rétegek: alsó lap fogantyúval, toast) és az 5.F (grafikonok a tokenekből, kézi témaválasztó).
+**Állapot (2026-10-23):** a specifikáció kész, az 5.A (tokenek, 0 látható változás, képkülönbséggel igazolva) kész. Az 5.B (a Csekk palettája és saját tárhelyes betűi) kész. Az 5.C (a keret: három elrendezési osztály, képernyőcímek) kész. Az 5.D (rétegek, komponensek, konténer-lekérdezések) kész. Az 5.E (rétegek) és az 5.F (grafikonok a tokenekből, kézi témaválasztó) kész: az 5. fázis lezárult. Következik a 6. fázis (megvalósítás képernyőnként).
 
 ## 6. Megvalósítás képernyőnként
 

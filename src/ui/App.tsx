@@ -9,7 +9,7 @@ import { backupIsStale, backupLabel, daysSince, exportBackup } from './backup';
 import { BudgetProvider, ToastProvider, useSafe, type Screen } from './context';
 import { useRouter } from './router';
 import { isQuickEntryKey } from './shortcuts';
-import { Icon, NOTE_TAGS_LIST } from './components/common';
+import { applyTheme, Icon, NOTE_TAGS_LIST, useThemePref } from './components/common';
 import { CoverSheet, coverSheetName, parseCoverSheet } from './components/Cover';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { QuickEntry } from './components/QuickEntry';
@@ -57,6 +57,9 @@ function useStartupMigration() {
 
 export function App() {
   const ready = useStartupMigration();
+  // A kézi téma (és a böngésző sávjának színe) a tárolt választást követi, egy másik fülön történt váltás után is.
+  const [themePref] = useThemePref();
+  useEffect(() => applyTheme(themePref), [themePref]);
   const raw = useLiveQuery(loadAll, []);
   const onboarding = !!raw && ready && !raw.settings;
   // A varázsló (pl. a Beállításokban kért teljes törlés után) az Áttekintésre vezessen, ne a korábbi képernyőre.

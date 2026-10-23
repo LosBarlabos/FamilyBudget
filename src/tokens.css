@@ -39,6 +39,10 @@
     --color-danger-fill: #d03b3b;
     --color-scrim: rgb(21 35 63 / 0.45);
     --chart-grid: #dce2eb;
+    /* A grafikonok a tokenekből olvassák a színeiket (Charts.tsx); a kategóriaszínek a kategóriából jönnek. */
+    --chart-tick: #5a6679;
+    --chart-faint: #b9c3d2;
+    --chart-zero: #9aa5b8;
     /* Az Áttekintés kiemelt kártyája: tintakék, a képernyő egyetlen sötét felülete. */
     --hero-bg: #15233f;
     --hero-text: #ffffff;
@@ -46,6 +50,12 @@
     --hero-line: rgba(255, 255, 255, 0.16);
     --hero-accent: #8fe3c4;
     --hero-danger: #ff9b93;
+
+    /* --- Mélység: kártya (keret), menü, alsó lap és panel, toast --- */
+    --elev-1: none;
+    --elev-2: 0 8px 24px rgb(21 35 63 / 0.16);
+    --elev-3: 0 16px 48px rgb(21 35 63 / 0.24);
+    --elev-4: 0 8px 24px rgb(21 35 63 / 0.22);
 
     /* --- Típus --- */
     --font-body: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -152,12 +162,59 @@
       --color-danger-subtle: #3d1d1b;
       --color-scrim: rgb(0 0 0 / 0.6);
       --chart-grid: #2b3656;
+      --chart-tick: #9aa5b8;
+      --chart-faint: #5d6b8d;
+      --chart-zero: #6c7a9c;
+      --elev-2: 0 8px 24px rgb(0 0 0 / 0.45);
+      --elev-3: 0 16px 48px rgb(0 0 0 / 0.55);
+      --elev-4: 0 8px 24px rgb(0 0 0 / 0.5);
       --hero-bg: #1c2d55;
       --hero-text: #eef2f8;
       --hero-text-2: #c5cfe2;
       --hero-line: rgba(255, 255, 255, 0.14);
       color-scheme: dark;
     }
+  }
+
+  /* Kézi témaválasztás (Beállítások → Megjelenés): a rendszerbeállítástól függetlenül sötét. */
+  :root[data-theme='dark'] {
+    --color-bg: #0e1525;
+    --color-surface: #172038;
+    --color-surface-sunken: #212c48;
+    --color-surface-muted: #2b3656;
+    --color-surface-inverse: #0a101d;
+    --color-text: #eef2f8;
+    --color-text-muted: #bac3d3;
+    --color-text-subtle: #9aa5b8;
+    --color-text-inverse: #bac3d3;
+    --color-border: #2b3656;
+    --color-border-strong: #6c7a9c;
+    --color-accent: #93b2ff;
+    --color-on-accent: #0e1525;
+    --color-accent-subtle: #1e2c52;
+    --color-accent-text: #b7cbff;
+    --color-bill: #e6d25b;
+    --color-on-bill: #2b2600;
+    --color-day: #33405f;
+    --color-ok: #72d3a2;
+    --color-ok-subtle: #173326;
+    --color-warn: #f2b45a;
+    --color-warn-subtle: #3b2e10;
+    --color-danger: #ff8f85;
+    --color-danger-subtle: #3d1d1b;
+    --color-scrim: rgb(0 0 0 / 0.6);
+    --chart-grid: #2b3656;
+    --chart-tick: #9aa5b8;
+    --chart-faint: #5d6b8d;
+    --chart-zero: #6c7a9c;
+    --elev-2: 0 8px 24px rgb(0 0 0 / 0.45);
+    --elev-3: 0 16px 48px rgb(0 0 0 / 0.55);
+    --elev-4: 0 8px 24px rgb(0 0 0 / 0.5);
+    --hero-bg: #1c2d55;
+    --hero-text: #eef2f8;
+    --hero-text-2: #c5cfe2;
+    --hero-line: rgba(255, 255, 255, 0.14);
+    color-scheme: dark;
   }
 
   /* Csökkentett mozgásnál a tokenből olvasott átmenetek azonnaliak. */

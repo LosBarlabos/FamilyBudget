@@ -398,8 +398,8 @@
   .toast {
     pointer-events: auto; max-width: 100%;
     background: var(--color-text); color: var(--color-bg); border-radius: 10px; padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
-    display: flex; align-items: center; gap: var(--space-3); font-size: var(--text-ui); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-    animation: toast-in 0.18s ease-out;
+    display: flex; align-items: center; gap: var(--space-3); font-size: var(--text-ui); box-shadow: var(--elev-4);
+    animation: toast-in var(--dur-base) ease-out;
   }
   .toast button { background: transparent; color: var(--color-bg); border-color: color-mix(in srgb, var(--color-bg) 40%, transparent); height: 28px; flex-shrink: 0; }
   .toast button:hover { background: color-mix(in srgb, var(--color-bg) 15%, transparent); }
@@ -410,7 +410,7 @@
   /* A sorban álló értesítések száma; azok a helyük felszabadulásakor jelennek meg. */
   .toast-more {
     background: var(--color-surface); color: var(--color-text-muted); border: 1px solid var(--color-border); border-radius: var(--radius-full);
-    padding: var(--space-0-5) 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    padding: var(--space-0-5) 10px; box-shadow: var(--elev-2);
   }
   @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } }
   @media (max-width: 639px) {
@@ -434,14 +434,15 @@
   /* A fix alsó sáv fölött (z-index), de a toastok alatt, hogy a hibaüzenet és a visszavonás elérhető maradjon. */
   .sheet-layer {
     position: fixed; inset: 0; z-index: var(--z-overlay); display: flex; align-items: flex-start; justify-content: center;
-    padding: 12vh var(--space-4) var(--space-4); background: rgba(0, 0, 0, 0.35); animation: fade-in 0.15s ease-out;
+    padding: 12vh var(--space-4) var(--space-4); background: var(--color-scrim); animation: fade-in var(--dur-fast) ease-out;
   }
   .sheet {
     width: min(440px, 100%); max-height: 100%; overflow: auto; overscroll-behavior: contain;
     background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.24); padding: var(--space-3) 18px 18px; outline: none;
+    box-shadow: var(--elev-3); padding: var(--space-3) 18px 18px; outline: none;
     animation: sheet-in 0.18s ease-out;
   }
+  .sheet-handle { display: none; }
   .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-3); }
   .sheet-menu { display: grid; gap: var(--space-1); }
   .sheet-menu button { height: 48px; padding: 0 var(--space-3); justify-content: flex-start; gap: var(--space-3); border: 1px solid transparent; border-radius: var(--radius-md); font-size: var(--text-base); }
@@ -509,8 +510,17 @@
     .sheet {
       width: 100%; max-height: calc(100% - 40px - var(--kb, 0px)); margin-bottom: var(--kb, 0px);
       border-radius: var(--radius-xl) var(--radius-xl) 0 0; border-width: 1px 0 0; padding-bottom: calc(18px + env(safe-area-inset-bottom));
-      animation: sheet-up 0.22s ease-out;
+      animation: sheet-up var(--dur-slow) ease-out;
     }
+    /* Fogantyú: lefelé húzva bezárja a lapot (Sheet.tsx); billentyűzettel az Esc és a bezárás gomb. */
+    .sheet-handle {
+      display: block; width: 100%; height: 20px; margin: calc(var(--space-3) * -1) 0 var(--space-1); touch-action: none; cursor: grab;
+    }
+    .sheet-handle::before {
+      content: ''; display: block; width: 40px; height: 5px; margin: var(--space-2) auto 0; border-radius: var(--radius-full); background: var(--color-border-strong);
+    }
+    .sheet.dragging { transition: none; }
+    .sheet.settling { transition: transform var(--dur-base) ease-out; }
   }
   @media (prefers-reduced-motion: reduce) {
     .sheet, .sheet-layer { animation: none; }
@@ -602,7 +612,7 @@
   .menu {
     position: absolute; right: 0; top: calc(100% + 4px); z-index: var(--z-dropdown); display: grid; min-width: 210px; padding: var(--space-1);
     background: var(--color-surface); border: 1px solid var(--color-border-strong); border-radius: var(--radius-md);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+    box-shadow: var(--elev-2);
   }
   .menu button { height: 38px; justify-content: flex-start; border: none; background: transparent; }
   .menu button:hover, .menu button:focus-visible { background: var(--color-surface-sunken); }

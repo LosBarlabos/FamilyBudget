@@ -11,22 +11,37 @@ import { savingsSpend, type TrendPoint } from '../../domain/analysis';
 import type { Category, Entry, PeriodId } from '../../domain/types';
 import { isExpense } from '../../domain/types';
 import { displayUnits } from '../../domain/units';
-import { useColorScheme } from './common';
+import { withAlpha } from '../color';
+import { useColorScheme, useReducedMotion } from './common';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Filler);
 
+/**
+ * A grafikonok színei a CSS-tokenekből (tokens.css: --chart-*, --color-accent, --color-surface), a betű a törzsszövegé.
+ * A téma váltásakor (rendszer vagy kézi választás) újraolvassa őket; csökkentett mozgásnál nincs animáció.
+ */
 function useChartTheme() {
   const scheme = useColorScheme();
-  return scheme === 'dark'
-    ? { grid: '#2b3656', tick: '#9aa5b8', surface: '#172038', accent: '#93b2ff', faint: '#5d6b8d', zero: '#6c7a9c' }
-    : { grid: '#dce2eb', tick: '#5a6679', surface: '#ffffff', accent: '#2346a8', faint: '#b9c3d2', zero: '#9aa5b8' };
+  const reduced = useReducedMotion();
+  return useMemo(() => {
+    const cs = getComputedStyle(document.documentElement);
+    const v = (name: string) => cs.getPropertyValue(name).trim();
+    // A Chart.js a betűt a globális alapértékből veszi (tengelyfeliratok, súgó).
+    ChartJS.defaults.font.family = v('--font-body');
+    return {
+      grid: v('--chart-grid'), tick: v('--chart-tick'), faint: v('--chart-faint'), zero: v('--chart-zero'),
+      surface: v('--color-surface'), accent: v('--color-accent'), reduced,
+    };
+    // A scheme csak újraolvasási jel: a tényleges érték a dokumentum stílusából jön.
+  }, [scheme, reduced]);
 }
+
 
 function baseOptions(t: ReturnType<typeof useChartTheme>, onSelect: (i: number) => void): ChartOptions<'line' | 'bar'> {
   return {
     responsive: true,
     maintainAspectRatio: false,
-    animation: { duration: 250 },
+    animation: t.reduced ? false : { duration: 250 },
     interaction: { mode: 'index', intersect: false },
     onClick: (_e, els) => {
       if (els.length) onSelect(els[0].index);
@@ -82,7 +97,7 @@ export function BalanceChart({
         label: 'Tény',
         data: ps.map((p, i) => (i <= lastClosed ? p.endBalance : null)),
         borderColor: t.accent,
-        backgroundColor: `${t.accent}14`,
+        backgroundColor: withAlpha(t.accent, 0.08),
         fill: 'origin',
         borderWidth: 2,
         pointRadius: ps.map((p) => (p.id === selectedId ? 6 : 3)),
@@ -193,7 +208,7 @@ export function SpendingChart({
   const alpha = (hex: string, i: number) => {
     const p = ps[i];
     if (p.id === selectedId) return hex;
-    return p.status === 'future' ? `${hex}59` : `${hex}b3`;
+    return p.status === 'future' ? withAlpha(hex, 0.35) : withAlpha(hex, 0.7);
   };
 
   const data: ChartData<'bar'> = {
@@ -213,7 +228,7 @@ export function SpendingChart({
     ...savings.map((s) => ({
       label: `${s.name} (megtakarításból)`,
       data: s.values,
-      backgroundColor: `${s.color}40`,
+      backgroundColor: withAlpha(s.color, 0.25),
       borderColor: s.color,
       borderWidth: 1,
       borderDash: [3, 2],
@@ -257,7 +272,7 @@ export function SpendingChart({
         ))}
         {savings.length > 0 && (
           <span className="cluster gap-1-5">
-            <span style={{ width: 10, height: 10, borderRadius: 2, background: `${t.tick}40`, border: `1px dashed ${t.tick}` }} />
+            <span style={{ width: 10, height: 10, borderRadius: 2, background: withAlpha(t.tick, 0.25), border: `1px dashed ${t.tick}` }} />
             halvány: megtakarításból
           </span>
         )}
@@ -297,7 +312,7 @@ export function TrendChart({ points, refId, height = 220 }: { points: TrendPoint
         ? [{
             label: 'Megtakarításból együtt',
             data: points.map((p) => p.actual + p.fromSavings),
-            borderColor: `${t.accent}80`,
+            borderColor: withAlpha(t.accent, 0.5),
             borderWidth: 2,
             borderDash: [2, 3],
             pointRadius: 0,
@@ -308,7 +323,7 @@ export function TrendChart({ points, refId, height = 220 }: { points: TrendPoint
         label: 'Tény',
         data: points.map((p) => p.actual),
         borderColor: t.accent,
-        backgroundColor: `${t.accent}14`,
+        backgroundColor: withAlpha(t.accent, 0.08),
         fill: 'origin',
         borderWidth: 2.5,
         pointRadius: points.map((p) => (p.current ? 5 : 3)),

@@ -17,7 +17,7 @@ export function Icon({ name, style, className = '' }: { name: string; style?: CS
 /** A kategória ikonja a kategória színével (IconTile; a méret alapból 32 px). */
 export function CatIcon({ cat, size = 'md' }: { cat: Pick<Category, 'icon' | 'color'>; size?: 'sm' | 'md' | 'lg' }) {
   return (
-    <span className={`tile tile-${size} cat-icon`} style={{ background: `${cat.color}1f`, color: cat.color }}>
+    <span className={`tile tile-${size} cat-icon`} style={{ background: `color-mix(in srgb, ${cat.color} 12%, transparent)`, color: cat.color }}>
       <Icon name={cat.icon} />
     </span>
   );
@@ -356,8 +356,46 @@ export function Delta({
   );
 }
 
+/** A téma választása eszközönként (Beállítások → Megjelenés); a „system” a rendszerbeállítást követi. */
+export type ThemePref = 'system' | 'light' | 'dark';
+export const THEME_KEY = 'theme';
+/** A böngésző sávjának színe témánként (a --color-bg értéke). */
+const THEME_COLOR = { light: '#f4f6f9', dark: '#0e1525' } as const;
+
+/**
+ * A téma alkalmazása a dokumentumon: a [data-theme] a tokens.css kézi blokkját kapcsolja, a theme-color a böngésző
+ * sávját. Szinkron fut, hogy a grafikonok a következő megjelenítéskor már az új tokeneket olvassák. Az index.html
+ * egy rövid szkriptje ugyanezt teszi az első megjelenítés előtt, hogy ne villanjon.
+ */
+export function applyTheme(pref: ThemePref) {
+  const root = document.documentElement;
+  if (pref === 'system') delete root.dataset.theme;
+  else root.dataset.theme = pref;
+  document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]').forEach((m) => {
+    const media = m.dataset.media ?? m.media;
+    m.dataset.media = media;
+    if (pref === 'system') {
+      m.media = media;
+      m.content = media.includes('dark') ? THEME_COLOR.dark : THEME_COLOR.light;
+    } else {
+      m.media = '';
+      m.content = THEME_COLOR[pref];
+    }
+  });
+}
+
+export function useThemePref(): [ThemePref, (p: ThemePref) => void] {
+  const [pref, setPref] = useLocalState<ThemePref>(THEME_KEY, 'system');
+  return [pref, (p) => {
+    applyTheme(p);
+    setPref(p);
+  }];
+}
+
+/** A ténylegesen látszó téma: a kézi választás, vagy annak híján a rendszerbeállítás. */
 export function useColorScheme(): 'light' | 'dark' {
   const q = '(prefers-color-scheme: dark)';
+  const [pref] = useThemePref();
   const [dark, setDark] = useState(() => window.matchMedia(q).matches);
   useEffect(() => {
     const m = window.matchMedia(q);
@@ -365,7 +403,21 @@ export function useColorScheme(): 'light' | 'dark' {
     m.addEventListener('change', h);
     return () => m.removeEventListener('change', h);
   }, []);
+  if (pref !== 'system') return pref;
   return dark ? 'dark' : 'light';
+}
+
+/** Csökkentett mozgás a rendszerben (a grafikonok animációja ilyenkor kikapcsol). */
+export function useReducedMotion(): boolean {
+  const q = '(prefers-reduced-motion: reduce)';
+  const [reduced, setReduced] = useState(() => window.matchMedia(q).matches);
+  useEffect(() => {
+    const m = window.matchMedia(q);
+    const h = () => setReduced(m.matches);
+    m.addEventListener('change', h);
+    return () => m.removeEventListener('change', h);
+  }, []);
+  return reduced;
 }
 
 export function downloadFile(name: string, content: string, mime: string) {

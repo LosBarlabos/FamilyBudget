@@ -1,11 +1,11 @@
-import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
 import { Icon } from './common';
 
 const FOCUSABLE =
   'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])';
 
 /**
- * Az app saját rétege: mobilon alsó lap, asztalon középre igazított panel. A fix alsó sáv fölött van, nem
+ * Az app saját rétege: kompakt elrendezésben alsó lap fogantyúval, egyébként középre igazított panel. A fix alsó sáv fölött van, nem
  * abban, és a képernyő-billentyűzet fölé emelkedik, így egyik sem takarja el. A toastok fölötte maradnak.
  */
 export function Sheet({
@@ -26,6 +26,29 @@ export function Sheet({
   // Még a mezők automatikus fókusza előtt: ide kerül vissza a fókusz bezáráskor.
   const [opener] = useState(() => (document.activeElement instanceof HTMLElement ? document.activeElement : null));
   const downOnLayer = useRef(false);
+  // Fogantyú (csak alsó lapként látszik): lefelé húzva követi az ujjat, és a lap negyedénél (legfeljebb 120 px)
+  // tovább húzva bezárja; rövidebb húzásnál visszaugrik.
+  const drag = useRef<{ y: number; dy: number } | null>(null);
+  const onHandleDown = (e: PointerEvent<HTMLDivElement>) => {
+    drag.current = { y: e.clientY, dy: 0 };
+    e.currentTarget.setPointerCapture(e.pointerId);
+    ref.current!.classList.remove('settling');
+    ref.current!.classList.add('dragging');
+  };
+  const onHandleMove = (e: PointerEvent<HTMLDivElement>) => {
+    if (!drag.current) return;
+    drag.current.dy = Math.max(0, e.clientY - drag.current.y);
+    ref.current!.style.transform = `translateY(${drag.current.dy}px)`;
+  };
+  const onHandleUp = () => {
+    const d = drag.current;
+    drag.current = null;
+    const el = ref.current!;
+    el.classList.remove('dragging');
+    if (d && d.dy > Math.min(120, el.offsetHeight / 4)) return onClose();
+    el.classList.add('settling');
+    el.style.transform = '';
+  };
 
   useEffect(() => {
     const el = ref.current!;
@@ -79,6 +102,14 @@ export function Sheet({
       onClick={(e) => downOnLayer.current && e.target === e.currentTarget && onClose()}
     >
       <div ref={ref} className="sheet" role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} onKeyDown={onKeyDown}>
+        <div
+          className="sheet-handle"
+          aria-hidden="true"
+          onPointerDown={onHandleDown}
+          onPointerMove={onHandleMove}
+          onPointerUp={onHandleUp}
+          onPointerCancel={onHandleUp}
+        />
         <div className="sheet-head">
           <h2 id={titleId}>{title}</h2>
           <button className="btn ghost icon" aria-label="Bezárás" onClick={onClose}>

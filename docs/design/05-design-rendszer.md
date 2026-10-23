@@ -268,6 +268,33 @@ Minden lépés után: `npx tsc`, `npx vitest run`, `npm run build`, és a képer
 - **Konténer-lekérdezések:** a tartalom 10 `@media` szabálya `@container content`-re váltott (680 és 860 px tartalomszélesség). Így 768 px-en, a sín mellett a kompakt sorok jelennek meg. 1024 px-en a Tervező és a Számlanaptár egy oszlopra vált, és ezzel megszűnt a Tervező 1024 px-es szétesése (K1, A05).
 - **Ellenőrzés:** `probe-core` 32 cellában 0 kontraszthiba, a fókusz 213 lépésből egyszer sem takart, friss betöltésnél 0 konzolhiba, 102 képernyőkép (`kepek/5d`).
 
+### Az 5.E és az 5.F eredménye (2026-10-23)
+
+- **Mélység és mozgás:**
+  - négy mélységtoken (`--elev-1…4`) a menü, az alsó lap és a toast nyers árnyékai helyett, sötét témában erősebb árnyékkal;
+  - a sötétítés a `--color-scrim` tokenből;
+  - a lap, a sötétítés és a toast animációja a mozgástokenekből, így csökkentett mozgásnál a toast belépése is azonnali (DR16).
+- **Alsó lap fogantyúval:**
+  - kompakt elrendezésben látszik, lefelé húzva követi az ujjat;
+  - a lap negyedénél (legfeljebb 120 px) tovább húzva bezárul, rövidebb húzásnál visszaugrik;
+  - fej nélküli Chrome-ban kipróbálva: 40 px-es húzás visszaugrik, 220 px-es bezárja, az útvonal az alatta lévő képernyő;
+  - mind a négy réteg (gyorsrögzítő, Több, Átcsoportosítás, Trend) megkapta.
+- **A sötétítés a navigáció fölött** (K16): a réteg z-szintje (40) a navigációé (30) fölött van. Kompakt elrendezésben a dokk közepén a réteg a legfelső elem.
+- **Grafikonok a tokenekből** (DR3):
+  - a színeket a `--chart-grid`, `--chart-tick`, `--chart-faint`, `--chart-zero`, `--color-accent` és `--color-surface` tokenből olvassák, a betűt a `--font-body`-ból;
+  - téma váltásakor újraolvassák;
+  - a kézzel összefűzött hexa átlátszóság helyett `withAlpha()` (`src/ui/color.ts`, tesztekkel);
+  - a kategóriaikon háttere `color-mix()`;
+  - csökkentett mozgásnál nincs animáció.
+- **Kézi témaválasztó** (Beállítások → Megjelenés: Rendszer / Világos / Sötét):
+  - eszközönként tárolódik;
+  - a `tokens.css` sötét értékei `[data-theme='dark']` alatt is érvényesek;
+  - az `index.html` egy rövid szkripttel még a megjelenítés előtt alkalmazza, így nincs villanás;
+  - a `theme-color` is követi.
+  - A böngészőben kipróbálva: „Sötét” mellett a világos rendszerbeállítás ellenére is sötét, újratöltés után is; „Rendszer”-re visszaállítva a `data-theme` eltűnik, és a két `theme-color` visszakapja a médiafeltételét.
+
+**Ami a rétegeknél maradt:** a Váratlan kiadás és az Új cél űrlapja ma a képernyőbe ágyazva nyílik meg, nem rétegként (K15). Ezek tartalmi átalakítása a 6. fázisban, a Rögzítés és a Kategóriák képernyővel együtt jön.
+
 A képernyők tartalmi átalakítása a 6. fázisban jön: a MonthStrip és a Bill az Áttekintésen, az „utána marad” előnézet a gyorsrögzítőben, az idővonal a Tervezőben.
 
 ## Nyitott kérdések

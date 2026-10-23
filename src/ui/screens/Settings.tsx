@@ -5,7 +5,7 @@ import { formatRange, periodName, periodStart, validateOverride } from '../../do
 import { clearOverride, importAll, requestPersistence, restoreSettings, saveBasicSettings, setOverride, wipeAll } from '../../db/repo';
 import { backupLabel, daysSince, exportBackup } from '../backup';
 import { useBudget, useSafe, useToast } from '../context';
-import { downloadFile, Icon, useFieldErrors } from '../components/common';
+import { downloadFile, Icon, Segmented, useFieldErrors, useThemePref, type ThemePref } from '../components/common';
 import { SyncPanel } from '../components/SyncPanel';
 import { disconnect } from '../../sync/engine';
 
@@ -18,6 +18,7 @@ export function Settings() {
       </div>
       {/* A kulcs miatt az űrlap újraindul, ha a beállítások máshonnan (pl. visszatöltésből) változnak. */}
       <BasicSettings key={`${s.payday}|${s.openingBalance}|${s.forecastPeriods}`} />
+      <Appearance />
       <PeriodOverrides />
       <div className="card">
         <div className="card-head"><h2>Közös használat (GitHub)</h2></div>
@@ -299,6 +300,26 @@ function DangerZone() {
           <button className="btn ghost" onClick={() => setArmed(false)}>Mégse</button>
         </div>
       )}
+    </div>
+  );
+}
+
+const THEMES: { id: ThemePref; label: string }[] = [
+  { id: 'system', label: 'Rendszer' },
+  { id: 'light', label: 'Világos' },
+  { id: 'dark', label: 'Sötét' },
+];
+
+/** Téma választása: eszközönként tárolódik, a közös adatba nem kerül. */
+function Appearance() {
+  const [pref, setPref] = useThemePref();
+  return (
+    <div className="card">
+      <div className="card-head"><h2>Megjelenés</h2></div>
+      <div className="cluster wrap gap-3">
+        <Segmented label="Téma" options={THEMES} value={pref} onChange={setPref} />
+        <span className="small muted">A „Rendszer” a telefon vagy a gép beállítását követi. Csak ezen az eszközön érvényes.</span>
+      </div>
     </div>
   );
 }

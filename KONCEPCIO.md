@@ -157,7 +157,7 @@ A rögzítő képernyő és az irányítópult tervezésekor készült két inte
   - **Közepes (640–1023 px):** ugyanez a menü keskeny sínként, ikonnal és rövid felirattal (Keretek, Naptár); a rögzítés négyzetes gomb a sín tetején.
   - **Kompakt (640 px alatt):** fent fejléc a képernyő címével és a mentés állapotával; alul, a hüvelykujj közelében a teljes szélességű „Kiadás rögzítése” sáv, alatta négy fül: Áttekintés, Keretek, Tervező, **Több**. A Több alsó lapon az Elemzés, a Számlanaptár, a Kategóriák és a Beállítások van.
   - A lejárt számlák száma a „Keretek és számlák” menüponton és fülön látszik.
-- **Rétegek** (gyorsrögzítő, alsó lap): kompakt elrendezésben alulról nyílnak, a fix alsó sáv és a képernyő-billentyűzet fölött; közepes és széles elrendezésben középre igazított panelként. Saját előzménybejegyzést kapnak, így a vissza gesztus őket zárja be. A parancsikonnal (`?gyors`) nyitott gyorsrögzítő is: alatta az útvonal képernyője (pl. az Áttekintés) marad, így a vissza gesztus nem lépteti ki az appot. A rétegből a már alatta látszó képernyőt választva csak a réteg zárul be. Az Esc, a bezárás gomb és a háttérre kattintás is bezárja őket. Az üzenetek (és a visszavonás) a réteg fölött maradnak; kompakt elrendezésben ilyenkor a képernyő tetején jelennek meg, hogy ne takarják a lap gombjait.
+- **Rétegek** (gyorsrögzítő, alsó lap): kompakt elrendezésben alulról nyílnak, a fix alsó sáv és a képernyő-billentyűzet fölött; közepes és széles elrendezésben középre igazított panelként. Saját előzménybejegyzést kapnak, így a vissza gesztus őket zárja be. A parancsikonnal (`?gyors`) nyitott gyorsrögzítő is: alatta az útvonal képernyője (pl. az Áttekintés) marad, így a vissza gesztus nem lépteti ki az appot. A rétegből a már alatta látszó képernyőt választva csak a réteg zárul be. Az Esc, a bezárás gomb és a háttérre kattintás is bezárja őket; alsó lapként a fogantyú lefelé húzása is (a lap negyedénél, legfeljebb 120 px-nél tovább húzva; rövidebb húzásnál visszaugrik). A sötétítés a navigáció fölött van. Az üzenetek (és a visszavonás) a réteg fölött maradnak; kompakt elrendezésben ilyenkor a képernyő tetején jelennek meg, hogy ne takarják a lap gombjait.
 
 ### 4.1 Első indítás (varázsló)
 1. **Időszak:** fizetésnap (1–31) és „Mennyi pénz van most a számlán?” (negatív is lehet).
@@ -243,6 +243,7 @@ A rögzítő képernyő és az irányítópult tervezésekor készült két inte
 
 ### 4.6 Beállítások és mentés
 - Fizetésnap, nyitó egyenleg, előrejelzési távolság. A mentés visszavonható.
+- **Megjelenés:** téma: Rendszer / Világos / Sötét. Eszközönként tárolódik, a közös adatba és a mentésbe nem kerül. A „Rendszer” a telefon vagy a gép beállítását követi. A választott téma már az első megjelenítéskor érvényes (nincs villanás), és a böngésző sávjának színe is követi.
 - Egy időszak kezdőnapjának felülírása. Ha a fizetésnap módosítása után egy felülírás érvénytelenné válik (két időszak összecsúszna), törlődik, és erről üzenet jelenik meg.
 - **Biztonsági mentés (JSON export, „Mentés letöltése”):** fájlnév `csaladi-koltsegvetes-ÉÉÉÉ-HH-NN.json`. Az utolsó mentés ideje is tárolódik.
 - **Visszatöltés:** fájl kiválasztása után előnézet (időszakok száma, kategóriák száma, legutóbbi módosítás), majd megerősítés után felülírja a jelenlegi adatokat.
