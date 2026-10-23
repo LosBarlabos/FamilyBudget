@@ -737,9 +737,31 @@
   .sumlist .total { border-top: 1px solid var(--color-border); padding-top: var(--space-2); margin-top: var(--space-0-5); font-weight: 600; color: var(--color-text); }
   .sumlist dd.total.pos { color: var(--color-ok); }
   .sumlist dd.total.neg { color: var(--color-danger); }
+  .plan-outlook { margin: 0 0 var(--space-3); }
+  .callout.plan-outlook { font-size: var(--text-sm); padding: var(--space-2) var(--space-3); }
+  /* Csak egyoszlopos Tervezőben: a lista fölött tapadó sáv a havi egyenleggel és a terv végével. */
+  .plan-bar { display: none; }
   @container content (max-width: 860px) {
     .planner { grid-template-columns: minmax(0, 1fr); }
     .planner-side { position: static; order: -1; }
+    .plan-bar {
+      position: sticky; top: 0; z-index: var(--z-sticky); display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--space-0-5) var(--space-3);
+      margin-bottom: var(--space-3); padding: var(--space-2) var(--space-3); font-size: var(--text-sm); color: var(--color-text-muted);
+      background: color-mix(in srgb, var(--color-surface) 94%, transparent); backdrop-filter: blur(8px);
+      border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--elev-2);
+    }
+    .plan-bar strong { color: var(--color-text); font-weight: 600; }
+    .plan-bar strong.pos { color: var(--color-ok); }
+    .plan-bar strong.neg { color: var(--color-danger); }
+  }
+  @media (min-width: 640px) and (max-width: 1023px) {
+    html:has(.plan-bar) { scroll-padding-top: 72px; }
+  }
+  @media (max-width: 639px) {
+    /* A fejléc alatt (65 px: 44 px-es gomb, 10 px-es margók, 1 px-es vonal). */
+    .plan-bar { top: calc(65px + var(--space-2)); }
+    /* A Tab-bal fókuszba gördülő sor ne kerüljön a fejléc és a tapadó sáv alá. */
+    html:has(.plan-bar) { scroll-padding-top: 140px; }
   }
   @container content (max-width: 680px) {
     .plan-row { grid-template-columns: minmax(0, 1fr) 124px; gap: var(--space-2) var(--space-3); }
@@ -948,6 +970,10 @@
   }
   .plan-row.off-cycle { grid-template-columns: minmax(0, 1fr) auto; }
   .plan-row.off-cycle .rec-name { color: var(--color-text-muted); }
+  @container content (max-width: 680px) {
+    .plan-row.off-cycle { grid-template-columns: minmax(0, 1fr); }
+    .plan-row.off-cycle > .btn { justify-self: start; margin-left: var(--space-10); }
+  }
 }
 
 @layer utilities {

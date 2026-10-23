@@ -239,7 +239,9 @@ A rögzítő képernyő és az irányítópult tervezésekor készült két inte
 - Kapcsoló: „Ettől a hónaptól” / „Csak erre a hónapra”. Minden megnyitáskor „Ettől a hónaptól” az alapállás.
 - Minden soronkénti mentés után üzenet jelenik meg a hatállyal, visszavonással (a kategória terveinek mentés előtti állapotára). Például: „Élelmiszer: 95 000 Ft novembertől · a decemberi egyedi terv (150 000 Ft) törölve”, vagy „… csak novemberre · decembertől újra 80 000 Ft”.
 - Gyorsműveletek: „Előző hónap tényei alapján”, „3 hónapos átlag alapján”. Csak a fix és keret kategóriákra futnak (a bevétel és a megtakarítás terve szándék), és nem írnak 0-t, ha a forrásidőszakban nincs rögzítés. Egyetlen visszavonással visszaállíthatók.
-- Élő előnézet: a futó egyenleg grafikonja a szerkesztés közben frissül, a változás előtti előrejelzés halványan látszik mellette.
+- Élő előnézet: a futó egyenleg grafikonja a szerkesztés közben frissül, a változás előtti előrejelzés halványan látszik mellette, alatta „A terv végén a változás: −40 000 Ft”. A nulla alatti szakasz, pont és terület piros (az Áttekintés grafikonján is).
+- A grafikon fölött egy mondat a folyamatban lévő hónaptól előre: „A legalacsonyabb pont novemberben 2 450 000 Ft. A terv végén (2027. április) 2 997 300 Ft.” (ha a mélypont ez a hónap: „A legalacsonyabb pont ennek a hónapnak a vége: …”, ha a terv vége: „A futó egyenleg a terv végéig csökken.”). Ha valamelyik hónapban mínuszba fordul, helyette piros figyelmeztetés a mélyponttal, mint az Áttekintésen.
+- Egyoszlopos elrendezésben (keskeny tartalomnál) a terv összesítője és a grafikon a lista fölött áll, görgetéskor pedig egy tapadó sáv mutatja a tervezett havi egyenleget és a terv végi egyenleget, szerkesztés után a változással („A terv végén 2 957 300 Ft (−40 000 Ft)”).
 - Összesítő: tervezett bevétel − kiadás − megtakarítás = tervezett havi egyenleg. Ha negatív, figyelmeztetés jelenik meg.
 
 ### 4.5 Kategóriák

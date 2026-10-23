@@ -2,7 +2,7 @@ import { addDays } from 'date-fns';
 import type { PeriodSummary, Summaries } from './balance';
 import { formatFt, formatSigned } from './money';
 import { untilDate, type PaceOverview, type PeriodDays } from './pace';
-import { fromISO, MONTHS, parsePeriodId, toISO } from './periods';
+import { fromISO, MONTHS, parsePeriodId, periodName, toISO } from './periods';
 import type { ISODate } from './types';
 
 /** A hónapcsík egy napja: eltelt, a mai, a költés által „előre elhasznált”, vagy még előttünk álló. */
@@ -88,17 +88,34 @@ export function negativeOutlook(s: Pick<Summaries, 'periods'>): NegativeOutlook 
 }
 
 /** A figyelmeztetés címe és alsora, pl. „Januárban mínuszba fordul a futó egyenleg.” */
-export function negativeOutlookText(o: NegativeOutlook): { title: string; sub: string } {
+export function negativeOutlookText(o: NegativeOutlook, { inPlanner = false } = {}): { title: string; sub: string } {
   const title =
     o.first.status === 'current'
       ? 'A hónap végére mínuszba fordul a futó egyenleg.'
       : `${inMonth(o.first.id)} mínuszba fordul a futó egyenleg.`;
   const when = o.low.id === o.first.id ? '' : `, ${inMonth(o.low.id).toLowerCase()}`;
-  return { title, sub: `A mélypont ${formatSigned(o.low.endBalance)}${when}. A Tervezőben látszik, melyik hónap okozza.` };
+  const hint = inPlanner ? 'A grafikonon látszik, melyik hónap okozza.' : 'A Tervezőben látszik, melyik hónap okozza.';
+  return { title, sub: `A mélypont ${formatSigned(o.low.endBalance)}${when}. ${hint}` };
 }
 
 /** A hero alsora a napi összeggel: „Naponta kb. 8 000 Ft jut, még 14 napig (nov. 5-ig).” */
 export function allowanceLine(perDay: number | null, days: PeriodDays, end: ISODate): { lead: string; amount: string; tail: string } | null {
   if (perDay === null || days.remaining <= 1) return null;
   return { lead: 'Naponta kb. ', amount: formatFt(perDay), tail: ` jut, ${remainingText(days, end)}.` };
+}
+
+/**
+ * A Tervező idővonalának összegzése a folyamatban lévő hónaptól előre: „A legalacsonyabb pont novemberben
+ * 2 450 000 Ft. A terv végén (2027. április) 3 010 000 Ft.” Null, ha nincs ilyen hónap.
+ */
+export function outlookSentence(s: Pick<Summaries, 'periods'>): string | null {
+  const ahead = s.periods.filter((p) => p.status !== 'closed');
+  const last = ahead.at(-1);
+  if (!last) return null;
+  const low = ahead.reduce((m, p) => (p.endBalance < m.endBalance ? p : m));
+  const end = `A terv végén (${periodName(last.id, true)}) ${formatFt(last.endBalance)}.`;
+  if (ahead.length === 1) return end;
+  if (low.id === last.id) return `A futó egyenleg a terv végéig csökken. ${end}`;
+  if (low.id === ahead[0].id) return `A legalacsonyabb pont ennek a hónapnak a vége: ${formatFt(low.endBalance)}. ${end}`;
+  return `A legalacsonyabb pont ${inMonth(low.id).toLowerCase()} ${formatFt(low.endBalance)}. ${end}`;
 }

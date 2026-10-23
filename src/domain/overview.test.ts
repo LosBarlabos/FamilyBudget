@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { PeriodSummary } from './balance';
 import {
-  allowanceLine, inMonth, monthStrip, negativeOutlook, negativeOutlookText, remainingText, stripDescription, stripSentence,
+  allowanceLine, inMonth, monthStrip, negativeOutlook, negativeOutlookText, outlookSentence, remainingText, stripDescription, stripSentence,
 } from './overview';
 import { periodDays } from './pace';
 
@@ -88,5 +88,23 @@ describe('negativeOutlook', () => {
 
   it('hónapnév raggal', () => {
     expect(['2027-01', '2027-03', '2027-09', '2027-10'].map(inMonth)).toEqual(['Januárban', 'Márciusban', 'Szeptemberben', 'Októberben']);
+  });
+});
+
+describe('outlookSentence', () => {
+  const per = (id: string, status: PeriodSummary['status'], endBalance: number) => ({ id, status, endBalance }) as PeriodSummary;
+
+  it('a mélypont és a terv vége a folyamatban lévő hónaptól', () => {
+    const s = { periods: [per('2026-09', 'closed', 100), per('2026-10', 'current', 2_500_000), per('2026-11', 'future', 2_450_000), per('2027-04', 'future', 3_010_000)] };
+    expect(sp(outlookSentence(s)!)).toBe('A legalacsonyabb pont novemberben 2 450 000 Ft. A terv végén (2027. április) 3 010 000 Ft.');
+  });
+
+  it('csökkenő, a hónap végénél nem lejjebb menő és egyhónapos terv; terv nélkül null', () => {
+    const down = { periods: [per('2026-10', 'current', 50_000), per('2026-11', 'future', -10_000)] };
+    expect(sp(outlookSentence(down)!)).toBe('A futó egyenleg a terv végéig csökken. A terv végén (2026. november) −10 000 Ft.');
+    const up = { periods: [per('2026-10', 'current', 50_000), per('2026-11', 'future', 60_000), per('2026-12', 'future', 55_000)] };
+    expect(sp(outlookSentence(up)!)).toBe('A legalacsonyabb pont ennek a hónapnak a vége: 50 000 Ft. A terv végén (2026. december) 55 000 Ft.');
+    expect(sp(outlookSentence({ periods: [per('2026-10', 'current', 5000)] })!)).toBe('A terv végén (2026. október) 5 000 Ft.');
+    expect(outlookSentence({ periods: [per('2026-09', 'closed', 1)] })).toBeNull();
   });
 });

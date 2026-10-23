@@ -1,6 +1,6 @@
 import {
   BarElement, CategoryScale, Chart as ChartJS, Filler, LinearScale, LineElement, PointElement, Tooltip,
-  type ChartData, type ChartOptions,
+  type ChartData, type ChartOptions, type ScriptableLineSegmentContext,
 } from 'chart.js';
 import { useMemo } from 'react';
 import { Bar as BarChart, Line } from 'react-chartjs-2';
@@ -30,7 +30,7 @@ function useChartTheme() {
     ChartJS.defaults.font.family = v('--font-body');
     return {
       grid: v('--chart-grid'), tick: v('--chart-tick'), faint: v('--chart-faint'), zero: v('--chart-zero'),
-      surface: v('--color-surface'), accent: v('--color-accent'), reduced,
+      surface: v('--color-surface'), accent: v('--color-accent'), danger: v('--color-danger'), reduced,
     };
     // A scheme csak újraolvasási jel: a tényleges érték a dokumentum stílusából jön.
   }, [scheme, reduced]);
@@ -78,6 +78,9 @@ export function BalanceChart({
   const t = useChartTheme();
   const ps = summaries.periods;
   const lastClosed = ps.findIndex((p) => p.status === 'current') - 1;
+  // A nulla alatti szakasz és pont piros: a mínuszba forduló futó egyenleg ne csak egy szám legyen.
+  const tone = (v: number) => (v < 0 ? t.danger : t.accent);
+  const belowZero = (c: ScriptableLineSegmentContext) => ((c.p0.parsed.y ?? 0) < 0 || (c.p1.parsed.y ?? 0) < 0 ? t.danger : undefined);
 
   const data: ChartData<'line'> = {
     labels: ps.map((p) => periodShortName(p.id)),
@@ -97,11 +100,11 @@ export function BalanceChart({
         label: 'Tény',
         data: ps.map((p, i) => (i <= lastClosed ? p.endBalance : null)),
         borderColor: t.accent,
-        backgroundColor: withAlpha(t.accent, 0.08),
-        fill: 'origin',
+        segment: { borderColor: belowZero },
+        fill: { target: 'origin', above: withAlpha(t.accent, 0.08), below: withAlpha(t.danger, 0.14) },
         borderWidth: 2,
         pointRadius: ps.map((p) => (p.id === selectedId ? 6 : 3)),
-        pointBackgroundColor: t.accent,
+        pointBackgroundColor: ps.map((p) => tone(p.endBalance)),
         pointBorderColor: t.surface,
         pointBorderWidth: 2,
         tension: 0.25,
@@ -110,11 +113,14 @@ export function BalanceChart({
         label: 'Előrejelzés',
         data: ps.map((p, i) => (i >= Math.max(0, lastClosed) ? p.endBalance : null)),
         borderColor: t.accent,
+        segment: { borderColor: belowZero },
+        // Az előrejelzés csak a nulla alatti részt színezi: a mínuszba forduló hónapok ne vesszenek el.
+        fill: { target: 'origin', above: 'transparent', below: withAlpha(t.danger, 0.14) },
         borderDash: [6, 4],
         borderWidth: 2,
         pointRadius: ps.map((p, i) => (i <= lastClosed ? 0 : p.id === selectedId ? 6 : 3)),
         pointBackgroundColor: t.surface,
-        pointBorderColor: t.accent,
+        pointBorderColor: ps.map((p) => tone(p.endBalance)),
         pointBorderWidth: 2,
         tension: 0.25,
       },

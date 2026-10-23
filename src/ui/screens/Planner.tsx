@@ -10,6 +10,7 @@ import {
 import type { Category, PeriodId, Plan } from '../../domain/types';
 import { changePlan, replacePlans, restorePlansOf, snapshotPlans } from '../../db/repo';
 import { useBudget, useSafe, useToast } from '../context';
+import { negativeOutlook, negativeOutlookText, outlookSentence } from '../../domain/overview';
 import { BalanceChart } from '../components/Charts';
 import { CatIcon, Icon, Segmented } from '../components/common';
 import { GoalStateChip } from '../components/Goals';
@@ -75,6 +76,13 @@ export function Planner() {
   const totals = totalsByType(active, p.byCategory);
   const changed = baseline !== null && preview.periods.some((x) => baseline.get(x.id) !== x.endBalance);
 
+  // Az idővonal összegzése a húzás közbeni tervvel: a mélypont, a terv vége, és hogy mennyit változott.
+  const outlook = outlookSentence(preview);
+  const neg = negativeOutlook(preview);
+  const negText = neg ? negativeOutlookText(neg, { inPlanner: true }) : null;
+  const lastP = preview.periods.at(-1)!;
+  const endDelta = lastP.endBalance - (baseline?.get(lastP.id) ?? lastP.endBalance);
+
   const prevId = shiftPeriod(periodId, -1);
   const prevSummary = summaries.byId.get(prevId);
 
@@ -131,6 +139,16 @@ export function Planner() {
 
       <div className="planner">
         <div>
+          {/* Telefonon a grafikon a lista fölött marad: a sáv húzás közben is mutatja, mit változtat a terv. */}
+          <div className="plan-bar num" aria-hidden="true">
+            <span>
+              Havi egyenleg <strong className={totals.plannedNet < 0 ? 'neg' : 'pos'}>{formatSigned(totals.plannedNet)}</strong>
+            </span>
+            <span>
+              A terv végén <strong className={lastP.endBalance < 0 ? 'neg' : ''}>{formatFt(lastP.endBalance)}</strong>
+              {changed && endDelta !== 0 && <span className={endDelta < 0 ? 'neg' : 'pos'}> ({formatSigned(endDelta)})</span>}
+            </span>
+          </div>
           <div className="card cluster wrap gap-2">
             <span className="small muted" style={{ marginRight: 'auto' }} title="Csak a fix számlák és a keretek tervét írja át, és csak ott, ahol volt rögzítés">
               Gyors kitöltés (fix és keret)
@@ -220,14 +238,22 @@ export function Planner() {
               <h2>Futó egyenleg</h2>
               <span className="small num">{formatFt(p.endBalance)}</span>
             </div>
+            {negText ? (
+              <div className="callout tone-danger plan-outlook">
+                <Icon name="chart-line" />
+                <span className="callout-text num">
+                  <strong>{negText.title}</strong> {negText.sub}
+                </span>
+              </div>
+            ) : (
+              outlook && <p className="small muted num plan-outlook">{outlook}</p>
+            )}
             <BalanceChart summaries={preview} selectedId={periodId} onSelect={setPeriodId} baseline={changed ? baseline : null} height={200} />
             {changed && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, gap: 8 }}>
+              <div className="cluster gap-2 mt-2" style={{ justifyContent: 'space-between' }}>
                 <span className="small muted">
-                  Az utolsó hónap végén:{' '}
-                  <span className={`num ${preview.periods.at(-1)!.endBalance - (baseline?.get(preview.periods.at(-1)!.id) ?? 0) < 0 ? 'neg' : 'pos'}`}>
-                    {formatSigned(preview.periods.at(-1)!.endBalance - (baseline?.get(preview.periods.at(-1)!.id) ?? 0))}
-                  </span>
+                  A terv végén a változás:{' '}
+                  <span className={`num ${endDelta < 0 ? 'neg' : 'pos'}`}>{formatSigned(endDelta)}</span>
                 </span>
                 <button className="btn sm ghost" onClick={() => setBaseline(new Map(summaries.periods.map((x) => [x.id, x.endBalance])))}>
                   Összevetés nullázása
