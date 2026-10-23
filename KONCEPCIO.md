@@ -168,26 +168,30 @@ A rögzítő képernyő és az irányítópult tervezésekor készült két inte
 
 ### 4.2 Irányítópult (kezdőképernyő)
 - **Fejléc:** időszakváltó (lapozás + időszakok listája, a folyamatban lévő jelölve), az időszak dátumai („Október · 10.10–11.09.”), „Mentés letöltése” gomb az utolsó letöltés idejével („Letöltve 3 napja”).
+- **Mínuszba forduló futó egyenleg:** ha a futó egyenleg a folyamatban lévő vagy egy előre tervezett hónap végére nulla alá megy, a kártya fölött piros sáv jelzi: „Januárban mínuszba fordul a futó egyenleg. A mélypont −45 000 Ft, februárban. A Tervezőben látszik, melyik hónap okozza.” (a folyamatban lévő hónapnál „A hónap végére …”). A sáv a Tervezőbe visz. Lezárt hónap nézésekor nem jelenik meg.
 - **„Jól állunk-e?” kártya** az oldal tetején:
-  - A folyamatban lévő időszakban nagy számmal: „Még elkölthető: 182 000 Ft” (a napi összegbe számító keretek maradéka, lásd Tempó). Alatta: „12 nap van fizetésig (okt. 9-ig) · naponta ~15 000 Ft”, az utolsó napon „Ma van a hónap utolsó napja”.
-  - Ha a keretek összesen túl vannak lépve: „Kereteken túl: 12 000 Ft”, és kimondva: „A keretek összesen 12 000 Ft-tal túl vannak lépve”.
-  - Mellette egy állapotmondat a leginkább túlfutó keretről (a várható túllépés szerint): „Az Élelmiszer keret gyorsabban fogy a tervezettnél, ezzel a tempóval ~18 000 Ft-tal lépi túl”, vagy „A Szabadidő keret már 5 000 Ft-tal túllépte a tervet”, ennek híján a terv nélküli költés („Ajándék: 80 000 Ft terv nélkül”), különben „Minden keret a terv szerint halad”. Ha több keret is figyelmet kér, a számuk alatta látszik.
-  - Napi keretterv nélkül az eddigi keretköltés látszik, és az ok: „ebben a hónapban nincs tervezett keret”, „egyik keret sem számít a napi elkölthető összegbe” vagy „a napi összegbe számító kereteknek nincs terve”. Állapotmondat ilyenkor csak túllépésnél van.
+  - A folyamatban lévő időszakban nagy számmal: „Még elkölthető a keretekből: 182 000 Ft” (a napi összegbe számító keretek maradéka, lásd Tempó). Alatta: „Naponta kb. 15 000 Ft jut, még 12 napig (okt. 9-ig).”, az utolsó napon „Ma van a hónap utolsó napja.”
+  - Ha a keretek összesen túl vannak lépve: „Kereteken túl: 12 000 Ft”, és kimondva: „A keretek összesen 12 000 Ft-tal túl vannak lépve, még 12 napig (okt. 9-ig).”
+  - **Hónapcsík:** a hónap minden napja egy oszlop (a hétvégék halványabbak). Az eltelt napok teliek, a mai bekarikázva. A napi összegbe számító keretekből elfogyott arányt napokra váltja (68% egy 31 napos hónapban 21 nap): ami ebből a mai nap utánra esik, sávozott borostyán. Alatta a hónap első és utolsó napja és a „ma” (széles helyen a következő hónap elseje is), és egy mondat: „3 nappal előrébb jársz.”, „6 nap tartalékod van.” vagy „Épp a terv szerint haladsz.”, utána „A keretek 68%-a fogyott el, a hónap 58%-a telt el.” A csík képernyőolvasóval egy mondatként hallható.
+  - A figyelmet kérő keretek nem itt, hanem a teendők között állnak, egyszer.
+  - Napi keretterv nélkül az eddigi keretköltés látszik, és az ok: „ebben a hónapban nincs tervezett keret”, „egyik keret sem számít a napi elkölthető összegbe” vagy „a napi összegbe számító kereteknek nincs terve”. Hónapcsík ilyenkor nincs.
   - Lezárt időszakban a zárómondat („A hónap +45 000 Ft-tal zárult”, illetve „A hónap 12 000 Ft mínusszal zárult”), alatta a bevétel, a kiadás és a félretétel. Jövőbeli időszakban a terv összegzése: tervezett havi egyenleg, bevétel, kiadás, félretétel, és hogy hány nap múlva kezdődik.
-- **Teendők** (csak a folyamatban lévő időszakban, a kártya alatt, legfeljebb 5 elem, fontossági sorrendben):
-  - lejárt vagy 5 napon belül esedékes, még le nem zárt fix számla (terv nélküli és esedékességi nap nélküli nem), „Kifizetve” gombbal, részlegesnél „Maradék”-kal; ez ugyanaz a lezáró rögzítés és visszavonás, mint a Rögzítésen;
-  - egyösszegű bevétel, ami az időszak 3. napja után sem (vagy csak részben) érkezett meg, „Megérkezett” gombbal;
+- **Elrendezés:** a folyamatban lévő időszakban széles tartalomnál (860 px-től) a kártya mellett jobbra a fizetendők és a teendők; keskenyebben alatta.
+- **Fizetendő és várható** (csak a folyamatban lévő időszakban): csekkszerű sorok, mindegyik a saját gombjával. Ugyanaz a lezáró rögzítés és visszavonás, mint a Rögzítésen.
+  - lejárt vagy 5 napon belül esedékes, még le nem zárt fix számla (terv nélküli és esedékességi nap nélküli nem): név, „lejárt okt. 20.” / „ma esedékes” / „esedékes okt. 25.”, összeg (részlegesnél a hátralék), „Kifizetve” gomb, részlegesnél „Maradék”. A lejárt számla csekksárga, az esedékes szaggatott keretű;
+  - egyösszegű bevétel, ami az időszak 3. napja után sem (vagy csak részben) érkezett meg, „+26 600 Ft” és „Megérkezett” gombbal;
+  - két vagy több számlánál a cím mellett „Mind kifizetve” gomb. Ha csak bevétel vár, a cím „Várt bevétel”.
+- **Teendők** (csak a folyamatban lévő időszakban, legfeljebb 5 elem, fontossági sorrendben):
   - gyorsan fogyó vagy túllépett keret, utánuk a terv nélkül költött napi keret (összesen legfeljebb 2), ami a Rögzítés sorára visz; ha van keret, amelyben maradt pénz, mellette a „Átcsoportosítás” gomb is (lásd Rugalmas keretek);
   - lemaradó cél, ami a Tervezőbe visz;
   - „N napja nem rögzítettél semmit” (4 nap felett, a legutóbbi rögzítés ideje szerint), ami a gyorsrögzítőt nyitja meg;
   - elavult mentés, „Mentés letöltése” gombbal.
-  - Ha nincs teendő, egy sor jelenik meg: „Minden rendben”. Ha 5-nél több van, alul látszik, hány maradt ki.
-  - Lezárás után a fókusz a helyére lépő teendő gombjára kerül, ha nincs ilyen, a címre vagy a „Minden rendben” sorra.
-- **Összesítő kártyák:**
-  - Bevétel: a folyamatban lévő időszakban az eddigi tény, alatta a terv; lezártban a tény, jövőbeliben a várható.
-  - Kiadás: a folyamatban lévő időszakban az eddigi tény, alatta a várható (amivel a futó egyenleg számol); máskor a tény, illetve a várható, alatta a terv.
-  - Havi egyenleg: várható (lezártban tény).
-  - Futó egyenleg az időszak végén, alatta a tartalék-mutató („≈ 1,4 hónapnyi kiadás”) és „félretéve most”: a célkártyákon látható összegyűlt összegek összege (induló összeg + befizetések − felhasználás).
+  - Ha se fizetendő, se teendő nincs, egy sor jelenik meg: „Minden rendben”. Ha 5-nél több teendő van, alul látszik, hány maradt ki.
+  - Lezárás után a fókusz a helyére lépő sor gombjára kerül, ha nincs ilyen, a szakasz címére vagy a „Minden rendben” sorra.
+- **A hónap számai** (kártya nélküli sor, felül vonallal; telefonon két oszlop):
+  - a folyamatban lévő időszakban: „Bejött” (az eddigi bevétel, alatta a terv), „Elment eddig” (alatta „a hónap végéig kb.” a várható kiadás, amivel a futó egyenleg számol), „Félretéve ebben a hónapban” (ha van terv vagy befizetés), „Megtakarítások összesen” (a célkártyákon látható összegyűlt összegek összege mai állás szerint: induló összeg + befizetések − felhasználás; ha van megtakarítási kategória);
+  - lezárt és jövőbeli időszakban: Bevétel, Kiadás (jövőbelinél „várható”, alatta a terv), „A hónap mérlege” (jövőbelinél „várható”);
+  - mindig: „A bankszámlán a hónap végén” (a futó egyenleg), alatta a tartalék-mutató („≈ 1,4 hónapnyi kiadás”), a folyamatban lévő időszakban „a hónap mérlege +76 940 Ft” is.
 - **Kategórialista:** ikon, név, terv/tény sáv (0 és 100% közé szorítva, a színe a tempót követi, a folyamatban lévő időszakban „ma” jelölővel), „tény / terv” számok, keretnél alatta „maradt · /nap”, százalékos eltérés az előző időszakhoz képest. Egy sorra kattintva a rögzítő képernyő ugyanannál a kategóriánál nyílik meg. A csoportok összecsukhatók; a csoportsor tempója csak akkor számít, ha minden tagja napi keret.
   - Jövőbeli időszakban a sor a tervet mutatja; ha oda már előre rögzítettek, a „tény / terv” számokat, mert az előrejelzés is ezzel számol.
   - A folyamatban lévő időszakban az eltérés az eddigi tényt az előző időszak ugyanannyiadik napjáig tartó tényével veti össze (a rögzítés dátuma alapján). Csak akkor jelenik meg, ha az előző időszakban addig volt tény.

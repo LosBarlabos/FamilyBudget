@@ -3,6 +3,7 @@ import { changeVsSameDay, type CategoryFigures, type PeriodSummary } from '../..
 import { goalProgress } from '../../domain/goals';
 import { formatFt, formatSigned } from '../../domain/money';
 import { envelopeLeftText, envelopeView, paceOverview, reserveMonths, reserveText, type PaceOverview } from '../../domain/pace';
+import { negativeOutlook, negativeOutlookText } from '../../domain/overview';
 import { periodName, shiftPeriod } from '../../domain/periods';
 import { cycleOf, isDuePeriod, nextDuePeriod } from '../../domain/plans';
 import type { Category } from '../../domain/types';
@@ -66,16 +67,10 @@ export function Dashboard() {
   const exp = typeTotals(['fix', 'keret']);
   const sav = typeTotals(['megtakaritas']);
   const current = p.status === 'current';
-  // A folyamatban lévő időszakban az eddigi bevétel, kiadás és félretétel a kiemelt kártyán áll, ezért a
-  // KPI-sorban csak az egyenlegek maradnak.
-  const heroStats = current
-    ? [
-        { label: 'Bevétel', value: formatFt(inc.actual), sub: `terv ${formatFt(inc.plan)}` },
-        { label: 'Kiadás', value: formatFt(exp.actual), sub: `várható ${formatFt(p.expense)}` },
-        ...(sav.plan > 0 || sav.actual > 0 ? [{ label: 'Félretéve', value: formatFt(sav.actual), sub: `terv ${formatFt(sav.plan)}` }] : []),
-      ]
-    : [];
   const future = p.status === 'future';
+  // A mínuszba forduló futó egyenleg a lezárt hónapokon nem segít, ott nem jelenik meg.
+  const outlook = useMemo(() => negativeOutlook(summaries), [summaries]);
+  const warn = outlook && p.status !== 'closed' ? negativeOutlookText(outlook) : null;
 
   return (
     <>
@@ -84,44 +79,63 @@ export function Dashboard() {
         <PeriodSwitcher />
       </div>
 
-      <Hero p={p} pace={pace} stats={heroStats} />
-      {current && <Todos p={p} pace={pace} goals={goals} />}
+      {warn && (
+        <button className="callout tone-danger callout-link" onClick={() => go('planner')}>
+          <Icon name="chart-line" />
+          <span className="callout-text num">
+            <strong>{warn.title}</strong> {warn.sub}
+          </span>
+          <Icon name="chevron-right" />
+        </button>
+      )}
 
-      {/* A folyamatban lévő időszakban a bevétel és a kiadás az eddigi tény, a terv és a várható alul. */}
-      <div className="stats">
-        {!current && (
+      <div className={`dash-top ${current ? 'with-side' : ''}`}>
+        <Hero p={p} pace={pace} />
+        {current && <Todos p={p} pace={pace} goals={goals} />}
+      </div>
+
+      {/* A hónap számai kimondott jelentéssel: mi jött be, mi ment el, mi került félre, és mi marad a számlán. */}
+      <section className="figures" aria-label="A hónap számai">
+        {current ? (
           <>
-            <Stat label={future ? 'Bevétel (várható)' : 'Bevétel'} value={formatFt(p.income)} sub={`terv ${formatFt(inc.plan)}`} />
-            <Stat label={future ? 'Kiadás (várható)' : 'Kiadás'} value={formatFt(p.expense)} sub={`terv ${formatFt(exp.plan)}`} />
+            <Stat label="Bejött" value={formatFt(inc.actual)} sub={`tervezve ${formatFt(inc.plan)}`} />
+            <Stat label="Elment eddig" value={formatFt(exp.actual)} sub={`a hónap végéig kb. ${formatFt(p.expense)}`} />
+            {(sav.plan > 0 || sav.actual > 0) && (
+              <Stat label="Félretéve ebben a hónapban" value={formatFt(sav.actual)} sub={`tervezve ${formatFt(sav.plan)}`} />
+            )}
+            {goals.length > 0 && <Stat label="Megtakarítások összesen" value={formatFt(savedNow)} sub="mai állás, a célok alatt részletezve" />}
+          </>
+        ) : (
+          <>
+            <Stat label={future ? 'Bevétel (várható)' : 'Bevétel'} value={formatFt(p.income)} sub={`tervezve ${formatFt(inc.plan)}`} />
+            <Stat label={future ? 'Kiadás (várható)' : 'Kiadás'} value={formatFt(p.expense)} sub={`tervezve ${formatFt(exp.plan)}`} />
+            <Stat
+              label={p.status === 'closed' ? 'A hónap mérlege' : 'A hónap várható mérlege'}
+              value={formatSigned(p.net)}
+              valueClass={p.net < 0 ? 'neg' : 'pos'}
+              sub={p.savings > 0 ? `megtakarításra félretéve ${formatFt(p.savings)}` : undefined}
+            />
           </>
         )}
         <Stat
-          label={p.status === 'closed' ? 'Havi egyenleg' : 'Várható havi egyenleg'}
-          value={formatSigned(p.net)}
-          valueClass={p.net < 0 ? 'neg' : 'pos'}
-          sub={p.savings > 0 ? `megtakarításra félretéve ${formatFt(p.savings)}` : undefined}
-        />
-        <Stat
-          label="Futó egyenleg a végén"
+          label="A bankszámlán a hónap végén"
           value={formatFt(p.endBalance)}
           valueClass={p.endBalance < 0 ? 'neg' : ''}
           sub={
-            reserve || goals.length > 0 ? (
-              <>
-                {reserve && (
-                  <span
-                    className="stat-line"
-                    title="Tartalék: az utolsó lezárt hónap végi egyenlege, az utolsó legfeljebb 3 lezárt hónap átlagos kiadásához mérve"
-                  >
-                    {reserve}
-                  </span>
-                )}
-                {goals.length > 0 && <span className="stat-line">félretéve most: {formatFt(savedNow)}</span>}
-              </>
-            ) : undefined
+            <>
+              {reserve && (
+                <span
+                  className="stat-line"
+                  title="Tartalék: az utolsó lezárt hónap végi egyenlege, az utolsó legfeljebb 3 lezárt hónap átlagos kiadásához mérve"
+                >
+                  {reserve}
+                </span>
+              )}
+              {current && <span className="stat-line">a hónap mérlege {formatSigned(p.net)}</span>}
+            </>
           }
         />
-      </div>
+      </section>
 
       <div className="grid-2 mb-4">
         <div className="card">

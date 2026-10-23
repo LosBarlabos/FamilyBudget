@@ -50,6 +50,7 @@
     --hero-line: rgba(255, 255, 255, 0.16);
     --hero-accent: #8fe3c4;
     --hero-danger: #ff9b93;
+    --hero-warn: #f2c46b;
 
     /* --- Mélység: kártya (keret), menü, alsó lap és panel, toast --- */
     --elev-1: none;

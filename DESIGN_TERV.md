@@ -85,7 +85,7 @@ Minden jelöltnél: mit old meg, mekkora munka, kell-e hozzá domain-változás 
 - Éves összesítő (idei és tavalyi) és a „ki mennyit rögzített” bontás.
 
 **Új jelöltek:**
-- **Megtakarítások egyenlege jól látható helyen** (a felhasználó kérése, 2026. okt. 23.): ma csak a Futó egyenleg kártya apró sorában („félretéve most”) és célonként a Megtakarítás és célok kártyán látszik. Kérdések: hol legyen (Áttekintés felső sávja, saját kártya vagy saját képernyő), csak a mai összeg kell-e vagy havi alakulás is (befizetések, felhasználás, grafikon), és célonként vagy összesítve.
+- **Megtakarítások egyenlege jól látható helyen** (a felhasználó kérése, 2026. okt. 23.): az első lépés kész, az Áttekintés „A hónap számai” sorában „Megtakarítások összesen” (mai állás), célonként a Megtakarítás és célok kártyán. Nyitott kérdések: kell-e saját képernyő, és a mai összeg mellett kell-e a havi alakulás is (befizetések, felhasználás, grafikon).
 - **Parancspaletta** (`Cmd/Ctrl+K`): ugrás képernyőre és kategóriára, gyors rögzítés gépeléssel („élelmiszer 12500”), keresés a megjegyzésekben.
 - **Gesztusok mobilon:** a számlasor elhúzása = kifizetve, a rögzítés elhúzása = törlés (visszavonással). Az alsó lap húzható fogantyúval csukható.
 - **Értesítések:** esedékes számla, havi zárás, elavult mentés (Notification API; iOS-en csak telepített PWA-ban). Ütemezett értesítéshez szerveroldali push kellene, ezért itt csak a megnyitáskori jelzés reális.
@@ -147,6 +147,8 @@ Sorrend (a keret előre, utána a leggyakrabban használt képernyők):
 8. **Első indítás** (a legelső benyomás, a végén, a kész rendszerrel).
 
 A 3. fázisban elfogadott funkciók a hozzájuk tartozó képernyővel együtt készülnek, külön commitban.
+
+**Állapot (2026-10-23):** a keret (1.) az 5.C és az 5.E lépésben elkészült, a képernyőváltás animációja még nincs. A 2. Áttekintés kész: hónapcsík a heróban, a mínuszba forduló futó egyenleg piros sávja, „Fizetendő és várható” csekksorokkal, egyszer megjelenő keret-figyelmeztetés, „A hónap számai” kimondott jelentéssel és a megtakarítások összesített egyenlegével. A kategórialista sorai maradtak, a rácsuk a Rögzítéssel együtt egységesül. Következik a 3. (gyorsrögzítő és Rögzítés).
 
 ## 7. Visszamérés
 

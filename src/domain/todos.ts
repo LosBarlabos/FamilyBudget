@@ -151,15 +151,18 @@ export function groupSettleMessage(g: TodoGroup): string {
   return `${g.items.length} ${g.of === 'bill' ? 'számla kifizetve' : 'bevétel megérkezett'} · ${formatFt(g.total)}`;
 }
 
+/** „lejárt okt. 20.”, „ma esedékes”, „esedékes okt. 25.” */
+export function billWhenText(t: Pick<BillTodo, 'due' | 'overdue'>, today: ISODate): string {
+  return t.overdue ? `lejárt ${shortDate(t.due)}` : t.due === today ? 'ma esedékes' : `esedékes ${shortDate(t.due)}`;
+}
+
 const roundTo100 = (n: number) => Math.round(n / 100) * 100;
 
 /** A teendő egysoros szövege. */
 export function todoText(t: Todo, today: ISODate): string {
   switch (t.kind) {
-    case 'bill': {
-      const when = t.overdue ? `lejárt ${shortDate(t.due)}` : t.due === today ? 'ma esedékes' : `esedékes ${shortDate(t.due)}`;
-      return `${t.cat.name} · ${when} · ${t.partial ? `hátra ${formatFt(t.amount)}` : formatFt(t.amount)}`;
-    }
+    case 'bill':
+      return `${t.cat.name} · ${billWhenText(t, today)} · ${t.partial ? `hátra ${formatFt(t.amount)}` : formatFt(t.amount)}`;
     case 'income':
       return t.partial
         ? `${t.cat.name}: még ${formatFt(t.amount)} nem érkezett meg`

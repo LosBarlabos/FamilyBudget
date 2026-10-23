@@ -297,6 +297,10 @@ Minden lépés után: `npx tsc`, `npx vitest run`, `npm run build`, és a képer
 
 A képernyők tartalmi átalakítása a 6. fázisban jön: a MonthStrip és a Bill az Áttekintésen, az „utána marad” előnézet a gyorsrögzítőben, az idővonal a Tervezőben.
 
+**A 6. fázisban elkészült (2026-10-23, Áttekintés):**
+- **MonthStrip** (`src/ui/components/MonthStrip.tsx`, számítás: `src/domain/overview.ts`): a hero sötét felületén, 48 px, 860 px-es tartalomtól 64 px. Állapotok: eltelt, ma (a `--hero-accent` gyűrűvel), előreszaladt (sávozott `--color-warn-fill`), jövőbeli, hétvége. `role="img"` egy mondatos leírással; a dátumfeliratok `aria-hidden`, mert a mondat kimondja őket. Új token: `--hero-warn` a mondat kiemeléséhez.
+- **Bill** (`.bill` a `Todos.tsx`-ben): kétsoros rács (név és dátum balra, összeg és gomb jobbra). Lejárt: `--color-bill` háttér, sötét gomb; esedékes: szaggatott `--color-border-strong` keret; várt bevétel: sima keret, „+” összeg `--color-ok` színnel. A gomb neve a számla nevével olvasható fel („Áram: kifizetve”).
+
 ## Nyitott kérdések
 
 - **Ikonok:** a teljes Tabler ikonfont (507 kB) marad, vagy részhalmaz/SVG (DR19)? A Csekk vázlatai kevés ikont használnak. Az 5.D-ben érdemes eldönteni, amikor a komponensek ikonigénye már látszik.
