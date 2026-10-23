@@ -62,10 +62,10 @@ function ErrorScreen({ error, stack }: { error: Error; stack: string }) {
         ugyanúgy visszatölthető, mint egy normál mentés.
       </p>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <button className="primary" onClick={download}>
+        <button className="btn primary" onClick={download}>
           <Icon name="download" /> Nyers adatmentés letöltése
         </button>
-        <button onClick={() => window.location.reload()}>
+        <button className="btn" onClick={() => window.location.reload()}>
           <Icon name="refresh" /> Újratöltés
         </button>
       </div>

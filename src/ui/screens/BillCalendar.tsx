@@ -70,11 +70,11 @@ export function BillCalendar() {
       <div className="page-head">
         <h1 className="page-title">Számlanaptár</h1>
         <div className="cal-nav">
-          <button className="icon" aria-label="Előző hónap" disabled={month <= minMonth} onClick={() => shift(-1)}>
+          <button className="btn icon" aria-label="Előző hónap" disabled={month <= minMonth} onClick={() => shift(-1)}>
             <Icon name="chevron-left" />
           </button>
           <span className="cal-month">{month.slice(0, 4)}. {MONTHS[first.getMonth()].toLowerCase()}</span>
-          <button className="icon" aria-label="Következő hónap" disabled={month >= maxMonth} onClick={() => shift(1)}>
+          <button className="btn icon" aria-label="Következő hónap" disabled={month >= maxMonth} onClick={() => shift(1)}>
             <Icon name="chevron-right" />
           </button>
         </div>
@@ -118,7 +118,7 @@ export function BillCalendar() {
           <div className="card-head">
             <h2 id="cal-list-title">{day ? shortDate(day) : 'A hónap tételei'}</h2>
             {day ? (
-              <button className="sm ghost" onClick={() => setDay(null)}>Az egész hónap</button>
+              <button className="btn sm ghost" onClick={() => setDay(null)}>Az egész hónap</button>
             ) : (
               <span className="small muted num">számlák {formatFt(billTotal)} · bevétel {formatFt(incomeTotal)}</span>
             )}
@@ -178,7 +178,7 @@ function Reminders({ onCategories }: { onCategories: () => void }) {
       {bills.length === 0 ? (
         <p className="small muted">
           Még egyik fix számlának sincs esedékességi napja. Add meg a Kategóriákban, és a naptár emlékeztetni tud.{' '}
-          <button className="sm" onClick={onCategories}>Kategóriák</button>
+          <button className="btn sm" onClick={onCategories}>Kategóriák</button>
         </p>
       ) : (
         <>
@@ -193,7 +193,7 @@ function Reminders({ onCategories }: { onCategories: () => void }) {
             naptár minden esedékesség előtti este 20:00-kor emlékeztet, akkor is, ha az app zárva van.
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-            <button className={saved && !stale ? '' : 'primary'} onClick={download}>
+            <button className={`btn ${saved && !stale ? '' : 'primary'}`} onClick={download}>
               <Icon name="calendar-plus" /> {saved ? 'Újra letöltöm' : 'Naptárfájl letöltése'}
             </button>
             <span className="tiny faint">

@@ -191,7 +191,7 @@ function Main({ data }: { data: BudgetData }) {
     <SyncButton onOpenSettings={() => tab('settings')} />
   ) : (
     <button
-      className={`sm backup ${stale ? 'stale' : ''}`}
+      className={`btn sm backup ${stale ? 'stale' : ''}`}
       title={`Mentés letöltése fájlba · ${backupLabel(days)}`}
       aria-label={`Mentés letöltése fájlba · ${backupLabel(days)}`}
       onClick={() => safe(() => exportBackup(data))}
@@ -209,7 +209,7 @@ function Main({ data }: { data: BudgetData }) {
             <span className="side-logo"><Icon name="wallet" /></span>
             <span>Családi<br />költségvetés</span>
           </div>
-          <button className="primary side-add" title="Kiadás rögzítése (N)" aria-label="Kiadás rögzítése" aria-keyshortcuts="N" onClick={openQuick}>
+          <button className="btn primary side-add" title="Kiadás rögzítése (N)" aria-label="Kiadás rögzítése" aria-keyshortcuts="N" onClick={openQuick}>
             <Icon name="plus" /> <span className="side-add-label">Kiadás rögzítése</span> <kbd aria-hidden="true">N</kbd>
           </button>
           <nav className="side-nav" aria-label="Fő navigáció">
@@ -246,7 +246,7 @@ function Main({ data }: { data: BudgetData }) {
               Új hónap kezdődött: <strong>{periodName(cur.id)}</strong> ({formatRange(cur.start, cur.end)}). Jó alkalom egy mentés letöltésére.
             </span>
             <button
-              className="sm primary"
+              className="btn sm primary"
               onClick={() =>
                 safe(async () => {
                   await exportBackup(data);
@@ -258,7 +258,7 @@ function Main({ data }: { data: BudgetData }) {
               <Icon name="download" /> Mentés letöltése
             </button>
             <button
-              className="sm ghost"
+              className="btn sm ghost"
               onClick={() =>
                 safe(async () => {
                   await updateSettings({ lastSeenPeriodId: summaries.currentId });

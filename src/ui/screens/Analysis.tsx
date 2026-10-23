@@ -148,7 +148,7 @@ function Deviations({ periods, hasClosed, onWiden }: { periods: PeriodSummary[];
         // Van lezárt időszak, csak a választott időablakban nincs (pl. „Ez az időszak”): ne állítsa, hogy még nincs.
         <div className="small muted" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           <span>A folyamatban lévő hónapot még nincs mihez mérni, az eltérések a lezárt hónapokból számolódnak.</span>
-          <button className="sm" onClick={onWiden}>Utolsó 12 hónap</button>
+          <button className="btn sm" onClick={onWiden}>Utolsó 12 hónap</button>
         </div>
       ) : closed === 0 ? (
         <p className="small muted" style={{ margin: 0 }}>
@@ -180,7 +180,7 @@ function Deviations({ periods, hasClosed, onWiden }: { periods: PeriodSummary[];
                 </span>
               </button>
               {d.kind !== 'under' && (
-                <button className="icon dev-plan" title="Terv módosítása a Tervezőben" aria-label={`${d.cat.name}: terv módosítása a Tervezőben`} onClick={() => go('planner')}>
+                <button className="btn icon dev-plan" title="Terv módosítása a Tervezőben" aria-label={`${d.cat.name}: terv módosítása a Tervezőben`} onClick={() => go('planner')}>
                   <Icon name="adjustments-horizontal" />
                 </button>
               )}
@@ -247,7 +247,7 @@ function Heatmap({ periods, spend, anchorId }: { periods: PeriodSummary[]; spend
           <span className="heat-name-in">
             {opts.group && (
               <button
-                className="sm ghost icon"
+                className="btn sm ghost icon"
                 aria-expanded={open}
                 aria-label={`${label}: ${open ? 'becsukás' : 'kategóriák mutatása'}`}
                 onClick={() => setOpenGroups(open ? openGroups.filter((k) => k !== u.key) : [...openGroups, u.key])}
@@ -327,7 +327,7 @@ function SearchAndTags() {
         <span className="sr-only">Keresés a rögzítésekben</span>
         <input type="search" placeholder="Megjegyzés, kategória, név vagy #címke" value={q} onChange={(e) => setQ(e.target.value)} />
         {q && (
-          <button className="sm ghost icon" aria-label="Keresés törlése" onClick={() => setQ('')}>
+          <button className="btn sm ghost icon" aria-label="Keresés törlése" onClick={() => setQ('')}>
             <Icon name="x" />
           </button>
         )}

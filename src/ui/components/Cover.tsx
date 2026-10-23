@@ -122,7 +122,7 @@ export function CoverSheet({ periodId, categoryId, onClose }: { periodId: Period
               <p className="small muted">
                 Egyik keretben sem maradt pénz ebben a hónapban. A keret tervét a Tervezőben emelheted.
               </p>
-              <button type="button" className="sm" onClick={() => go('planner')}>
+              <button type="button" className="btn sm" onClick={() => go('planner')}>
                 Tervező <Icon name="chevron-right" />
               </button>
             </div>
@@ -173,7 +173,7 @@ export function CoverSheet({ periodId, categoryId, onClose }: { periodId: Period
                     }}
                   />
                   <span className="muted">Ft</span>
-                  <button type="submit" className="primary" disabled={pending} aria-busy={pending}>
+                  <button type="submit" className="btn primary" disabled={pending} aria-busy={pending}>
                     <Icon name="arrows-exchange" /> Átcsoportosítás
                   </button>
                 </div>

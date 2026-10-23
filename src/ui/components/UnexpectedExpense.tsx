@@ -104,7 +104,7 @@ export function UnexpectedExpense({ onClose }: { onClose: () => void }) {
         <h2 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Icon name="alert-triangle" style={{ color: 'var(--color-danger)' }} /> Váratlan kiadás
         </h2>
-        <button className="sm ghost icon" aria-label="Bezárás" onClick={onClose}><Icon name="x" /></button>
+        <button className="btn sm ghost icon" aria-label="Bezárás" onClick={onClose}><Icon name="x" /></button>
       </div>
       <div className="form-grid">
         <label className="field">
@@ -146,8 +146,8 @@ export function UnexpectedExpense({ onClose }: { onClose: () => void }) {
       {error && <div className="error" style={{ marginTop: 6 }}>{error}</div>}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>
-        <button onClick={onClose}>Mégse</button>
-        <button className="primary" onClick={submit} disabled={pending}>Rögzítés</button>
+        <button className="btn" onClick={onClose}>Mégse</button>
+        <button className="btn primary" onClick={submit} disabled={pending}>Rögzítés</button>
       </div>
     </div>
   );

@@ -1,3 +1,6 @@
+/* A CSS-rétegek sorrendje: a src/styles.css elején leírva. */
+@layer tokens, base, components, app;
+
 /*
  * Saját tárhelyről kiszolgált betűk (public/fonts/, SIL Open Font License 1.1, a licencek ugyanott).
  * Latin és latin-ext részhalmaz: a latin-ext adja az ő és ű betűt, a latin a valódi mínuszjelet (U+2212).

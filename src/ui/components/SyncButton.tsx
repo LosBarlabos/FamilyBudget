@@ -63,7 +63,7 @@ export function SyncButton({ onOpenSettings }: { onOpenSettings: () => void }) {
   const title = st.status === 'error' && st.error ? `${label}: ${st.error}` : label;
   return (
     <button
-      className={`sm backup sync ${tone} ${st.status === 'syncing' ? 'spinning' : ''}`}
+      className={`btn sm backup sync ${tone} ${st.status === 'syncing' ? 'spinning' : ''}`}
       title={title}
       aria-label={title}
       onClick={() => (st.status === 'error' ? onOpenSettings() : void syncNow())}

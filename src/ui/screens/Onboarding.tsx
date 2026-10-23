@@ -205,13 +205,13 @@ export function Onboarding() {
             </div>
           )}
           <div className="wizard-nav">
-            <button className="ghost" onClick={() => { setShowImport(!showImport); setShowJoin(false); }}>
+            <button className="btn ghost" onClick={() => { setShowImport(!showImport); setShowJoin(false); }}>
               <Icon name="upload" /> Van már mentésem
             </button>
-            <button className="ghost" onClick={() => { setShowJoin(!showJoin); setShowImport(false); }}>
+            <button className="btn ghost" onClick={() => { setShowJoin(!showJoin); setShowImport(false); }}>
               <Icon name="users" /> Csatlakozom egy közöshöz
             </button>
-            <button className="primary" onClick={next1}>Tovább <Icon name="arrow-right" /></button>
+            <button className="btn primary" onClick={next1}>Tovább <Icon name="arrow-right" /></button>
           </div>
           {showImport && (
             <div className="import-preview">
@@ -257,8 +257,8 @@ export function Onboarding() {
             <span className="small num muted" style={{ marginRight: 'auto' }}>
               Tervezett havi egyenleg: <span className={totals.net < 0 ? 'neg' : 'pos'}>{formatSigned(totals.net)}</span>
             </span>
-            <button onClick={goBack}><Icon name="arrow-left" /> Vissza</button>
-            <button className="primary" onClick={next2}>Tovább <Icon name="arrow-right" /></button>
+            <button className="btn" onClick={goBack}><Icon name="arrow-left" /> Vissza</button>
+            <button className="btn primary" onClick={next2}>Tovább <Icon name="arrow-right" /></button>
           </div>
         </div>
       )}
@@ -308,8 +308,8 @@ export function Onboarding() {
               ),
           )}
           <div className="wizard-nav">
-            <button onClick={goBack}><Icon name="arrow-left" /> Vissza</button>
-            <button className="primary" onClick={next3}>Tovább <Icon name="arrow-right" /></button>
+            <button className="btn" onClick={goBack}><Icon name="arrow-left" /> Vissza</button>
+            <button className="btn primary" onClick={next3}>Tovább <Icon name="arrow-right" /></button>
           </div>
         </div>
       )}
@@ -335,8 +335,8 @@ export function Onboarding() {
             <li>Safariban használd az appot a Dockhoz hozzáadva (Fájl → Hozzáadás a Dockhoz).</li>
           </ul>
           <div className="wizard-nav">
-            <button onClick={goBack}><Icon name="arrow-left" /> Vissza</button>
-            <button className="primary" onClick={finish}>Kezdés <Icon name="arrow-right" /></button>
+            <button className="btn" onClick={goBack}><Icon name="arrow-left" /> Vissza</button>
+            <button className="btn primary" onClick={finish}>Kezdés <Icon name="arrow-right" /></button>
           </div>
         </div>
       )}

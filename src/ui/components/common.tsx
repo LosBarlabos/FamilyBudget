@@ -183,14 +183,14 @@ export function AmountInput({
             onKeyDown={(e) => e.key === 'Enter' && submit()}
           />
         )}
-        <button className="sm" onClick={submit} disabled={pending} aria-busy={pending}>{buttonLabel}</button>
+        <button className="btn sm" onClick={submit} disabled={pending} aria-busy={pending}>{buttonLabel}</button>
         {noteToggle && !noteOpen && (
-          <button className="sm ghost" onClick={() => setNoteOpen(true)}>
+          <button className="btn sm ghost" onClick={() => setNoteOpen(true)}>
             <Icon name="plus" /> Megjegyzés
           </button>
         )}
         {onCancel && (
-          <button className="sm ghost icon" aria-label="Mégse" onClick={onCancel}>
+          <button className="btn sm ghost icon" aria-label="Mégse" onClick={onCancel}>
             <Icon name="x" />
           </button>
         )}
@@ -255,7 +255,7 @@ export function MenuButton({ label, items }: { label: string; items: MenuItem[] 
     >
       <button
         ref={button}
-        className="sm ghost icon"
+        className="btn sm ghost icon"
         aria-label={label}
         aria-haspopup="menu"
         aria-expanded={open}
@@ -271,7 +271,7 @@ export function MenuButton({ label, items }: { label: string; items: MenuItem[] 
       {open && (
         <div id={menuId} className="menu" role="menu" aria-label={label}>
           {items.map((it) => (
-            <button
+            <button className="btn"
               key={it.label}
               role="menuitem"
               onClick={() => {
@@ -296,7 +296,7 @@ export function SettleButton({
   const [busy, setBusy] = useState(false);
   return (
     <button
-      className={`sm ${primary ? 'primary' : 'success'}`}
+      className={`btn sm ${primary ? 'primary' : 'success'}`}
       disabled={busy}
       aria-busy={busy}
       aria-label={ariaLabel}

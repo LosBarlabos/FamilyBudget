@@ -34,7 +34,7 @@ function Connected({ cfg }: { cfg: SyncConfig }) {
           A neved ezen az eszközön
           <input type="text" value={name} maxLength={30} onChange={(e) => setName(e.target.value)} />
         </label>
-        <button
+        <button className="btn"
           disabled={!name.trim() || name.trim() === cfg.name}
           onClick={() => {
             renameDevice(name.trim());
@@ -45,18 +45,18 @@ function Connected({ cfg }: { cfg: SyncConfig }) {
         </button>
       </div>
       <div className="sync-row">
-        <button className="primary" disabled={st.status === 'syncing'} onClick={() => syncNow()}>
+        <button className="btn primary" disabled={st.status === 'syncing'} onClick={() => syncNow()}>
           <Icon name="refresh" /> Szinkronizálás most
         </button>
         {!armed ? (
-          <button className="ghost" onClick={() => setArmed(true)}>Kikapcsolás ezen az eszközön…</button>
+          <button className="btn ghost" onClick={() => setArmed(true)}>Kikapcsolás ezen az eszközön…</button>
         ) : (
           <>
             <span className="small muted" style={{ flex: '1 1 220px' }}>
               Az adatok itt megmaradnak, de ez az eszköz többé nem szinkronizál. A token törlődik innen.
             </span>
             <button
-              className="danger"
+              className="btn danger"
               onClick={async () => {
                 await disconnect();
                 toast('A közös használat kikapcsolva ezen az eszközön');
@@ -64,7 +64,7 @@ function Connected({ cfg }: { cfg: SyncConfig }) {
             >
               Kikapcsolás
             </button>
-            <button className="ghost" onClick={() => setArmed(false)}>Mégse</button>
+            <button className="btn ghost" onClick={() => setArmed(false)}>Mégse</button>
           </>
         )}
       </div>
@@ -158,7 +158,7 @@ function ConnectForm({ join }: { join: boolean }) {
       {error && <div className="error" role="alert">{error}</div>}
       {!choice ? (
         <div className="sync-row">
-          <button className="primary" disabled={!valid || busy} aria-busy={busy} onClick={start}>
+          <button className="btn primary" disabled={!valid || busy} aria-busy={busy} onClick={start}>
             <Icon name={join ? 'users' : 'cloud-upload'} /> {busy ? 'Kapcsolódás…' : join ? 'Csatlakozás' : 'Bekapcsolás'}
           </button>
         </div>
@@ -169,13 +169,13 @@ function ConnectForm({ join }: { join: boolean }) {
             {choice.categories.filter((c) => !c.archived).length} kategória · {choice.entries.length} rögzítés
           </div>
           <div className="sync-row">
-            <button className="primary" disabled={busy} onClick={() => run(async () => { await connect(cfg, 'download'); done('Csatlakoztál a közös költségvetéshez'); })}>
+            <button className="btn primary" disabled={busy} onClick={() => run(async () => { await connect(cfg, 'download'); done('Csatlakoztál a közös költségvetéshez'); })}>
               A közöset használom
             </button>
-            <button className="danger" disabled={busy} onClick={() => run(async () => { await connect(cfg, 'upload'); done('A közös költségvetés felülírva az itteni adatokkal'); })}>
+            <button className="btn danger" disabled={busy} onClick={() => run(async () => { await connect(cfg, 'upload'); done('A közös költségvetés felülírva az itteni adatokkal'); })}>
               Az itteni adattal felülírom
             </button>
-            <button className="ghost" disabled={busy} onClick={() => setChoice(null)}>Mégse</button>
+            <button className="btn ghost" disabled={busy} onClick={() => setChoice(null)}>Mégse</button>
           </div>
           <div className="tiny faint" style={{ marginTop: 8 }}>
             „A közöset használom”: az ezen az eszközön lévő adatok helyére a közös kerül. Előtte érdemes menteni.

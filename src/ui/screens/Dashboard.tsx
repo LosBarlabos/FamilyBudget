@@ -140,7 +140,7 @@ export function Dashboard() {
             <h2>Megtakarítás és célok</h2>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span className="small faint">mai állás</span>
-              <button className="sm" onClick={() => go('categories', NEW_GOAL)}>
+              <button className="btn sm" onClick={() => go('categories', NEW_GOAL)}>
                 <Icon name="plus" /> Új cél
               </button>
             </div>

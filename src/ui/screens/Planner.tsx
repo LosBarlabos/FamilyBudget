@@ -136,7 +136,7 @@ export function Planner() {
               Gyors kitöltés (fix és keret)
             </span>
             <button
-              className="sm"
+              className="btn sm"
               disabled={!lastClosed}
               title={lastClosed ? `${periodName(lastClosed.id)} tényleges összegei` : 'Még nincs lezárt hónap'}
               onClick={() => lastClosed && bulk('Előző hónap alapján', (c) => quickFillAmount(summaries, data.entries, c, [lastClosed.id]))}
@@ -144,7 +144,7 @@ export function Planner() {
               <Icon name="history" /> Előző hónap tényei alapján
             </button>
             <button
-              className="sm"
+              className="btn sm"
               disabled={!lastClosed}
               title={lastClosed ? 'Az utolsó legfeljebb 3 lezárt hónap átlaga' : 'Még nincs lezárt hónap'}
               onClick={() => bulk('3 havi átlag alapján', (c) => quickFillAmount(summaries, data.entries, c, last3))}
@@ -229,7 +229,7 @@ export function Planner() {
                     {formatSigned(preview.periods.at(-1)!.endBalance - (baseline?.get(preview.periods.at(-1)!.id) ?? 0))}
                   </span>
                 </span>
-                <button className="sm ghost" onClick={() => setBaseline(new Map(summaries.periods.map((x) => [x.id, x.endBalance])))}>
+                <button className="btn sm ghost" onClick={() => setBaseline(new Map(summaries.periods.map((x) => [x.id, x.endBalance])))}>
                   Összevetés nullázása
                 </button>
               </div>
@@ -260,7 +260,7 @@ function OffCycleRow({ cat, next, amount, onGo }: { cat: Category; next: PeriodI
           </div>
         </div>
       </div>
-      <button className="sm ghost num" onClick={() => onGo(next)} title={`${periodName(next, true)} tervének megnyitása`}>
+      <button className="btn sm ghost num" onClick={() => onGo(next)} title={`${periodName(next, true)} tervének megnyitása`}>
         {periodName(next)}: {formatFt(amount)} <Icon name="chevron-right" />
       </button>
     </div>
@@ -393,7 +393,7 @@ function PlanRow({
           <span>{goalSummary(goal)}</span>
           {goal.requiredMonthly !== null && (goal.state === 'behind' || goal.requiredMonthly !== currentPlan) && (
             <button
-              className="sm ghost"
+              className="btn sm ghost"
               title={`A mostani hónaptól (${periodName(currentId).toLowerCase()}) minden hónapra`}
               onClick={() => onApplyGoal(goal.requiredMonthly!)}
             >

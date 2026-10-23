@@ -82,7 +82,7 @@ function BasicSettings() {
         <span className="tiny faint" style={{ flex: 1, minWidth: 220 }}>
           A fizetésnap módosításakor a meglévő rögzítések abban a hónapban maradnak, ahová korábban kerültek.
         </span>
-        <button className="primary" onClick={save}>Mentés</button>
+        <button className="btn primary" onClick={save}>Mentés</button>
       </div>
     </div>
   );
@@ -129,7 +129,7 @@ function PeriodOverrides() {
           Kezdőnap
           <input type="date" value={date} aria-invalid={error ? true : undefined} aria-describedby={error ? overrideErrorId : undefined} onChange={(e) => { setDate(e.target.value); setError(''); }} />
         </label>
-        <button onClick={save}>Beállítás</button>
+        <button className="btn" onClick={save}>Beállítás</button>
       </div>
       {error && <div className="error" id={overrideErrorId} role="alert" style={{ marginTop: 6 }}>{error}</div>}
       {data.overrides.length > 0 && (
@@ -138,7 +138,7 @@ function PeriodOverrides() {
             <div key={o.periodId} className="small" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
               <Icon name="calendar-event" style={{ color: 'var(--color-text-subtle)' }} />
               <span style={{ flex: 1 }}>{periodName(o.periodId, true)}: kezdés {o.startDate.replaceAll('-', '.')}.</span>
-              <button className="sm ghost" onClick={() => safe(async () => { await clearOverride(o.periodId); toast('Visszaállítva a fizetésnapra', () => setOverride(o)); })}>
+              <button className="btn sm ghost" onClick={() => safe(async () => { await clearOverride(o.periodId); toast('Visszaállítva a fizetésnapra', () => setOverride(o)); })}>
                 Visszaállítás
               </button>
             </div>
@@ -164,10 +164,10 @@ function Backup() {
         szinkronizált mappába (OneDrive, iCloud) áttenni, így a gép elvesztését is túléli.
       </p>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <button className="primary" onClick={() => safe(() => exportBackup(data))}>
+        <button className="btn primary" onClick={() => safe(() => exportBackup(data))}>
           <Icon name="download" /> Mentés letöltése
         </button>
-        <button onClick={() => downloadFile(`csaladi-koltsegvetes-${new Date().toISOString().slice(0, 10)}.csv`, buildCsv(data, summaries), 'text/csv;charset=utf-8')}>
+        <button className="btn" onClick={() => downloadFile(`csaladi-koltsegvetes-${new Date().toISOString().slice(0, 10)}.csv`, buildCsv(data, summaries), 'text/csv;charset=utf-8')}>
           <Icon name="table" /> Táblázat (CSV, Excelhez)
         </button>
       </div>
@@ -202,7 +202,7 @@ export function ImportPanel({ onDone }: { onDone?: () => void }) {
   return (
     <div>
       <input ref={input} type="file" accept="application/json,.json" hidden onChange={(e) => pick(e.target.files?.[0])} />
-      <button onClick={() => input.current?.click()}>
+      <button className="btn" onClick={() => input.current?.click()}>
         <Icon name="upload" /> Visszatöltés mentésből
       </button>
       {error && <div className="error" role="alert" style={{ marginTop: 8 }}>{error}</div>}
@@ -219,7 +219,7 @@ export function ImportPanel({ onDone }: { onDone?: () => void }) {
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button
-              className="danger"
+              className="btn danger"
               onClick={async () => {
                 try {
                   await importAll(file.f);
@@ -233,7 +233,7 @@ export function ImportPanel({ onDone }: { onDone?: () => void }) {
             >
               Felülírás és betöltés
             </button>
-            <button className="ghost" onClick={() => setFile(null)}>Mégse</button>
+            <button className="btn ghost" onClick={() => setFile(null)}>Mégse</button>
           </div>
         </div>
       )}
@@ -278,7 +278,7 @@ function DangerZone() {
     <div className="card">
       <div className="card-head"><h2>Minden adat törlése</h2></div>
       {!armed ? (
-        <button className="danger" onClick={() => setArmed(true)}><Icon name="trash" /> Összes adat törlése…</button>
+        <button className="btn danger" onClick={() => setArmed(true)}><Icon name="trash" /> Összes adat törlése…</button>
       ) : (
         <div className="small" style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           <span style={{ color: 'var(--color-danger)', flex: 1, minWidth: 220 }}>
@@ -286,7 +286,7 @@ function DangerZone() {
           </span>
           {/* A közös használat előbb kikapcsol, különben a következő szinkron a közös költségvetést is kiürítené. */}
           <button
-            className="danger"
+            className="btn danger"
             onClick={() =>
               safe(async () => {
                 await disconnect();
@@ -296,7 +296,7 @@ function DangerZone() {
           >
             Végleges törlés
           </button>
-          <button className="ghost" onClick={() => setArmed(false)}>Mégse</button>
+          <button className="btn ghost" onClick={() => setArmed(false)}>Mégse</button>
         </div>
       )}
     </div>

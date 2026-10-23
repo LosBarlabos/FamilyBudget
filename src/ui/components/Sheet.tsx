@@ -81,7 +81,7 @@ export function Sheet({
       <div ref={ref} className="sheet" role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} onKeyDown={onKeyDown}>
         <div className="sheet-head">
           <h2 id={titleId}>{title}</h2>
-          <button className="ghost icon" aria-label="Bezárás" onClick={onClose}>
+          <button className="btn ghost icon" aria-label="Bezárás" onClick={onClose}>
             <Icon name="x" />
           </button>
         </div>

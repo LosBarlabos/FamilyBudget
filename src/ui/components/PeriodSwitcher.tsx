@@ -13,7 +13,7 @@ export function PeriodSwitcher() {
 
   return (
     <div className="period-switch">
-      <button className="icon" aria-label="Előző hónap" disabled={i <= 0} onClick={() => setPeriodId(list[i - 1].id)}>
+      <button className="btn icon" aria-label="Előző hónap" disabled={i <= 0} onClick={() => setPeriodId(list[i - 1].id)}>
         <Icon name="chevron-left" />
       </button>
       <select aria-label="Hónap" value={periodId} onChange={(e) => setPeriodId(e.target.value)}>
@@ -24,7 +24,7 @@ export function PeriodSwitcher() {
           </option>
         ))}
       </select>
-      <button className="icon" aria-label="Következő hónap" disabled={i >= list.length - 1} onClick={() => setPeriodId(list[i + 1].id)}>
+      <button className="btn icon" aria-label="Következő hónap" disabled={i >= list.length - 1} onClick={() => setPeriodId(list[i + 1].id)}>
         <Icon name="chevron-right" />
       </button>
       {p && (
@@ -34,7 +34,7 @@ export function PeriodSwitcher() {
       )}
       {p && <span className={`period-badge ${p.status === 'current' ? 'current' : ''}`}>{STATUS_LABEL[p.status]}</span>}
       {p && p.status !== 'current' && (
-        <button className="sm ghost" onClick={() => setPeriodId(summaries.currentId)}>
+        <button className="btn sm ghost" onClick={() => setPeriodId(summaries.currentId)}>
           Ugrás a mostanira
         </button>
       )}

@@ -63,7 +63,7 @@ export function Categories() {
     <>
       <div className="page-head">
         <h1 className="page-title">Kategóriák</h1>
-        <button className="primary" onClick={() => edit('new')}>
+        <button className="btn primary" onClick={() => edit('new')}>
           <Icon name="plus" /> Új kategória
         </button>
       </div>
@@ -149,7 +149,7 @@ export function Categories() {
 
       {archived.length > 0 && (
         <div className="card">
-          <button className="ghost" onClick={() => setShowArchived(!showArchived)} aria-expanded={showArchived}>
+          <button className="btn ghost" onClick={() => setShowArchived(!showArchived)} aria-expanded={showArchived}>
             <Icon name="chevron-right" className={`chev ${showArchived ? 'open' : ''}`} />
             Archivált kategóriák ({archived.length})
           </button>
@@ -161,7 +161,7 @@ export function Categories() {
                   <div className="rec-name">{c.name}</div>
                   <div className="tiny faint">{TYPE_LABEL[c.type]}{c.group ? ` · ${c.group}` : ''}</div>
                 </div>
-                <button className="sm" onClick={() => setArchived(c, false)}>
+                <button className="btn sm" onClick={() => setArchived(c, false)}>
                   <Icon name="arrow-back-up" /> Visszaállítás
                 </button>
               </div>
@@ -203,10 +203,10 @@ function CategoryRow({
         <div className="tiny faint num">{meta.join(' · ')}</div>
       </div>
       <div className="rec-actions">
-        <button className="sm ghost icon" aria-label="Feljebb" onClick={onUp} disabled={first}><Icon name="arrow-up" /></button>
-        <button className="sm ghost icon" aria-label="Lejjebb" onClick={onDown} disabled={last}><Icon name="arrow-down" /></button>
-        <button className="sm" onClick={onEdit}><Icon name="pencil" /> Szerkesztés</button>
-        <button className="sm ghost icon" aria-label="Archiválás" title="Archiválás" onClick={onArchive}><Icon name="archive" /></button>
+        <button className="btn sm ghost icon" aria-label="Feljebb" onClick={onUp} disabled={first}><Icon name="arrow-up" /></button>
+        <button className="btn sm ghost icon" aria-label="Lejjebb" onClick={onDown} disabled={last}><Icon name="arrow-down" /></button>
+        <button className="btn sm" onClick={onEdit}><Icon name="pencil" /> Szerkesztés</button>
+        <button className="btn sm ghost icon" aria-label="Archiválás" title="Archiválás" onClick={onArchive}><Icon name="archive" /></button>
       </div>
     </div>
   );
@@ -464,8 +464,8 @@ export function CategoryForm({
       <div style={{ display: 'flex', gap: 8, marginTop: 16, alignItems: 'center' }}>
         <CatIcon cat={c} />
         <span className="muted small" style={{ marginRight: 'auto' }}>{c.name || 'Előnézet'}</span>
-        <button onClick={onCancel}>Mégse</button>
-        <button className="primary" onClick={save}>Mentés</button>
+        <button className="btn" onClick={onCancel}>Mégse</button>
+        <button className="btn primary" onClick={save}>Mentés</button>
       </div>
     </div>
   );

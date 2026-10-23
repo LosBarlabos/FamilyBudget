@@ -148,7 +148,7 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
             {suggested.map((q) => (
               <button
                 key={q}
-                className="sm num"
+                className="btn sm num"
                 disabled={pending}
                 aria-label={`${formatFt(q)} beírása`}
                 onMouseDown={keepFocus}
@@ -180,7 +180,7 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
           {cats.length === 0 ? (
             <p className="small muted" style={{ margin: 0 }}>
               Még nincs keret kategória (pl. Élelmiszer), amibe gyorsan rögzíthetnél.{' '}
-              <button className="link" onClick={() => go('categories')}>Kategóriák</button>
+              <button className="btn link" onClick={() => go('categories')}>Kategóriák</button>
             </p>
           ) : (
             <div className="chips">
@@ -241,7 +241,7 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
             onKeyDown={onEnter}
           />
         ) : (
-          <button className="sm ghost quick-note-toggle" onClick={() => setNoteOpen(true)}>
+          <button className="btn sm ghost quick-note-toggle" onClick={() => setNoteOpen(true)}>
             <Icon name="plus" /> Megjegyzés
           </button>
         )}
@@ -251,7 +251,7 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
             {periodName(periodId)} hónap · {shortDate(date)}
             {def && <span className="kbd-hint faint"> · Enter: {def.name}</span>}
           </span>
-          <button className="sm ghost" onClick={unexpected}>
+          <button className="btn sm ghost" onClick={unexpected}>
             <Icon name="alert-triangle" /> Váratlan kiadás
           </button>
         </div>

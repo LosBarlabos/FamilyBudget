@@ -134,7 +134,7 @@ export function Todos({ p, pace, goals }: { p: PeriodSummary; pace: PaceOverview
           <span className="todo-actions">
             {cover && (
               <button
-                className="sm"
+                className="btn sm"
                 aria-label={`${t.env.cat.name}: átcsoportosítás másik keretből`}
                 onClick={() => {
                   // Ha a fedezettel a teendő megszűnik, a fókusz a helyére lépőre kerül (mint a lezárásnál).
@@ -145,7 +145,7 @@ export function Todos({ p, pace, goals }: { p: PeriodSummary; pace: PaceOverview
                 <Icon name="arrows-exchange" /> Átcsoportosítás
               </button>
             )}
-            <button className="sm" aria-label={`${t.env.cat.name} megnyitása a Rögzítésben`} onClick={() => go('record', t.env.cat.id)}>
+            <button className="btn sm" aria-label={`${t.env.cat.name} megnyitása a Rögzítésben`} onClick={() => go('record', t.env.cat.id)}>
               Megnyitás <Icon name="chevron-right" />
             </button>
           </span>
@@ -153,19 +153,19 @@ export function Todos({ p, pace, goals }: { p: PeriodSummary; pace: PaceOverview
       }
       case 'goal':
         return (
-          <button className="sm" aria-label={`${t.cat.name}: havi terv a Tervezőben`} onClick={() => go('planner')}>
+          <button className="btn sm" aria-label={`${t.cat.name}: havi terv a Tervezőben`} onClick={() => go('planner')}>
             Tervező <Icon name="chevron-right" />
           </button>
         );
       case 'idle':
         return (
-          <button className="sm" onClick={openQuick}>
+          <button className="btn sm" onClick={openQuick}>
             <Icon name="plus" /> Rögzítés
           </button>
         );
       case 'backup':
         return (
-          <button className="sm" onClick={() => safe(() => exportBackup(data))}>
+          <button className="btn sm" onClick={() => safe(() => exportBackup(data))}>
             <Icon name="download" /> Mentés letöltése
           </button>
         );
@@ -178,7 +178,7 @@ export function Todos({ p, pace, goals }: { p: PeriodSummary; pace: PaceOverview
     return (
       <span className="todo-actions">
         <button
-          className="sm"
+          className="btn sm"
           aria-expanded={open}
           aria-controls={`todo-sub-${g.of}`}
           onClick={() => setExpanded(open ? expanded.filter((k) => k !== key) : [...expanded, key])}

@@ -135,11 +135,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div key={m.id} className={`toast ${m.tone === 'error' ? 'error' : ''}`} role={m.tone === 'error' ? 'alert' : undefined}>
             <span>{m.text}</span>
             {m.undo ? (
-              <button className="sm" onClick={() => runUndo(m)}>
+              <button className="btn sm" onClick={() => runUndo(m)}>
                 Visszavonás
               </button>
             ) : (
-              <button className="sm ghost icon" aria-label="Értesítés bezárása" onClick={() => dismiss(m.id)}>
+              <button className="btn sm ghost icon" aria-label="Értesítés bezárása" onClick={() => dismiss(m.id)}>
                 <i className="ti ti-x" aria-hidden="true" />
               </button>
             )}

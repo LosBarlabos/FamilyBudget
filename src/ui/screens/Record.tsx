@@ -190,7 +190,7 @@ export function Record() {
       <div className="page-head">
         <PeriodSwitcher />
         {!unexpectedOpen && (
-          <button onClick={() => setUnexpectedOpen(true)}>
+          <button className="btn" onClick={() => setUnexpectedOpen(true)}>
             <Icon name="alert-triangle" /> Váratlan kiadás
           </button>
         )}
@@ -469,7 +469,7 @@ function FixRow({
                 {formatFt(e.amount)}
                 {e.note && <span className="faint">· {e.note}</span>}
                 {e.settles && <Icon name="lock" className="faint" />}
-                <button aria-label={`${shortDate(e.date)}: ${formatFt(e.amount)} törlése`} onClick={() => removeEntry(e.id, `${cat.name}: ${formatFt(e.amount)} törölve`)}>
+                <button className="btn" aria-label={`${shortDate(e.date)}: ${formatFt(e.amount)} törlése`} onClick={() => removeEntry(e.id, `${cat.name}: ${formatFt(e.amount)} törölve`)}>
                   <Icon name="x" />
                 </button>
               </span>
@@ -481,10 +481,10 @@ function FixRow({
             <Icon name="receipt-refund" className="fee-icon" />
             <span id={feeTextId} className="small num fee-text">{feeSuggestionText(fee)}</span>
             <span className="fee-actions">
-              <button className="sm primary" aria-describedby={feeTextId} disabled={feePending} aria-busy={feePending} onClick={() => acceptFee(fee)}>
+              <button className="btn sm primary" aria-describedby={feeTextId} disabled={feePending} aria-busy={feePending} onClick={() => acceptFee(fee)}>
                 Igen
               </button>
-              <button className="sm" aria-describedby={feeTextId} disabled={feePending} onClick={rejectFee}>
+              <button className="btn sm" aria-describedby={feeTextId} disabled={feePending} onClick={rejectFee}>
                 Nem
               </button>
             </span>
@@ -528,7 +528,7 @@ function FixRow({
                   <span key={w.id} className="pill num" title={shortDate(w.date)}>
                     −{formatFt(w.amount)}
                     {w.note && <span className="faint">· {w.note}</span>}
-                    <button aria-label={`${formatFt(w.amount)} felhasználás törlése`} onClick={() => removeEntry(w.id, 'Felhasználás törölve')}>
+                    <button className="btn" aria-label={`${formatFt(w.amount)} felhasználás törlése`} onClick={() => removeEntry(w.id, 'Felhasználás törölve')}>
                       <Icon name="x" />
                     </button>
                   </span>
@@ -677,7 +677,7 @@ function EnvelopeRow({
               {/* Túlfutó vagy terv nélkül költött keretnél: egy másik keret maradéka fedezheti, csak erre a hónapra. */}
               {showCover && (
                 <button
-                  className="sm"
+                  className="btn sm"
                   aria-label={`${cat.name}: átcsoportosítás másik keretből`}
                   onClick={() => {
                     coverFocus.current = true;
@@ -699,7 +699,7 @@ function EnvelopeRow({
                 {quick.map((q) => (
                   <button
                     key={q}
-                    className="sm num"
+                    className="btn sm num"
                     aria-label={`${formatFt(q)} hozzáadása`}
                     disabled={quickPending}
                     aria-busy={quickPending}
@@ -733,7 +733,7 @@ function EnvelopeRow({
                 <span key={e.id} className="pill num" title={`${shortDate(e.date)}${e.note ? ` · ${e.note}` : ''}`}>
                   {formatFt(e.amount)}
                   {e.note && <span className="faint">· {e.note}</span>}
-                  <button aria-label={`${formatFt(e.amount)} törlése`} onClick={() => remove(e.id)}>
+                  <button className="btn" aria-label={`${formatFt(e.amount)} törlése`} onClick={() => remove(e.id)}>
                     <Icon name="x" />
                   </button>
                 </span>
@@ -797,7 +797,7 @@ function RecentEntries() {
                   {sign}
                   {formatFt(e.amount)}
                 </span>
-                <button className="sm ghost icon" aria-label={`${name}: ${formatFt(e.amount)} törlése`} onClick={() => remove(e, name)}>
+                <button className="btn sm ghost icon" aria-label={`${name}: ${formatFt(e.amount)} törlése`} onClick={() => remove(e, name)}>
                   <Icon name="trash" />
                 </button>
               </li>
