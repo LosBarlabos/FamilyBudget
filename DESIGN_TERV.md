@@ -85,6 +85,7 @@ Minden jelöltnél: mit old meg, mekkora munka, kell-e hozzá domain-változás 
 - Éves összesítő (idei és tavalyi) és a „ki mennyit rögzített” bontás.
 
 **Új jelöltek:**
+- **Megtakarítások egyenlege jól látható helyen** (a felhasználó kérése, 2026. okt. 23.): ma csak a Futó egyenleg kártya apró sorában („félretéve most”) és célonként a Megtakarítás és célok kártyán látszik. Kérdések: hol legyen (Áttekintés felső sávja, saját kártya vagy saját képernyő), csak a mai összeg kell-e vagy havi alakulás is (befizetések, felhasználás, grafikon), és célonként vagy összesítve.
 - **Parancspaletta** (`Cmd/Ctrl+K`): ugrás képernyőre és kategóriára, gyors rögzítés gépeléssel („élelmiszer 12500”), keresés a megjegyzésekben.
 - **Gesztusok mobilon:** a számlasor elhúzása = kifizetve, a rögzítés elhúzása = törlés (visszavonással). Az alsó lap húzható fogantyúval csukható.
 - **Értesítések:** esedékes számla, havi zárás, elavult mentés (Notification API; iOS-en csak telepített PWA-ban). Ütemezett értesítéshez szerveroldali push kellene, ezért itt csak a megnyitáskori jelzés reális.
