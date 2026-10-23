@@ -152,10 +152,6 @@
   /* Row: a listasorok közös elválasztója (korábban 10 külön szabály). A sorok belső rácsa képernyőnként a 6. fázisban egységesül. */
   :is(.todo, .list-row, .rec-row, .rec-env, .recent-row, .plan-row, .cat-row, .cat-edit, .goal-row, .cal-row) + :is(.todo, .list-row, .rec-row, .rec-env, .recent-row, .plan-row, .cat-row, .cat-edit, .goal-row, .cal-row, .rec-more),
   :is(.where-list, .dev-list) > li + li { box-shadow: 0 -1px 0 var(--color-border); }
-  /* A vonal a sor felső élén fut: ott nincs lekerekítés, különben a vonal a sarkokban elhajlik. */
-  :is(.todo, .list-row, .rec-row, .rec-env, .recent-row, .plan-row, .cat-row, .cat-edit, .goal-row, .cal-row) + :is(.todo, .list-row, .rec-row, .rec-env, .recent-row, .plan-row, .cat-row, .cat-edit, .goal-row, .cal-row, .rec-more) {
-    border-top-left-radius: 0; border-top-right-radius: 0;
-  }
 
   /* Chip: 40 px-es, lekerekített, választható vagy művelet (kategóriaválasztó, javasolt számla, #címke). */
   .chip {
@@ -890,7 +886,11 @@
   .heat { border-collapse: separate; border-spacing: 3px; font-size: var(--text-sm); }
   .heat th { font-weight: 500; color: var(--color-text-muted); font-size: var(--text-xs); padding: var(--space-0-5) var(--space-1); white-space: nowrap; }
   .heat thead th.on { color: var(--color-text); font-weight: 650; }
-  .heat .heat-name { position: sticky; left: 0; z-index: var(--z-sticky); background: var(--color-surface); text-align: left; padding: 0 var(--space-1-5) 0 0; min-width: 120px; max-width: 160px; }
+  /* A rögzített névoszlop a görgetősáv belső margóját és a cellaközt is kitakarja, hogy ne lógjon ki mögüle cella. */
+  .heat .heat-name {
+    position: sticky; left: 0; z-index: var(--z-sticky); background: var(--color-surface); text-align: left; padding: 0 var(--space-1-5) 0 0; min-width: 120px; max-width: 160px;
+    box-shadow: -8px 0 0 var(--color-surface), 3px 0 0 var(--color-surface);
+  }
   .heat-name-in { display: flex; align-items: center; gap: var(--space-0-5); }
   .heat-label { min-height: 36px; padding: var(--space-1) var(--space-0-5); font-size: var(--text-sm); font-weight: 500;
     color: var(--color-text); white-space: normal; text-align: left; line-height: 1.25;
@@ -957,6 +957,11 @@
     padding: var(--space-1-5) var(--space-2); border-radius: var(--radius-md); color: var(--color-text); text-align: left; font: inherit;
   }
   .cal-row:hover { background: var(--color-surface-sunken); }
+  /* A lejárt számla csekkként, mint az Áttekintés fizetendői; az állapotszöveg a csekk tintájával, félkövéren. */
+  .cal-row.overdue { background: var(--color-bill); color: var(--color-on-bill); border-radius: var(--radius-bill); }
+  .cal-row.overdue:hover { background: color-mix(in srgb, var(--color-bill) 88%, var(--color-on-bill)); }
+  .cal-row.overdue :is(.cal-date, .tiny) { color: var(--color-on-bill); }
+  .cal-row.overdue .tiny { font-weight: 600; }
   .cal-date { font-size: var(--text-sm); color: var(--color-text-muted); }
   .cal-main { display: flex; flex-direction: column; min-width: 0; }
   .cal-main .rec-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -973,6 +978,12 @@
   @container content (max-width: 680px) {
     .plan-row.off-cycle { grid-template-columns: minmax(0, 1fr); }
     .plan-row.off-cycle > .btn { justify-self: start; margin-left: var(--space-10); }
+  }
+
+  /* A sorok elválasztója (components réteg) a sor felső élén fut: itt, a sorok saját lekerekítése után vesszük el
+     a felső sarkokat, különben a vonal a sarkokban elhajlik. */
+  :is(.todo, .list-row, .rec-row, .rec-env, .recent-row, .plan-row, .cat-row, .cat-edit, .goal-row, .cal-row) + :is(.todo, .list-row, .rec-row, .rec-env, .recent-row, .plan-row, .cat-row, .cat-edit, .goal-row, .cal-row, .rec-more) {
+    border-top-left-radius: 0; border-top-right-radius: 0;
   }
 }
 

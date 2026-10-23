@@ -134,7 +134,7 @@ export function BillCalendar() {
           ) : (
             <div className="cal-list">
               {shown.map((e) => (
-                <button key={`${e.periodId}-${e.cat.id}`} className="cal-row" onClick={() => open(e)}>
+                <button key={`${e.periodId}-${e.cat.id}`} className={`cal-row ${e.kind === 'bill' && e.state === 'overdue' ? 'overdue' : ''}`} onClick={() => open(e)}>
                   <span className="cal-date num">{shortDate(e.date)}</span>
                   <CatIcon cat={e.cat} />
                   <span className="cal-main">
