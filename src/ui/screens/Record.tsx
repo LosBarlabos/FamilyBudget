@@ -274,7 +274,7 @@ function Section({ title, icon, hint, children }: { title: string; icon: string;
     <div className="card">
       <div className="card-head">
         <h2 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Icon name={icon} style={{ color: 'var(--text-3)' }} /> {title}
+          <Icon name={icon} style={{ color: 'var(--color-text-subtle)' }} /> {title}
         </h2>
         {hint && <span className="small faint">{hint}</span>}
       </div>

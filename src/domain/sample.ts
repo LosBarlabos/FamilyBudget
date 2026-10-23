@@ -150,11 +150,13 @@ export function buildSample(kind: SampleKind, now = new Date()): ExportFile {
   const add = (periodId: PeriodId, catId: string, amount: number, date: ISODate, extra: Partial<Entry> = {}) => {
     const hh = String(7 + Math.floor(rand() * 14)).padStart(2, '0');
     const mm = String(Math.floor(rand() * 60)).padStart(2, '0');
-    // Az előre (jövőbeli napra) rögzített tétel is most készült: a rögzítés ideje nem lehet a jövőben.
+    // Az előre (jövőbeli napra) rögzített tétel is már elkészült: a rögzítés ideje nem lehet a jövőben. A mai nap
+    // elejére esik, hogy a nap folyamán bármikor betöltött minta ugyanazt mutassa (a képernyőképek összevethetők).
     const stamp = new Date(`${date}T${hh}:${mm}:00`);
+    const earliest = new Date(`${today}T00:05:00`);
     entries.push({
       id: `minta-e${seq++}`, periodId, categoryId: `minta-${catId}`, amount: Math.round(amount), date,
-      createdAt: (stamp > now ? new Date(now.getTime() - 3_600_000) : stamp).toISOString(), ...extra,
+      createdAt: (stamp > now ? (earliest < now ? earliest : now) : stamp).toISOString(), ...extra,
     });
   };
   /** Keret: a teljes összeg n részletben, véletlen napokon az időszakon belül (legfeljebb a megadott napig). */

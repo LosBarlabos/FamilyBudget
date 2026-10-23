@@ -25,12 +25,12 @@ export function CatIcon({ cat }: { cat: Pick<Category, 'icon' | 'color'> }) {
 export type BarTone = 'neutral' | 'accent' | 'warn' | 'over' | 'good' | 'plan';
 
 const TONE: Record<BarTone, string> = {
-  neutral: 'var(--text-3)',
-  accent: 'var(--accent)',
-  warn: 'var(--warn-fill)',
-  over: 'var(--danger-fill)',
-  good: 'var(--success)',
-  plan: 'var(--border-strong)',
+  neutral: 'var(--color-text-subtle)',
+  accent: 'var(--color-accent)',
+  warn: 'var(--color-warn-fill)',
+  over: 'var(--color-danger-fill)',
+  good: 'var(--color-ok)',
+  plan: 'var(--color-border-strong)',
 };
 
 /** A keretsáv színe a tempót követi: rendben semleges akcentszín, gyors fogyás borostyán, túllépés piros. */

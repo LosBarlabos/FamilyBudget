@@ -13,6 +13,7 @@ npm test           # a számítási logika tesztjei
 npm run build      # éles build a dist/ mappába
 npm run kepek      # képernyőképek a mintaadattal (fut a dev szerver mellett, lásd docs/design/00-elokeszites.md)
 npm run meresek -- --probak <mappa>   # a UX/UI Audit plugin mérései ugyanezen a mátrixon (docs/design/01-audit.md)
+node scripts/kepdiff.mjs <előtte> <utána>   # két képernyőkép-sorozat képpontos összevetése, különbségképekkel
 node scripts/hasznalat.mjs <mentés.json>   # használati minták egy mentésből, csak összesítve (docs/design/02-felhasznaloi-kutatas.md)
 ```
 

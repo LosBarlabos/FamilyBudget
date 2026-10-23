@@ -172,7 +172,7 @@ function Reminders({ onCategories }: { onCategories: () => void }) {
     <section className="card" aria-labelledby="cal-remind-title">
       <div className="card-head">
         <h2 id="cal-remind-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Icon name="bell-ringing" style={{ color: 'var(--text-3)' }} /> Emlékeztető a telefonodon
+          <Icon name="bell-ringing" style={{ color: 'var(--color-text-subtle)' }} /> Emlékeztető a telefonodon
         </h2>
       </div>
       {bills.length === 0 ? (

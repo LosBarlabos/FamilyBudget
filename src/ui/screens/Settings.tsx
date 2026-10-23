@@ -136,7 +136,7 @@ function PeriodOverrides() {
         <div style={{ marginTop: 12 }}>
           {data.overrides.map((o) => (
             <div key={o.periodId} className="small" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
-              <Icon name="calendar-event" style={{ color: 'var(--text-3)' }} />
+              <Icon name="calendar-event" style={{ color: 'var(--color-text-subtle)' }} />
               <span style={{ flex: 1 }}>{periodName(o.periodId, true)}: kezdés {o.startDate.replaceAll('-', '.')}.</span>
               <button className="sm ghost" onClick={() => safe(async () => { await clearOverride(o.periodId); toast('Visszaállítva a fizetésnapra', () => setOverride(o)); })}>
                 Visszaállítás
@@ -171,7 +171,7 @@ function Backup() {
           <Icon name="table" /> Táblázat (CSV, Excelhez)
         </button>
       </div>
-      <div style={{ borderTop: '1px solid var(--border)', marginTop: 16, paddingTop: 16 }}>
+      <div style={{ borderTop: '1px solid var(--color-border)', marginTop: 16, paddingTop: 16 }}>
         <ImportPanel />
       </div>
     </div>
@@ -214,7 +214,7 @@ export function ImportPanel({ onDone }: { onDone?: () => void }) {
             <br />
             Készült: {dt(file.preview.exportedAt)} · utolsó rögzítés: {dt(file.preview.lastChange)}
           </div>
-          <div className="small" style={{ margin: '10px 0', color: 'var(--warn)' }}>
+          <div className="small" style={{ margin: '10px 0', color: 'var(--color-warn)' }}>
             <Icon name="alert-triangle" /> A betöltés felülírja a jelenlegi adatokat.
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
@@ -254,7 +254,7 @@ function Storage() {
     <div className="card">
       <div className="card-head"><h2>Tárolás</h2></div>
       <div className="small" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Icon name={persisted ? 'shield-check' : 'shield'} style={{ color: persisted ? 'var(--success)' : 'var(--warn)', fontSize: 18 }} />
+        <Icon name={persisted ? 'shield-check' : 'shield'} style={{ color: persisted ? 'var(--color-ok)' : 'var(--color-warn)', fontSize: 18 }} />
         {persisted === undefined
           ? 'Ellenőrzés…'
           : persisted
@@ -281,7 +281,7 @@ function DangerZone() {
         <button className="danger" onClick={() => setArmed(true)}><Icon name="trash" /> Összes adat törlése…</button>
       ) : (
         <div className="small" style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          <span style={{ color: 'var(--danger)', flex: 1, minWidth: 220 }}>
+          <span style={{ color: 'var(--color-danger)', flex: 1, minWidth: 220 }}>
             Minden kategória, terv és rögzítés végleg törlődik ebből a böngészőből. Előtte érdemes menteni.
           </span>
           {/* A közös használat előbb kikapcsol, különben a következő szinkron a közös költségvetést is kiürítené. */}

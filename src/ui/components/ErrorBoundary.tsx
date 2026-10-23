@@ -55,7 +55,7 @@ function ErrorScreen({ error, stack }: { error: Error; stack: string }) {
   return (
     <div className="error-screen card" role="alert">
       <h1 style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-        <Icon name="alert-octagon" style={{ color: 'var(--danger)' }} /> Hiba történt
+        <Icon name="alert-octagon" style={{ color: 'var(--color-danger)' }} /> Hiba történt
       </h1>
       <p className="muted" style={{ marginTop: 0 }}>
         Az adatok a böngészőben megvannak. Mielőtt bármi mást próbálsz, töltsd le a nyers adatmentést: a Beállításokban

@@ -102,7 +102,7 @@ export function UnexpectedExpense({ onClose }: { onClose: () => void }) {
     <div className="card unexpected" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
       <div className="card-head">
         <h2 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Icon name="alert-triangle" style={{ color: 'var(--danger)' }} /> Váratlan kiadás
+          <Icon name="alert-triangle" style={{ color: 'var(--color-danger)' }} /> Váratlan kiadás
         </h2>
         <button className="sm ghost icon" aria-label="Bezárás" onClick={onClose}><Icon name="x" /></button>
       </div>
