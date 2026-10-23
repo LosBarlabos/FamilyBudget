@@ -57,11 +57,11 @@ function ErrorScreen({ error, stack }: { error: Error; stack: string }) {
       <h1 style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
         <Icon name="alert-octagon" style={{ color: 'var(--color-danger)' }} /> Hiba történt
       </h1>
-      <p className="muted" style={{ marginTop: 0 }}>
+      <p className="muted mt-0">
         Az adatok a böngészőben megvannak. Mielőtt bármi mást próbálsz, töltsd le a nyers adatmentést: a Beállításokban
         ugyanúgy visszatölthető, mint egy normál mentés.
       </p>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <div className="cluster wrap gap-2">
         <button className="btn primary" onClick={download}>
           <Icon name="download" /> Nyers adatmentés letöltése
         </button>
@@ -69,8 +69,8 @@ function ErrorScreen({ error, stack }: { error: Error; stack: string }) {
           <Icon name="refresh" /> Újratöltés
         </button>
       </div>
-      {status && <div className="small" style={{ marginTop: 10 }}>{status}</div>}
-      <details style={{ marginTop: 16 }}>
+      {status && <div className="small mt-3">{status}</div>}
+      <details className="mt-4">
         <summary className="small muted">A hiba részletei</summary>
         <pre className="error-details">
           {error.name}: {error.message}

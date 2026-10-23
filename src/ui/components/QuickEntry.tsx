@@ -178,7 +178,7 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
         <div role="group" aria-labelledby={envTitleId}>
           <div id={envTitleId} className="quick-title">Melyik keretből?</div>
           {cats.length === 0 ? (
-            <p className="small muted" style={{ margin: 0 }}>
+            <p className="small muted m-0">
               Még nincs keret kategória (pl. Élelmiszer), amibe gyorsan rögzíthetnél.{' '}
               <button className="btn link" onClick={() => go('categories')}>Kategóriák</button>
             </p>
@@ -187,7 +187,7 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
               {cats.map((c) => (
                 <button
                   key={c.id}
-                  className={`chip-btn ${c.id === def?.id ? 'on' : ''}`}
+                  className={`chip chip-cat ${c.id === def?.id ? 'on' : ''}`}
                   disabled={pending}
                   aria-keyshortcuts={c.id === def?.id ? 'Enter' : undefined}
                   onMouseDown={keepFocus}
@@ -208,7 +208,7 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
               {bills.map((b) => (
                 <button
                   key={b.cat.id}
-                  className={`chip-btn num ${b.overdue ? 'late' : ''}`}
+                  className={`chip chip-cat num ${b.overdue ? 'late' : ''}`}
                   disabled={pending}
                   title={`${b.overdue ? 'Lejárt' : 'Esedékes'}: ${shortDate(b.due)}`}
                   aria-label={`${b.cat.name}: ${settleLabel(b.cat.type, b.partial).toLowerCase()}, ${
@@ -222,7 +222,7 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
                 </button>
               ))}
             </div>
-            <div className="tiny faint" style={{ marginTop: 6 }}>
+            <div className="tiny faint mt-1-5">
               Koppintásra lezárja: üres mezőnél a látható összeggel, beírt összegnél azzal.
             </div>
           </div>

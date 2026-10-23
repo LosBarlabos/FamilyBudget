@@ -1,6 +1,6 @@
 import { formatRange, periodName } from '../../domain/periods';
 import { useBudget } from '../context';
-import { Icon } from './common';
+import { Badge, Icon } from './common';
 
 const STATUS_LABEL = { closed: 'Lezárt', current: 'Folyamatban', future: 'Jövőbeli' } as const;
 
@@ -32,7 +32,7 @@ export function PeriodSwitcher() {
           {formatRange(p.start, p.end)}
         </span>
       )}
-      {p && <span className={`period-badge ${p.status === 'current' ? 'current' : ''}`}>{STATUS_LABEL[p.status]}</span>}
+      {p && <Badge tone={p.status === 'current' ? 'accent' : 'neutral'} className="period-badge">{STATUS_LABEL[p.status]}</Badge>}
       {p && p.status !== 'current' && (
         <button className="btn sm ghost" onClick={() => setPeriodId(summaries.currentId)}>
           Ugrás a mostanira

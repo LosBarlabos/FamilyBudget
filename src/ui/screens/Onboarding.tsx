@@ -145,7 +145,7 @@ export function Onboarding() {
 
   return (
     <div className="onboarding">
-      <div className="brand" style={{ marginBottom: 20 }}>
+      <div className="brand mb-5">
         <Icon name="wallet" /> Családi költségvetés
       </div>
       <div className="steps" aria-label="Lépések">
@@ -158,8 +158,8 @@ export function Onboarding() {
 
       {step === 'period' && (
         <div className="card">
-          <h1 style={{ marginBottom: 6 }}>Állítsuk be a költségvetést</h1>
-          <p className="muted" style={{ marginTop: 0 }}>
+          <h1 className="mb-1-5">Állítsuk be a költségvetést</h1>
+          <p className="muted mt-0">
             A hónap fizetéstől fizetésig tart. Add meg, hányadikán érkezik a fizetés.
           </p>
           <div className="form-grid">
@@ -197,9 +197,9 @@ export function Onboarding() {
             </div>
           )}
           {validPayday && (
-            <div className="banner info" style={{ marginTop: 16, marginBottom: 0 }}>
+            <div className="callout tone-accent" style={{ marginTop: 16, marginBottom: 0 }}>
               <Icon name="calendar" />
-              <span className="grow">
+              <span className="callout-text">
                 Az első hónap: <strong>{periodName(firstId)}</strong> ({formatRange(periodStart(firstId, cfg), periodEnd(firstId, cfg))})
               </span>
             </div>
@@ -220,7 +220,7 @@ export function Onboarding() {
           )}
           {showJoin && (
             <div className="import-preview">
-              <p className="small muted" style={{ marginTop: 0 }}>
+              <p className="small muted mt-0">
                 Ha a párod már használja az appot közösen (GitHubon), add meg ugyanazt a tárolót és tokent, és a saját neved.
               </p>
               <SyncPanel join />
@@ -231,8 +231,8 @@ export function Onboarding() {
 
       {step === 'cats' && (
         <div className="card">
-          <h1 style={{ marginBottom: 6 }}>Kategóriák és havi összegek</h1>
-          <p className="muted" style={{ marginTop: 0 }}>
+          <h1 className="mb-1-5">Kategóriák és havi összegek</h1>
+          <p className="muted mt-0">
             Ez a kiinduló terv. Kapcsold ki, amire nincs szükséged, és írd be a szokásos havi összeget. Később bármikor módosíthatod.
           </p>
           {TYPE_ORDER.map((t) => (
@@ -265,8 +265,8 @@ export function Onboarding() {
 
       {step === 'past' && (
         <div className="card">
-          <h1 style={{ marginBottom: 6 }}>Ebben a hónapban már megtörtént</h1>
-          <p className="muted" style={{ marginTop: 0 }}>
+          <h1 className="mb-1-5">Ebben a hónapban már megtörtént</h1>
+          <p className="muted mt-0">
             Jelöld, ami a mostani hónapban már ki van fizetve vagy megérkezett. A terv összegével rögzül, később módosítható.
             Ezekből és a mostani egyenlegből számolja ki az app, mennyi pénz volt a hónap elején.
           </p>
@@ -288,7 +288,7 @@ export function Onboarding() {
             (sec) =>
               sec.rows.length > 0 && (
                 <div key={sec.label}>
-                  <div className="section-title" style={{ marginTop: 16 }}>{sec.title}</div>
+                  <div className="section-title mt-4">{sec.title}</div>
                   {sec.rows.map((r) => (
                     <div key={r.cat.id} className="ob-row ob-past">
                       <span />
@@ -316,8 +316,8 @@ export function Onboarding() {
 
       {step === 'finish' && (
         <div className="card">
-          <h1 style={{ marginBottom: 6 }}>Minden kész</h1>
-          <p className="muted" style={{ marginTop: 0 }}>Így néz ki a kiinduló havi terv:</p>
+          <h1 className="mb-1-5">Minden kész</h1>
+          <p className="muted mt-0">Így néz ki a kiinduló havi terv:</p>
           <dl className="sumlist num" style={{ maxWidth: 380 }}>
             <dt>Bevétel</dt><dd>{formatFt(totals.inc)}</dd>
             <dt>Kiadás</dt><dd>−{formatFt(totals.exp)}</dd>
@@ -325,7 +325,7 @@ export function Onboarding() {
             <dt className="total">Havi egyenleg</dt>
             <dd className={`total ${totals.net < 0 ? 'neg' : 'pos'}`}>{formatSigned(totals.net)}</dd>
           </dl>
-          <p className="small muted num" style={{ marginBottom: 0 }}>
+          <p className="small muted num mb-0">
             {next
               ? `A költségvetés a következő fizetéssel indul (${shortDate(choice.nextStart)}), ${formatFt(signedOf(opening) ?? 0)} kezdő egyenleggel.`
               : `Nyitó egyenleg a hónap elején (${shortDate(periodStart(firstId, cfg))}): ${formatFt(openingFromNow(signedOf(opening) ?? 0, pastItems()))}.`}

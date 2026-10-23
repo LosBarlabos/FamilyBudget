@@ -124,14 +124,14 @@ export function BalanceChart({
   return (
     <div>
       <div className="tiny muted" style={{ display: 'flex', gap: 16, marginBottom: 8, flexWrap: 'wrap' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span className="cluster gap-1-5">
           <span style={{ width: 16, height: 2, background: t.accent }} /> Tény (hónap végén)
         </span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span className="cluster gap-1-5">
           <span style={{ width: 16, borderTop: `2px dashed ${t.accent}` }} /> Előrejelzés a terv alapján
         </span>
         {baseline && (
-          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span className="cluster gap-1-5">
             <span style={{ width: 16, borderTop: `2px dotted ${t.faint}` }} /> Módosítás előtt
           </span>
         )}
@@ -250,13 +250,13 @@ export function SpendingChart({
     <div>
       <div className="tiny muted" style={{ display: 'flex', gap: '6px 14px', marginBottom: 8, flexWrap: 'wrap' }}>
         {series.map((s) => (
-          <span key={s.key} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <span className="cluster gap-1-5" key={s.key}>
             <span style={{ width: 10, height: 10, borderRadius: 2, background: s.color }} />
             {s.name}
           </span>
         ))}
         {savings.length > 0 && (
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <span className="cluster gap-1-5">
             <span style={{ width: 10, height: 10, borderRadius: 2, background: `${t.tick}40`, border: `1px dashed ${t.tick}` }} />
             halvány: megtakarításból
           </span>
@@ -342,17 +342,17 @@ export function TrendChart({ points, refId, height = 220 }: { points: TrendPoint
   return (
     <div>
       <div className="tiny muted" style={{ display: 'flex', gap: '6px 16px', marginBottom: 8, flexWrap: 'wrap' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span className="cluster gap-1-5">
           <span style={{ width: 16, height: 2, background: t.accent }} /> Tény
         </span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span className="cluster gap-1-5">
           <span style={{ width: 16, height: 2, background: t.faint }} /> Terv
         </span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span className="cluster gap-1-5">
           <span style={{ width: 16, borderTop: `2px dashed ${t.tick}` }} /> 3 havi átlag
         </span>
         {withSavings && (
-          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span className="cluster gap-1-5">
             <span style={{ width: 16, borderTop: `2px dotted ${t.accent}` }} /> Megtakarításból együtt
           </span>
         )}

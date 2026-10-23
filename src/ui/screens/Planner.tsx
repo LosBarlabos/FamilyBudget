@@ -124,14 +124,14 @@ export function Planner() {
       <h1 className="sr-only">Tervező</h1>
       <div className="page-head">
         <PeriodSwitcher />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <div className="cluster wrap gap-2">
           <Segmented label="Módosítás hatálya" options={MODES} value={mode} onChange={setMode} />
         </div>
       </div>
 
       <div className="planner">
         <div>
-          <div className="card" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          <div className="card cluster wrap gap-2">
             <span className="small muted" style={{ marginRight: 'auto' }} title="Csak a fix számlák és a keretek tervét írja át, és csak ott, ahol volt rögzítés">
               Gyors kitöltés (fix és keret)
             </span>
@@ -200,7 +200,7 @@ export function Planner() {
 
         <aside className="planner-side">
           <div className="card">
-            <h2 style={{ marginBottom: 12 }}>{periodName(periodId)} terve</h2>
+            <h2 className="mb-3">{periodName(periodId)} terve</h2>
             <dl className="sumlist num">
               <dt>Bevétel</dt><dd>{formatFt(totals.plannedIncome)}</dd>
               <dt>Kiadás</dt><dd>−{formatFt(totals.plannedExpense)}</dd>
@@ -209,7 +209,7 @@ export function Planner() {
               <dd className={`total ${totals.plannedNet < 0 ? 'neg' : 'pos'}`}>{formatSigned(totals.plannedNet)}</dd>
             </dl>
             {totals.plannedNet < 0 && (
-              <div className="banner warn" style={{ margin: '12px 0 0', padding: '8px 12px' }}>
+              <div className="callout tone-warn" style={{ margin: '12px 0 0', padding: '8px 12px' }}>
                 <Icon name="alert-triangle" />
                 <span className="grow small">A terv szerint ebben a hónapban több megy el, mint amennyi bejön.</span>
               </div>

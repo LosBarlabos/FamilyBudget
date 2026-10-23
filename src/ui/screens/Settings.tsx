@@ -131,9 +131,9 @@ function PeriodOverrides() {
         </label>
         <button className="btn" onClick={save}>Beállítás</button>
       </div>
-      {error && <div className="error" id={overrideErrorId} role="alert" style={{ marginTop: 6 }}>{error}</div>}
+      {error && <div className="error mt-1-5" id={overrideErrorId} role="alert">{error}</div>}
       {data.overrides.length > 0 && (
-        <div style={{ marginTop: 12 }}>
+        <div className="mt-3">
           {data.overrides.map((o) => (
             <div key={o.periodId} className="small" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
               <Icon name="calendar-event" style={{ color: 'var(--color-text-subtle)' }} />
@@ -159,11 +159,11 @@ function Backup() {
         <h2>Biztonsági mentés</h2>
         <span className={`small ${days === null || days >= 30 ? 'neg' : 'faint'}`}>{backupLabel(days)}</span>
       </div>
-      <p className="small muted" style={{ marginTop: 0 }}>
+      <p className="small muted mt-0">
         Az adatok ebben a böngészőben vannak tárolva. A mentés egy fájl, amit a Letöltések mappában találsz. Érdemes egy
         szinkronizált mappába (OneDrive, iCloud) áttenni, így a gép elvesztését is túléli.
       </p>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <div className="cluster wrap gap-2">
         <button className="btn primary" onClick={() => safe(() => exportBackup(data))}>
           <Icon name="download" /> Mentés letöltése
         </button>
@@ -205,7 +205,7 @@ export function ImportPanel({ onDone }: { onDone?: () => void }) {
       <button className="btn" onClick={() => input.current?.click()}>
         <Icon name="upload" /> Visszatöltés mentésből
       </button>
-      {error && <div className="error" role="alert" style={{ marginTop: 8 }}>{error}</div>}
+      {error && <div className="error mt-2" role="alert">{error}</div>}
       {file && (
         <div className="import-preview">
           <div style={{ fontWeight: 500, marginBottom: 6 }}>{file.name}</div>
@@ -217,7 +217,7 @@ export function ImportPanel({ onDone }: { onDone?: () => void }) {
           <div className="small" style={{ margin: '10px 0', color: 'var(--color-warn)' }}>
             <Icon name="alert-triangle" /> A betöltés felülírja a jelenlegi adatokat.
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className="cluster gap-2">
             <button
               className="btn danger"
               onClick={async () => {
@@ -253,7 +253,7 @@ function Storage() {
   return (
     <div className="card">
       <div className="card-head"><h2>Tárolás</h2></div>
-      <div className="small" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div className="small cluster gap-2">
         <Icon name={persisted ? 'shield-check' : 'shield'} style={{ color: persisted ? 'var(--color-ok)' : 'var(--color-warn)', fontSize: 18 }} />
         {persisted === undefined
           ? 'Ellenőrzés…'
@@ -261,7 +261,7 @@ function Storage() {
             ? 'Tartós tárolás engedélyezve: a böngésző nem törli magától az adatokat.'
             : 'A böngésző nem adott tartós tárolást. Használd az appot telepítve (lásd lent), és ments rendszeresen.'}
       </div>
-      {usage !== null && <div className="tiny faint" style={{ marginTop: 6 }}>Felhasznált hely: {Math.max(1, Math.round(usage / 1024))} kB</div>}
+      {usage !== null && <div className="tiny faint mt-1-5">Felhasznált hely: {Math.max(1, Math.round(usage / 1024))} kB</div>}
       <ul className="small muted" style={{ margin: '12px 0 0', paddingLeft: 18 }}>
         <li>Safariban: Fájl → Hozzáadás a Dockhoz. A sima weboldal adatait a Safari 7 nap használaton kívül törölheti, a Dockhoz adott appét nem.</li>
         <li>Chrome-ban: a címsor jobb oldalán a „Telepítés” ikon.</li>
@@ -280,7 +280,7 @@ function DangerZone() {
       {!armed ? (
         <button className="btn danger" onClick={() => setArmed(true)}><Icon name="trash" /> Összes adat törlése…</button>
       ) : (
-        <div className="small" style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="small cluster wrap gap-2">
           <span style={{ color: 'var(--color-danger)', flex: 1, minWidth: 220 }}>
             Minden kategória, terv és rögzítés végleg törlődik ebből a böngészőből. Előtte érdemes menteni.
           </span>

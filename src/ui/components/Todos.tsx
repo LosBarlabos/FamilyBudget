@@ -13,7 +13,7 @@ import { useSettleAll, useSettleRest } from '../actions';
 import { backupIsStale, daysSince, exportBackup } from '../backup';
 import { useBudget, useSafe } from '../context';
 import { useSyncConfig } from '../../sync/engine';
-import { Icon, SettleButton } from './common';
+import { Badge, Icon, SettleButton } from './common';
 
 const todoKey = (t: TodoItem) => {
   switch (t.kind) {
@@ -208,7 +208,7 @@ export function Todos({ p, pace, goals }: { p: PeriodSummary; pace: PaceOverview
     const open = t.kind === 'group' && expanded.includes(todoKey(t));
     return (
       <li key={todoKey(t)} className="todo">
-        <span className={`todo-icon ${icon.tone}`}>
+        <span className={`tile tile-lg todo-icon ${icon.tone}`}>
           <Icon name={icon.name} />
         </span>
         <span className="todo-text num">
@@ -229,7 +229,7 @@ export function Todos({ p, pace, goals }: { p: PeriodSummary; pace: PaceOverview
     <section className="card todos" aria-labelledby="todos-title">
       <div className="todos-head">
         <h2 id="todos-title" className="todos-title" tabIndex={-1}>Teendők</h2>
-        <span className="todos-count num" aria-hidden="true">{items.length}</span>
+        <Badge tone="strong" className="num" aria-hidden>{items.length}</Badge>
       </div>
       <ul id="todo-list" className="todo-list">
         {shown.map(row)}

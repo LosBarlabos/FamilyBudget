@@ -206,7 +206,7 @@ function Main({ data }: { data: BudgetData }) {
         {/* Asztalon oldalsáv: logó, kiemelt rögzítés, a menü ikonokkal, alul a mentés állapota. */}
         <aside className="sidebar">
           <div className="side-brand">
-            <span className="side-logo"><Icon name="wallet" /></span>
+            <span className="tile tile-lg side-logo"><Icon name="wallet" /></span>
             <span>Családi<br />költségvetés</span>
           </div>
           <button className="btn primary side-add" title="Kiadás rögzítése (N)" aria-label="Kiadás rögzítése" aria-keyshortcuts="N" onClick={openQuick}>
@@ -240,9 +240,9 @@ function Main({ data }: { data: BudgetData }) {
         </header>
 
         {newPeriod && (
-          <div className="banner info">
+          <div className="callout tone-accent">
             <Icon name="sparkles" />
-            <span className="grow">
+            <span className="callout-text">
               Új hónap kezdődött: <strong>{periodName(cur.id)}</strong> ({formatRange(cur.start, cur.end)}). Jó alkalom egy mentés letöltésére.
             </span>
             <button
@@ -272,10 +272,10 @@ function Main({ data }: { data: BudgetData }) {
         )}
 
         {beforeFirst && (
-          <div className="banner info">
+          <div className="callout tone-accent">
             <Icon name="calendar-time" />
             {/* A „következő fizetéssel” indulásnál és egy későbbre tett fizetésnap után is igaz. */}
-            <span className="grow">
+            <span className="callout-text">
               Az első költségvetési hónap ({periodName(s.firstPeriodId)}, {shortDate(periodStart(s.firstPeriodId, cfg))}) még nem
               kezdődött el. Addig a havi terv nem számít, a futó egyenleget csak a rögzített tételek változtatják.
             </span>

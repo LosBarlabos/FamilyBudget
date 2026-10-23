@@ -4,7 +4,7 @@ import { buildIcs, calendarEvents, icsBills, icsSnapshot, icsStale, type Calenda
 import { formatFt } from '../../domain/money';
 import { fromISO, MONTHS, shortDate, toISO } from '../../domain/periods';
 import { useBudget } from '../context';
-import { CatIcon, downloadFile, Icon, useLocalState } from '../components/common';
+import { CatIcon, downloadFile, EmptyState, Icon, useLocalState } from '../components/common';
 
 /** A letöltött naptárfájl lenyomata ezen az eszközön (a naptár importja is eszközönkénti). */
 const ICS_KEY = 'calendar-ics';
@@ -124,10 +124,13 @@ export function BillCalendar() {
             )}
           </div>
           {shown.length === 0 ? (
-            <p className="small muted">
-              Ebben a hónapban nincs esedékes számla. A naptárban azok a fix számlák látszanak, amelyeknek van esedékességi
-              napja.
-            </p>
+            <EmptyState
+              icon="calendar-off"
+              title="Ebben a hónapban nincs esedékes számla"
+              action={<button className="btn sm" onClick={() => go('categories')}>Esedékességi nap megadása</button>}
+            >
+              A naptárban azok a fix számlák látszanak, amelyeknek van esedékességi napja. Ezt a Kategóriákban állíthatod be.
+            </EmptyState>
           ) : (
             <div className="cal-list">
               {shown.map((e) => (
@@ -171,7 +174,7 @@ function Reminders({ onCategories }: { onCategories: () => void }) {
   return (
     <section className="card" aria-labelledby="cal-remind-title">
       <div className="card-head">
-        <h2 id="cal-remind-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <h2 className="cluster gap-2" id="cal-remind-title">
           <Icon name="bell-ringing" style={{ color: 'var(--color-text-subtle)' }} /> Emlékeztető a telefonodon
         </h2>
       </div>
@@ -183,16 +186,16 @@ function Reminders({ onCategories }: { onCategories: () => void }) {
       ) : (
         <>
           {stale && (
-            <div className="banner warn" role="status">
+            <div className="callout tone-warn" role="status">
               <Icon name="alert-triangle" />
-              <span className="grow">A számlák változtak a letöltés óta. Töltsd le újra, és importáld a naptáradba.</span>
+              <span className="callout-text">A számlák változtak a letöltés óta. Töltsd le újra, és importáld a naptáradba.</span>
             </div>
           )}
           <p className="small muted" style={{ margin: '0 0 12px' }}>
             Letöltheted a következő hónapok számláit naptárfájlként. A telefonon megnyitva a naptáradba kerülnek, és a
             naptár minden esedékesség előtti este 20:00-kor emlékeztet, akkor is, ha az app zárva van.
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <div className="cluster wrap gap-3">
             <button className={`btn ${saved && !stale ? '' : 'primary'}`} onClick={download}>
               <Icon name="calendar-plus" /> {saved ? 'Újra letöltöm' : 'Naptárfájl letöltése'}
             </button>

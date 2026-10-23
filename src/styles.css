@@ -1,6 +1,6 @@
 /*
  * Rétegek (sorrendjük a src/fonts.css elején): tokens → base (alaphelyzet, elemek) → components (közös vezérlők)
- * → app (keret, képernyők, segédosztályok). Egy későbbi réteg szabálya a nagyobb specifikusságú korábbit is felülírja,
+ * → app (keret, képernyők) → utilities (elrendezési segédosztályok: Stack, Cluster, térköz). Egy későbbi réteg szabálya a nagyobb specifikusságú korábbit is felülírja,
  * így a képernyő mindig igazíthat egy komponensen. A Tabler ikonfont CSS-e rétegen kívül van, de csak a .ti betűjét állítja.
  */
 @layer base {
@@ -81,10 +81,87 @@
   @media (pointer: coarse), (max-width: 720px) {
     input[type='text'], input[type='number'], input[type='date'], input[type='password'], select, input.sm, select.sm { font-size: var(--text-md); }
   }
+  /* Field állapotai: hibás (a useFieldErrors adja az aria-invalidot) és tiltott. A hibát a mező alatti szöveg is kimondja. */
+  input[aria-invalid='true'], select[aria-invalid='true'] { border-color: var(--color-danger); box-shadow: inset 0 0 0 1px var(--color-danger); }
+  input:disabled, select:disabled { background: var(--color-surface-sunken); color: var(--color-text-subtle); border-color: var(--color-border); cursor: not-allowed; }
   input::placeholder { color: var(--color-text-subtle); }
   input[type='range'] { width: 100%; accent-color: var(--color-accent); margin: 0; }
   label.field { display: flex; flex-direction: column; gap: var(--space-1); font-size: var(--text-sm); color: var(--color-text-muted); }
   .error { color: var(--color-danger); font-size: var(--text-sm); }
+
+  /* Badge: állapot, darabszám, rövid címke. Tónus: tone-neutral (alap), tone-accent, tone-ok, tone-warn, tone-danger,
+     tone-strong (darabszám); méret: alap (12 px) vagy sm (11 px). A jelentést a szöveg hordozza, nem csak a szín. */
+  .badge {
+    display: inline-flex; align-items: center; gap: var(--space-1); padding: var(--space-0-5) var(--space-2); border-radius: var(--radius-full);
+    font-size: var(--text-xs); font-weight: 500; line-height: 1.4; white-space: nowrap;
+    background: var(--color-surface-sunken); color: var(--color-text-muted);
+  }
+  .badge.sm { font-size: var(--text-2xs); padding: var(--space-px) var(--space-1-5); }
+  .badge.tone-accent { background: var(--color-accent-subtle); color: var(--color-accent-text); }
+  .badge.tone-ok { background: var(--color-ok-subtle); color: var(--color-ok); }
+  .badge.tone-warn { background: var(--color-warn-subtle); color: var(--color-warn); }
+  .badge.tone-danger { background: var(--color-danger-subtle); color: var(--color-danger); }
+  .badge.tone-strong { min-width: 22px; height: 22px; justify-content: center; padding: 0 var(--space-1-5); background: var(--color-text); color: var(--color-bg); font-weight: 700; }
+  /* A törölhető badge gombja: kicsi kör, de 24 px-es érintési célponttal (WCAG 2.5.8). */
+  .badge-remove {
+    position: relative; width: 18px; height: 18px; justify-content: center; border-radius: 50%; color: var(--color-text-subtle);
+  }
+  .badge-remove::after { content: ''; position: absolute; inset: -3px; }
+  .badge-remove .ti { font-size: var(--icon-2xs); }
+  @media (hover: hover) { .badge-remove:hover { background: var(--color-surface-muted); color: var(--color-text); } }
+
+  /* IconTile: ikon egy színezett négyzetben. Méret: tile-sm 24, tile-md 32, tile-lg 40 px; a színt a használat adja. */
+  .tile { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: var(--radius-md); }
+  .tile .ti { font-size: inherit; }
+  .tile-sm { width: 24px; height: 24px; border-radius: var(--radius-sm); font-size: var(--icon-xs); }
+  .tile-md { width: 32px; height: 32px; font-size: var(--icon-md); }
+  .tile-lg { width: 40px; height: 40px; font-size: var(--icon-lg); }
+
+  /* Meter: vízszintes sáv. A sáv (meter) egy vagy több kitöltést (meter-fill) tart; a „ma” vagy a terv jelölője
+     (meter-mark) a közös burkolón (meter-wrap) van, hogy a sáv lekerekítése ne vágja le. Méret: alap 8 px, meter-lg 10 px. */
+  .meter-wrap { position: relative; display: block; }
+  .meter { display: flex; height: 8px; border-radius: var(--radius-full); background: var(--color-surface-sunken); overflow: hidden; }
+  .meter.meter-lg { height: 10px; }
+  .meter-fill { height: 100%; border-radius: var(--radius-full); background: var(--color-accent); transition: width var(--dur-slow) ease; }
+  .meter-fill:not(:last-child) { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+  .meter-fill:not(:first-child) { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+  .meter-fill.is-over { background: var(--color-danger-fill); }
+  .meter-fill.is-unplanned { background: var(--color-warn-fill); }
+  .meter-fill.is-savings { background: repeating-linear-gradient(135deg, var(--color-accent) 0 3px, transparent 3px 6px); opacity: 0.7; }
+  /* A jelölő felület színű szegélye a kitöltésen is kiemeli. */
+  .meter-mark {
+    position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; border-radius: 1px;
+    background: var(--color-text-muted); box-shadow: 0 0 0 1px var(--color-surface); pointer-events: none;
+  }
+  .meter-mark.is-plan { background: var(--color-text); }
+
+  /* Callout: kiemelt üzenet a tartalom között (ikon, szöveg, műveletek). Tónus: tone-accent, tone-warn, tone-danger, tone-ok. */
+  .callout { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); margin-bottom: var(--space-4); font-size: var(--text-ui); }
+  .callout.tone-accent { background: var(--color-accent-subtle); color: var(--color-accent-text); }
+  .callout.tone-warn { background: var(--color-warn-subtle); color: var(--color-warn); }
+  .callout.tone-danger { background: var(--color-danger-subtle); color: var(--color-danger); }
+  .callout.tone-ok { background: var(--color-ok-subtle); color: var(--color-ok); }
+  .callout-text { flex: 1; min-width: 200px; }
+
+  /* EmptyState: üres állapot ikonnal, címmel, rövid szöveggel és egy művelettel, hogy ne legyen zsákutca. */
+  .empty { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-8) var(--space-4); text-align: center; }
+  .empty-icon { font-size: 40px; color: var(--color-text-subtle); }
+  .empty-title { margin: 0; font-weight: 600; }
+  .empty-text { max-width: 520px; margin: 0 0 var(--space-2); color: var(--color-text-muted); font-size: var(--text-ui); }
+
+  /* Row: a listasorok közös elválasztója (korábban 10 külön szabály). A sorok belső rácsa képernyőnként a 6. fázisban egységesül. */
+  :is(.todo, .list-row, .rec-row, .rec-env, .recent-row, .plan-row, .cat-row, .cat-edit, .goal-row, .cal-row) + :is(.todo, .list-row, .rec-row, .rec-env, .recent-row, .plan-row, .cat-row, .cat-edit, .goal-row, .cal-row, .rec-more),
+  :is(.where-list, .dev-list) > li + li { box-shadow: 0 -1px 0 var(--color-border); }
+
+  /* Chip: 40 px-es, lekerekített, választható vagy művelet (kategóriaválasztó, javasolt számla, #címke). */
+  .chip {
+    height: 40px; max-width: 100%; padding: 0 14px; gap: var(--space-2); border: 1px solid var(--color-border-strong); border-radius: var(--radius-full);
+    background: var(--color-surface); color: var(--color-text); font-size: var(--text-ui);
+  }
+  .chip.chip-cat { padding-left: 5px; font-size: var(--text-base); }
+  .chip.chip-cat .cat-icon { width: 30px; height: 30px; border-radius: 50%; font-size: var(--text-md); }
+  .chip.late { border-color: color-mix(in srgb, var(--color-danger) 50%, transparent); }
+  @media (hover: hover) { .chip:hover { background: var(--color-surface-sunken); } }
 
   .seg { display: inline-flex; border: 1px solid var(--color-border-strong); border-radius: var(--radius-md); padding: var(--space-0-5); gap: var(--space-0-5); background: var(--color-surface); }
   .seg button { height: 26px; font-size: var(--text-sm); padding: 0 10px; border-radius: var(--radius-sm); color: var(--color-text-muted); }
@@ -113,17 +190,18 @@
     padding: var(--space-6) var(--gutter) var(--space-12);
   }
 
+  /* A képernyők tartalma a saját szélességéhez igazodik, nem az ablakéhoz (@container content). Így az oldalsáv és a
+     sín melletti keskenyebb tartalom is a neki való elrendezést kapja: 680 px alatt a kompakt sorok, 860 px alatt
+     egy oszlop (Tervező, Számlanaptár). */
+  .app-main > main { container: content / inline-size; }
+
   .sidebar {
     position: sticky; top: 0; height: 100vh; overflow-y: auto;
     display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-5) var(--space-3);
     background: var(--color-surface); border-right: 1px solid var(--color-border);
   }
   .side-brand { display: flex; align-items: center; gap: 10px; padding: 0 var(--space-1-5); font-family: var(--font-display); font-weight: 600; font-size: var(--text-lg); line-height: 1.15; }
-  .side-logo {
-    width: 36px; height: 36px; flex-shrink: 0; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;
-    background: var(--hero-bg); color: var(--hero-text);
-  }
-  .side-logo .ti { font-size: var(--icon-lg); }
+  .side-logo { background: var(--hero-bg); color: var(--hero-text); }
   .btn.side-add { height: 48px; border-radius: var(--radius-lg); justify-content: center; gap: var(--space-2); font-size: var(--text-base); font-weight: 600; }
   .btn.side-add .ti { font-size: var(--icon-lg); }
   .side-add kbd {
@@ -229,28 +307,18 @@
   .page-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-4); }
   .period-switch { display: flex; align-items: center; gap: var(--space-1-5); flex-wrap: wrap; }
   .period-switch select { font-weight: 600; font-size: var(--text-md); height: 36px; }
-  .period-badge { font-size: var(--text-xs); padding: var(--space-0-5) var(--space-2); border-radius: var(--radius-full); background: var(--color-surface-sunken); color: var(--color-text-muted); }
-  .period-badge.current { background: var(--color-accent-subtle); color: var(--color-accent-text); }
 
   .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4) 18px; margin-bottom: var(--space-4); }
   .card-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: 10px; flex-wrap: wrap; }
-  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); }
-  .kpi { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 14px var(--space-4); }
-  .kpi .label { font-size: var(--text-sm); color: var(--color-text-muted); }
-  .kpi .value { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 600; margin-top: var(--space-0-5); }
-  .kpi .sub { font-size: var(--text-xs); color: var(--color-text-subtle); margin-top: var(--space-0-5); }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); }
+  .stat { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 14px var(--space-4); }
+  .stat .label { font-size: var(--text-sm); color: var(--color-text-muted); }
+  .stat .value { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 600; margin-top: var(--space-0-5); }
+  .stat .sub { font-size: var(--text-xs); color: var(--color-text-subtle); margin-top: var(--space-0-5); }
   .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: var(--space-4); }
   .grid-2 > .card { margin-bottom: 0; }
 
-  .bar { height: 8px; background: var(--color-surface-sunken); border-radius: var(--radius-xs); overflow: hidden; }
-  .bar > div { height: 100%; border-radius: var(--radius-xs); transition: width var(--dur-slow) ease; }
-  /* „Ma” jelölő: az időszakból eltelt idő aránya; a felület színű szegély a kitöltésen is kiemeli. */
-  .bar-wrap { position: relative; }
-  .bar-today {
-    position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; border-radius: 1px;
-    background: var(--color-text-muted); box-shadow: 0 0 0 1px var(--color-surface); pointer-events: none;
-  }
-  .kpi .sub .kpi-line { display: block; }
+  .stat .sub .stat-line { display: block; }
 
   /* --- Áttekintés: „Jól állunk-e?” és teendők --- */
   .hero {
@@ -265,9 +333,8 @@
   .hero-sub { font-size: var(--text-ui); color: var(--hero-text-2); }
   .hero-sub strong { color: var(--hero-text); font-weight: 600; }
   .hero-meter { display: grid; gap: var(--space-1-5); margin-top: 14px; }
-  .hero .bar { height: 10px; border-radius: 5px; background: var(--hero-line); }
-  .hero .bar > div { border-radius: 5px; }
-  .hero .bar-today { top: -4px; bottom: -4px; width: 3px; background: var(--hero-text); box-shadow: 0 0 0 2px var(--hero-bg); }
+  .hero .meter { height: 10px; background: var(--hero-line); }
+  .hero .meter-mark { top: -4px; bottom: -4px; width: 3px; background: var(--hero-text); box-shadow: 0 0 0 2px var(--hero-bg); }
   .hero-meter-text { display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--space-0-5) var(--space-3); font-size: var(--text-xs); color: var(--hero-text-2); }
   .hero p.hero-ok { display: flex; align-items: center; gap: var(--space-1-5); margin-top: var(--space-2); font-size: var(--text-sm); color: var(--hero-accent); }
   .hero-ok .ti { font-size: var(--icon-sm); }
@@ -288,26 +355,14 @@
   .hero-alert:hover { filter: brightness(0.97); }
   .hero-alert:disabled { opacity: 1; }
   .hero-alert > .ti { font-size: var(--icon-md); flex-shrink: 0; }
-  .hero-alert-icon {
-    width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
-    background: color-mix(in srgb, currentColor 14%, transparent);
-  }
-  .hero-alert-icon .ti { font-size: var(--icon-lg); }
+  .hero-alert-icon { background: color-mix(in srgb, currentColor 14%, transparent); }
   .hero-alert-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-0-5); font-weight: 500; }
   .todos { padding: var(--space-1-5) var(--space-4) var(--space-2); }
   .todos-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin: var(--space-2) 0 var(--space-0-5); }
   .todos-title { font-size: var(--text-md); font-weight: 600; margin: 0; }
-  .todos-count {
-    min-width: 22px; height: 22px; padding: 0 var(--space-1-5); border-radius: var(--radius-full); background: var(--color-text); color: var(--color-bg);
-    font-size: var(--text-xs); font-weight: 700; display: inline-flex; align-items: center; justify-content: center;
-  }
   .todo-list { list-style: none; margin: 0; padding: 0; }
   .todo { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2) var(--space-3); min-height: 56px; padding: var(--space-2) 0; }
-  .todo + .todo { box-shadow: 0 -1px 0 var(--color-border); }
-  .todo-icon {
-    width: 38px; height: 38px; border-radius: 11px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
-    font-size: 19px; background: var(--color-surface-sunken); color: var(--color-text-muted);
-  }
+  .todo-icon { background: var(--color-surface-sunken); color: var(--color-text-muted); }
   .todo-icon.bad { background: var(--color-danger-subtle); color: var(--color-danger); }
   .todo-icon.warn { background: var(--color-warn-subtle); color: var(--color-warn); }
   .todo-icon.info { background: var(--color-accent-subtle); color: var(--color-accent-text); }
@@ -318,35 +373,22 @@
   .todo-actions { display: flex; gap: var(--space-1-5); flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
   .todo-sublist { flex-basis: 100%; margin: 0 0 0 50px; }
   .todo-sublist .todo { min-height: 48px; padding: var(--space-1) 0; }
-  .todo-sublist .todo-icon { width: 30px; height: 30px; font-size: var(--text-md); border-radius: 9px; }
+  .todo-sublist .todo-icon { width: 32px; height: 32px; font-size: var(--icon-md); }
   .todo-sublist .todo-title { font-size: var(--text-ui); }
   .todo-more { margin: var(--space-0-5) 0 var(--space-1); }
   .todos-ok { display: flex; align-items: center; gap: var(--space-2); padding: 10px var(--space-4); font-size: var(--text-ui); color: var(--color-ok); }
   .todos-ok .ti { font-size: var(--icon-md); }
   /* Programból kapott fókusz (lezárt teendő után): a képernyőolvasó felolvassa, keret nem kell. */
   .todos-title:focus, .todos-ok:focus { outline: none; }
-  @media (max-width: 720px) {
+  @container content (max-width: 680px) {
     .hero { padding: var(--space-5); border-radius: 22px; }
     .hero-title { font-size: 19px; }
     .todo > button, .todo-actions > button { height: 40px; }
     .todo-sublist { margin-left: 0; }
   }
 
-  .banner { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); margin-bottom: var(--space-4); font-size: var(--text-ui); }
-  .banner.info { background: var(--color-accent-subtle); color: var(--color-accent-text); }
-  .banner.warn { background: var(--color-warn-subtle); color: var(--color-warn); }
-  .banner .grow { flex: 1; min-width: 200px; }
 
-  .pill { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--text-xs); padding: var(--space-0-5) var(--space-1) var(--space-0-5) var(--space-2); border-radius: var(--radius-full); background: var(--color-surface-sunken); color: var(--color-text-muted); }
-  .pill button { height: 18px; width: 18px; padding: 0; border: none; background: transparent; color: var(--color-text-subtle); justify-content: center; border-radius: 50%; }
-  .pill button:hover { background: var(--color-surface-muted); color: var(--color-text); }
-  .pill button .ti { font-size: var(--icon-2xs); }
-  .delta { font-size: var(--text-2xs); padding: var(--space-px) var(--space-1-5); border-radius: var(--radius-xs); font-weight: 500; }
-  .delta.up { background: var(--color-danger-subtle); color: var(--color-danger); }
-  .delta.down { background: var(--color-ok-subtle); color: var(--color-ok); }
-  .delta.up.good { background: var(--color-ok-subtle); color: var(--color-ok); }
-  .delta.down.good { background: var(--color-danger-subtle); color: var(--color-danger); }
-  .cat-icon { width: 30px; height: 30px; border-radius: var(--radius-md); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 17px; }
+
 
   .toasts {
     position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: var(--z-toast);
@@ -380,12 +422,12 @@
   .flash { animation: flash 1.6s ease-out; }
   @keyframes flash { 0%, 30% { background: var(--color-accent-subtle); } 100% { background: transparent; } }
 
-  @media (max-width: 720px) {
+  @container content (max-width: 680px) {
     .grid-2 { grid-template-columns: minmax(0, 1fr); }
-    .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .kpi .value { font-size: var(--text-xl); }
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .stat .value { font-size: var(--text-xl); }
     /* A folyamatban lévő időszak jelzője a választóban (•) is látszik; a címke csak sortörést okozna. */
-    .period-badge.current { display: none; }
+    .period-badge.tone-accent { display: none; }
   }
 
   /* --- Réteg: alsó lap (mobilon) vagy középre igazított panel (asztalon) --- */
@@ -445,13 +487,10 @@
   .cover-empty { display: grid; gap: 10px; justify-items: start; }
   .cover-empty p, p.cover-empty { margin: 0; }
   .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-  .chip-btn { height: 40px; max-width: 100%; padding: 0 14px 0 5px; border: 1px solid var(--color-border-strong); border-radius: var(--radius-full); background: var(--color-surface); color: var(--color-text); font-size: var(--text-base); gap: var(--space-2); }
   .chip-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-  .chip-btn .cat-icon { width: 30px; height: 30px; border-radius: 50%; font-size: var(--text-md); }
-  .chip-btn.late { border-color: color-mix(in srgb, var(--color-danger) 50%, transparent); }
   /* Az Enter célja csak billentyűzetes eszközön számít, érintőképernyőn nem emeljük ki. */
   @media (hover: hover) {
-    .chip-btn.on { border-color: var(--color-accent); box-shadow: inset 0 0 0 1px var(--color-accent); }
+    .chip.on { border-color: var(--color-accent); box-shadow: inset 0 0 0 1px var(--color-accent); }
   }
   @media (hover: none) {
     .kbd-hint { display: none; }
@@ -477,9 +516,6 @@
     .sheet, .sheet-layer { animation: none; }
   }
 
-  .empty-state { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-10) var(--space-6); text-align: center; }
-  .empty-state .empty-icon { font-size: 40px; color: var(--color-text-subtle); }
-  .empty-state p { max-width: 520px; margin: 0 0 var(--space-2); }
 
   /* --- Listák --- */
   .section-title { font-size: var(--text-xs); font-weight: 600; color: var(--color-text-subtle); text-transform: uppercase; letter-spacing: 0.04em; margin: 14px var(--space-1-5) var(--space-1); }
@@ -489,7 +525,6 @@
     padding: 9px var(--space-2); border-radius: var(--radius-md); cursor: pointer;
   }
   .list-row:hover { background: var(--color-surface-sunken); }
-  .list-row + .list-row { box-shadow: 0 -1px 0 var(--color-border); }
   .list-row:hover, .list-row:hover + .list-row { box-shadow: none; }
   .list-row .name { display: flex; align-items: center; gap: 10px; min-width: 0; }
   .list-row .name .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -500,7 +535,7 @@
   .chev { color: var(--color-text-subtle); font-size: var(--text-md); transition: transform 0.15s; width: 16px; }
   .chev.open { transform: rotate(90deg); }
   .count { font-size: var(--text-xs); color: var(--color-text-subtle); }
-  @media (max-width: 720px) {
+  @container content (max-width: 680px) {
     .list-row { grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-1-5) var(--space-3); }
     .list-row .name { grid-column: 1 / -1; }
     .list-row .amounts { font-size: var(--text-xs); max-width: 180px; }
@@ -524,11 +559,8 @@
   .check-btn.late .check-ring { border-color: var(--color-danger); }
   .check-btn.part .check-ring { border-color: var(--color-warn-fill); color: var(--color-warn-fill); }
   .check-btn.on .check-ring { background: var(--color-ok); border-color: var(--color-ok); color: var(--color-surface); }
-  .rec-row + .rec-row, .rec-env + .rec-env { box-shadow: 0 -1px 0 var(--color-border); }
   .rec-name { font-weight: 500; display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
   .rec-actions { display: flex; gap: var(--space-1-5); justify-content: flex-end; flex-wrap: wrap; }
-  .due { font-size: var(--text-2xs); font-weight: 500; padding: var(--space-px) 7px; border-radius: var(--radius-full); background: var(--color-surface-sunken); color: var(--color-text-muted); }
-  .due.late { background: var(--color-danger-subtle); color: var(--color-danger); }
   .rec-env { border-radius: var(--radius-md); }
   .rec-env.open { background: color-mix(in srgb, var(--color-surface-sunken) 55%, transparent); }
   .rec-env-head {
@@ -565,7 +597,7 @@
   .rec-more {
     width: 100%; height: 40px; padding: 0 var(--space-1-5); gap: var(--space-2); justify-content: flex-start; color: var(--color-text-muted); font-size: var(--text-sm);
   }
-  .rec-row + .rec-more { border-radius: 0; box-shadow: 0 -1px 0 var(--color-border); }
+  .rec-row + .rec-more { border-radius: 0; }
   .menu-wrap { position: relative; }
   .menu {
     position: absolute; right: 0; top: calc(100% + 4px); z-index: var(--z-dropdown); display: grid; min-width: 210px; padding: var(--space-1);
@@ -580,12 +612,11 @@
   .recent-title { flex: 1; text-align: left; font-weight: 500; }
   .recent-list { list-style: none; margin: 0; padding: 0 0 var(--space-1-5); }
   .recent-row { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: var(--space-1-5) var(--space-2); }
-  .recent-row + .recent-row { box-shadow: 0 -1px 0 var(--color-border); }
   .recent-main { min-width: 0; }
   .recent-name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .recent-name .muted { font-weight: 400; }
   .pills { display: flex; flex-wrap: wrap; gap: var(--space-1-5); margin-top: 10px; }
-  @media (max-width: 720px) {
+  @container content (max-width: 680px) {
     .fee-actions > button { height: 36px; min-width: 56px; justify-content: center; }
     .rec-actions .menu-wrap > button { width: 40px; height: 40px; }
     .rec-env-body { padding-left: var(--space-1-5); }
@@ -598,7 +629,6 @@
   .planner { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: var(--space-4); align-items: start; }
   .planner-side { position: sticky; top: 72px; }
   .plan-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(120px, 1fr) 124px; gap: var(--space-4); align-items: center; padding: 9px var(--space-1); }
-  .plan-row + .plan-row { box-shadow: 0 -1px 0 var(--color-border); }
   .plan-name { display: flex; align-items: center; gap: 10px; min-width: 0; }
   .sumlist { display: grid; grid-template-columns: 1fr auto; gap: var(--space-1-5) var(--space-3); margin: 0; font-size: var(--text-ui); }
   .sumlist dt { color: var(--color-text-muted); }
@@ -606,18 +636,17 @@
   .sumlist .total { border-top: 1px solid var(--color-border); padding-top: var(--space-2); margin-top: var(--space-0-5); font-weight: 600; color: var(--color-text); }
   .sumlist dd.total.pos { color: var(--color-ok); }
   .sumlist dd.total.neg { color: var(--color-danger); }
-  @media (max-width: 900px) {
+  @container content (max-width: 860px) {
     .planner { grid-template-columns: minmax(0, 1fr); }
     .planner-side { position: static; order: -1; }
   }
-  @media (max-width: 720px) {
+  @container content (max-width: 680px) {
     .plan-row { grid-template-columns: minmax(0, 1fr) 124px; gap: var(--space-2) var(--space-3); }
     .plan-row input[type='range'] { grid-column: 1 / -1; order: 3; }
   }
 
   /* --- Kategóriák --- */
   .cat-row { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; padding: 9px var(--space-1); }
-  .cat-row + .cat-row, .cat-row + .cat-edit, .cat-edit + .cat-row { box-shadow: 0 -1px 0 var(--color-border); }
   .cat-meta { min-width: 0; }
   .cat-edit { padding: 14px var(--space-1); }
   .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-3); }
@@ -627,7 +656,7 @@
   .icon-pick.on { background: var(--color-accent-subtle); color: var(--color-accent-text); border-color: var(--color-accent); }
   .swatch { width: 28px; height: 28px; padding: 0; border-radius: 50%; border: 2px solid transparent; }
   .swatch.on { box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-text); }
-  @media (max-width: 720px) {
+  @container content (max-width: 680px) {
     .cat-row { grid-template-columns: 30px minmax(0, 1fr); }
     .cat-row .rec-actions { grid-column: 2; justify-content: flex-start; }
   }
@@ -657,14 +686,9 @@
   .goal-row { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: var(--space-3); align-items: start; padding: 10px var(--space-2); border-radius: var(--radius-md); }
   .goal-row[role='button'] { cursor: pointer; }
   .goal-row[role='button']:hover { background: var(--color-surface-sunken); }
-  .goal-row + .goal-row { box-shadow: 0 -1px 0 var(--color-border); }
   .goal-row:hover + .goal-row, .goal-row[role='button']:hover { box-shadow: none; }
   .goal-main { min-width: 0; }
   .goal-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-1) var(--space-3); flex-wrap: wrap; }
-  .chip { font-size: var(--text-2xs); font-weight: 500; padding: var(--space-px) 7px; border-radius: var(--radius-full); background: var(--color-surface-sunken); color: var(--color-text-muted); }
-  .chip.ok { background: var(--color-ok-subtle); color: var(--color-ok); }
-  .chip.bad { background: var(--color-danger-subtle); color: var(--color-danger); }
-  .chip.warn { background: var(--color-warn-subtle); color: var(--color-warn); }
   .goal-hint { grid-column: 1 / -1; display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; margin: -2px 0 var(--space-0-5) var(--space-10); }
   .goal-fields { margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px dashed var(--color-border-strong); }
   .check-field-wrap { display: flex; flex-direction: column; gap: var(--space-0-5); margin-top: var(--space-3); }
@@ -708,7 +732,6 @@
   .where-head { flex-wrap: nowrap; align-items: flex-start; }
   .where-total { text-align: right; font-size: var(--text-lg); font-weight: 650; white-space: nowrap; }
   .where-list, .dev-list { list-style: none; margin: 0; padding: 0; }
-  .where-list > li + li, .dev-list > li + li { box-shadow: 0 -1px 0 var(--color-border); }
   .where-row {
     width: 100%; padding: 10px var(--space-1); gap: var(--space-3); border-radius: var(--radius-md);
     display: flex; align-items: center; text-align: left; white-space: normal;
@@ -719,13 +742,6 @@
   .where-name { font-weight: 500; }
   .where-amt { font-size: var(--text-ui); font-weight: 600; }
   .where-amt .faint { font-weight: 400; }
-  .where-bar { position: relative; display: flex; height: 10px; border-radius: 5px; background: var(--color-surface-sunken); }
-  .where-bar > span:first-child { border-radius: 5px 0 0 5px; }
-  .wb-actual { background: var(--color-accent); }
-  .wb-actual.over { background: var(--color-danger-fill); }
-  .wb-actual.unplanned { background: var(--color-warn-fill); }
-  .wb-savings { background: repeating-linear-gradient(135deg, var(--color-accent) 0 3px, transparent 3px 6px); opacity: 0.7; }
-  .wb-plan { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; border-radius: 1px; background: var(--color-text); box-shadow: 0 0 0 1px var(--color-surface); }
   .where-legend, .heat-legend { display: flex; flex-wrap: wrap; gap: var(--space-1-5) 14px; margin-top: 10px; }
   .where-legend > span, .heat-legend > span { display: inline-flex; align-items: center; gap: var(--space-1-5); }
   .lg { display: inline-block; width: 14px; height: 10px; border-radius: 3px; }
@@ -776,14 +792,12 @@
     border: 1px solid var(--color-border-strong); background: var(--color-surface); color: var(--color-text-subtle);
   }
   .search-box:focus-within { outline: 2px solid var(--color-accent); outline-offset: 1px; }
-  .search-box input { flex: 1; min-width: 0; height: 40px; border: none; outline: none; background: transparent; color: var(--color-text); font: inherit; font-size: var(--text-base); }
+  .search-box input { flex: 1; min-width: 0; height: 40px; border: none; outline: none; background: transparent; color: var(--color-text); font: inherit; font-size: var(--text-md); /* 16 px: az iOS így érintőképernyős táblagépen sem nagyít rá (DR9) */ }
   .tag-list { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
-  .tag-chip { height: 40px; border-radius: var(--radius-full); gap: var(--space-2); padding: 0 14px; font-size: var(--text-ui); }
   .tag-name { font-weight: 600; color: var(--color-accent-text); }
   .search-row { grid-template-columns: 30px minmax(0, 1fr) auto; }
   .trend { display: grid; gap: 14px; }
-  @media (max-width: 720px) {
-    .search-box input { font-size: var(--text-md); }
+  @container content (max-width: 680px) {
     .heat .heat-name { min-width: 104px; max-width: 120px; }
     .page-head .seg { width: 100%; }
     .page-head .seg button { flex: 1; height: 36px; }
@@ -818,19 +832,62 @@
     /* A sor gomb: az alap gombstílus egysoros, fix magasságú; itt az állapotszöveg törhet, az összeg nem. */ white-space: normal;
     padding: var(--space-1-5) var(--space-2); border-radius: var(--radius-md); color: var(--color-text); text-align: left; font: inherit;
   }
-  .cal-row + .cal-row { box-shadow: 0 -1px 0 var(--color-border); }
   .cal-row:hover { background: var(--color-surface-sunken); }
   .cal-date { font-size: var(--text-sm); color: var(--color-text-muted); }
   .cal-main { display: flex; flex-direction: column; min-width: 0; }
   .cal-main .rec-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .cal-amount { font-weight: 600; white-space: nowrap; }
-  @media (max-width: 900px) {
+  @container content (max-width: 860px) {
     .cal-layout { grid-template-columns: minmax(0, 1fr); }
   }
-  @media (max-width: 720px) {
+  @container content (max-width: 680px) {
     .cal-month { min-width: 0; }
     .cal-row { grid-template-columns: 52px 30px minmax(0, 1fr) auto; gap: var(--space-2); }
   }
   .plan-row.off-cycle { grid-template-columns: minmax(0, 1fr) auto; }
   .plan-row.off-cycle .rec-name { color: var(--color-text-muted); }
+}
+
+@layer utilities {
+  /* Stack: függőleges halom résekkel. Cluster: vízszintes sor középre igazítva, a wrap-pel törhet. A rés a térközskálából. */
+  .stack { display: flex; flex-direction: column; gap: var(--space-2); }
+  .cluster { display: flex; align-items: center; gap: var(--space-2); }
+  .cluster.wrap { flex-wrap: wrap; }
+  .gap-0 { gap: 0; }
+  .gap-0-5 { gap: var(--space-0-5); }
+  .gap-1 { gap: var(--space-1); }
+  .gap-1-5 { gap: var(--space-1-5); }
+  .gap-2 { gap: var(--space-2); }
+  .gap-3 { gap: var(--space-3); }
+  .gap-4 { gap: var(--space-4); }
+  .gap-5 { gap: var(--space-5); }
+  .gap-6 { gap: var(--space-6); }
+  .gap-8 { gap: var(--space-8); }
+  .gap-10 { gap: var(--space-10); }
+  .gap-12 { gap: var(--space-12); }
+  .mt-0 { margin-top: 0; }
+  .mt-0-5 { margin-top: var(--space-0-5); }
+  .mt-1 { margin-top: var(--space-1); }
+  .mt-1-5 { margin-top: var(--space-1-5); }
+  .mt-2 { margin-top: var(--space-2); }
+  .mt-3 { margin-top: var(--space-3); }
+  .mt-4 { margin-top: var(--space-4); }
+  .mt-5 { margin-top: var(--space-5); }
+  .mt-6 { margin-top: var(--space-6); }
+  .mt-8 { margin-top: var(--space-8); }
+  .mt-10 { margin-top: var(--space-10); }
+  .mt-12 { margin-top: var(--space-12); }
+  .mb-0 { margin-bottom: 0; }
+  .mb-0-5 { margin-bottom: var(--space-0-5); }
+  .mb-1 { margin-bottom: var(--space-1); }
+  .mb-1-5 { margin-bottom: var(--space-1-5); }
+  .mb-2 { margin-bottom: var(--space-2); }
+  .mb-3 { margin-bottom: var(--space-3); }
+  .mb-4 { margin-bottom: var(--space-4); }
+  .mb-5 { margin-bottom: var(--space-5); }
+  .mb-6 { margin-bottom: var(--space-6); }
+  .mb-8 { margin-bottom: var(--space-8); }
+  .mb-10 { margin-bottom: var(--space-10); }
+  .mb-12 { margin-bottom: var(--space-12); }
+  .m-0 { margin: 0; }
 }

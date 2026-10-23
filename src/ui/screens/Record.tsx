@@ -15,7 +15,7 @@ import {
 } from '../../db/repo';
 import { useSettleRest } from '../actions';
 import { UNEXPECTED_PANEL, useBudget, useSafe, useToast } from '../context';
-import { AmountInput, Bar, CatIcon, Icon, Kpi, MenuButton, PACE_TONE, useLocalState, type MenuItem } from '../components/common';
+import { AmountInput, Badge, Bar, CatIcon, Icon, Stat, MenuButton, PACE_TONE, useLocalState, type MenuItem } from '../components/common';
 import { GoalStateChip } from '../components/Goals';
 import { UnexpectedExpense } from '../components/UnexpectedExpense';
 import { PeriodSwitcher } from '../components/PeriodSwitcher';
@@ -199,23 +199,23 @@ export function Record() {
       {unexpectedOpen && <UnexpectedExpense key={unexpectedKey} onClose={() => setUnexpectedOpen(false)} />}
 
       {p.status === 'future' && (
-        <div className="banner info">
+        <div className="callout tone-accent">
           <Icon name="calendar-event" />
-          <span className="grow">Ez egy jövőbeli hónap. Előre is rögzíthetsz, például ha egy számlát már most kifizettél.</span>
+          <span className="callout-text">Ez egy jövőbeli hónap. Előre is rögzíthetsz, például ha egy számlát már most kifizettél.</span>
         </div>
       )}
       {p.status === 'closed' && (
-        <div className="banner info">
+        <div className="callout tone-accent">
           <Icon name="lock-open" />
-          <span className="grow">Lezárt hónap. A módosítás a futó egyenleget is megváltoztatja.</span>
+          <span className="callout-text">Lezárt hónap. A módosítás a futó egyenleget is megváltoztatja.</span>
         </div>
       )}
 
       <RecentEntries />
 
-      <div className="kpis">
-        <Kpi label="Rögzített kiadás" value={formatFt(expActual)} sub={`terv ${formatFt(expPlan)}`} />
-        <Kpi
+      <div className="stats">
+        <Stat label="Rögzített kiadás" value={formatFt(expActual)} sub={`terv ${formatFt(expPlan)}`} />
+        <Stat
           label="Fix számlák"
           value={`${fixDone} / ${dueFixed.length} kifizetve`}
           sub={
@@ -225,7 +225,7 @@ export function Record() {
             </>
           }
         />
-        <Kpi
+        <Stat
           label={allowance && allowance.left < 0 ? 'Kereteken túl' : 'Keretekből még elkölthető'}
           value={formatFt(allowance ? Math.abs(allowance.left) : envLeft)}
           valueClass={allowance && allowance.left < 0 ? 'neg' : undefined}
@@ -273,7 +273,7 @@ function Section({ title, icon, hint, children }: { title: string; icon: string;
   return (
     <div className="card">
       <div className="card-head">
-        <h2 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <h2 className="cluster gap-2">
           <Icon name={icon} style={{ color: 'var(--color-text-subtle)' }} /> {title}
         </h2>
         {hint && <span className="small faint">{hint}</span>}
@@ -452,9 +452,9 @@ function FixRow({
         <div className="rec-name">
           {cat.name}
           {due && !done && (
-            <span className={`due ${late ? 'late' : ''}`}>
+            <Badge size="sm" tone={late ? 'danger' : 'neutral'}>
               {late ? 'lejárt' : 'esedékes'} {shortDate(due)}
-            </span>
+            </Badge>
           )}
         </div>
         <div className={`small num ${done ? 'pos' : 'muted'}`}>
@@ -464,12 +464,12 @@ function FixRow({
         {showParts && entries.length > 0 && (
           <div className="pills">
             {entries.map((e) => (
-              <span key={e.id} className="pill num" title={e.settles ? 'Ezzel a rögzítéssel a tétel lezárult' : undefined}>
+              <span key={e.id} className="badge tone-neutral num" title={e.settles ? 'Ezzel a rögzítéssel a tétel lezárult' : undefined}>
                 <span className="faint">{shortDate(e.date)}</span>
                 {formatFt(e.amount)}
                 {e.note && <span className="faint">· {e.note}</span>}
                 {e.settles && <Icon name="lock" className="faint" />}
-                <button className="btn" aria-label={`${shortDate(e.date)}: ${formatFt(e.amount)} törlése`} onClick={() => removeEntry(e.id, `${cat.name}: ${formatFt(e.amount)} törölve`)}>
+                <button className="badge-remove" aria-label={`${shortDate(e.date)}: ${formatFt(e.amount)} törlése`} onClick={() => removeEntry(e.id, `${cat.name}: ${formatFt(e.amount)} törölve`)}>
                   <Icon name="x" />
                 </button>
               </span>
@@ -491,7 +491,7 @@ function FixRow({
           </div>
         )}
         {editing && (
-          <div style={{ marginTop: 8 }}>
+          <div className="mt-2">
             <AmountInput
               key={editing}
               autoFocus
@@ -504,12 +504,12 @@ function FixRow({
                   : record(v, true, `${cat.name}: ${word.toLowerCase()} ${formatFt(v)}`)
               }
             />
-            {editing === 'settle' && <div className="tiny faint" style={{ marginTop: 4 }}>Ezzel a tétel ebben a hónapban lezárul.</div>}
+            {editing === 'settle' && <div className="tiny faint mt-1">Ezzel a tétel ebben a hónapban lezárul.</div>}
           </div>
         )}
         {goal && (
           <div className="goal-inline">
-            <div className="small num" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <div className="small num cluster wrap gap-2">
               <span>
                 Összegyűlt: <strong>{formatFt(goal.saved)}</strong>
                 {goal.target !== null && <span className="faint"> / {formatFt(goal.target)} · {goal.pct}%</span>}
@@ -525,10 +525,10 @@ function FixRow({
             {withdrawals.length > 0 && (
               <div className="pills">
                 {withdrawals.map((w) => (
-                  <span key={w.id} className="pill num" title={shortDate(w.date)}>
+                  <span key={w.id} className="badge tone-neutral num" title={shortDate(w.date)}>
                     −{formatFt(w.amount)}
                     {w.note && <span className="faint">· {w.note}</span>}
-                    <button className="btn" aria-label={`${formatFt(w.amount)} felhasználás törlése`} onClick={() => removeEntry(w.id, 'Felhasználás törölve')}>
+                    <button className="badge-remove" aria-label={`${formatFt(w.amount)} felhasználás törlése`} onClick={() => removeEntry(w.id, 'Felhasználás törölve')}>
                       <Icon name="x" />
                     </button>
                   </span>
@@ -537,7 +537,7 @@ function FixRow({
             )}
             {withdrawing && (
               <div style={{ marginTop: 8, display: 'grid', gap: 8 }}>
-                <label className="small muted" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <label className="small muted cluster wrap gap-2">
                   Mire ment?
                   <select className="sm" value={spendId} onChange={(e) => setSpendId(e.target.value)}>
                     <option value="">Nem számít kiadásnak</option>
@@ -730,10 +730,10 @@ function EnvelopeRow({
           {mode === 'add' && entries.length > 0 && (
             <div className="pills">
               {entries.map((e) => (
-                <span key={e.id} className="pill num" title={`${shortDate(e.date)}${e.note ? ` · ${e.note}` : ''}`}>
+                <span key={e.id} className="badge tone-neutral num" title={`${shortDate(e.date)}${e.note ? ` · ${e.note}` : ''}`}>
                   {formatFt(e.amount)}
                   {e.note && <span className="faint">· {e.note}</span>}
-                  <button className="btn" aria-label={`${formatFt(e.amount)} törlése`} onClick={() => remove(e.id)}>
+                  <button className="badge-remove" aria-label={`${formatFt(e.amount)} törlése`} onClick={() => remove(e.id)}>
                     <Icon name="x" />
                   </button>
                 </span>

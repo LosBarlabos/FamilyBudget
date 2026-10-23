@@ -23,10 +23,10 @@ function Connected({ cfg }: { cfg: SyncConfig }) {
   const [armed, setArmed] = useState(false);
   return (
     <div className="sync-panel">
-      <p className="small" style={{ margin: 0 }}>
+      <p className="small m-0">
         <Icon name="lock" /> Közös költségvetés: <strong>{cfg.repo}</strong> · {cfg.path}
       </p>
-      <p className={`small ${st.status === 'error' ? 'neg' : 'muted'}`} style={{ margin: 0 }} role="status">
+      <p className={`small ${st.status === 'error' ? 'neg' : 'muted'} m-0`} role="status">
         {st.status === 'error' ? st.error : syncLabel(st)}
       </p>
       <div className="sync-row">
@@ -152,7 +152,7 @@ function ConnectForm({ join }: { join: boolean }) {
           <input type="text" value={path} autoCapitalize="off" spellCheck={false} onChange={(e) => setPath(e.target.value)} />
         </label>
       </div>
-      <p className="tiny faint" style={{ margin: 0 }}>
+      <p className="tiny faint m-0">
         A token csak ebben a böngészőben tárolódik. A költségvetés csak privát tárolóba kerülhet; nyilvánoshoz az app nem kapcsolódik.
       </p>
       {error && <div className="error" role="alert">{error}</div>}
@@ -165,7 +165,7 @@ function ConnectForm({ join }: { join: boolean }) {
       ) : (
         <div className="import-preview">
           <div style={{ fontWeight: 500, marginBottom: 6 }}>A tárolóban már van közös költségvetés</div>
-          <div className="small muted num" style={{ marginBottom: 10 }}>
+          <div className="small muted num mb-3">
             {choice.categories.filter((c) => !c.archived).length} kategória · {choice.entries.length} rögzítés
           </div>
           <div className="sync-row">
@@ -177,7 +177,7 @@ function ConnectForm({ join }: { join: boolean }) {
             </button>
             <button className="btn ghost" disabled={busy} onClick={() => setChoice(null)}>Mégse</button>
           </div>
-          <div className="tiny faint" style={{ marginTop: 8 }}>
+          <div className="tiny faint mt-2">
             „A közöset használom”: az ezen az eszközön lévő adatok helyére a közös kerül. Előtte érdemes menteni.
           </div>
         </div>

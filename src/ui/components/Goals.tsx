@@ -1,19 +1,19 @@
 import { goalSummary, type GoalProgress, type GoalState } from '../../domain/goals';
 import { formatFt } from '../../domain/money';
 import type { Category } from '../../domain/types';
-import { Bar, CatIcon } from './common';
+import { Badge, Bar, CatIcon, type BadgeTone } from './common';
 
-const STATE: Record<Exclude<GoalState, 'noTarget'>, { label: string; cls: string }> = {
-  reached: { label: 'Elérve', cls: 'ok' },
-  onTrack: { label: 'Időben', cls: 'ok' },
-  behind: { label: 'Lemarad', cls: 'bad' },
-  noPlan: { label: 'Nincs havi terv', cls: 'warn' },
+const STATE: Record<Exclude<GoalState, 'noTarget'>, { label: string; tone: BadgeTone }> = {
+  reached: { label: 'Elérve', tone: 'ok' },
+  onTrack: { label: 'Időben', tone: 'ok' },
+  behind: { label: 'Lemarad', tone: 'danger' },
+  noPlan: { label: 'Nincs havi terv', tone: 'warn' },
 };
 
 export function GoalStateChip({ state }: { state: GoalState }) {
   if (state === 'noTarget') return null;
   const s = STATE[state];
-  return <span className={`chip ${s.cls}`}>{s.label}</span>;
+  return <Badge size="sm" tone={s.tone}>{s.label}</Badge>;
 }
 
 export function GoalRow({ cat, g, onClick }: { cat: Category; g: GoalProgress; onClick?: () => void }) {

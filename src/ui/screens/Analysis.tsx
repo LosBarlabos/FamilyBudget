@@ -9,7 +9,7 @@ import { periodName, periodShortLabel, shortDate } from '../../domain/periods';
 import { isExpense, type Category, type Entry } from '../../domain/types';
 import { displayUnits, type Unit } from '../../domain/units';
 import { useBudget } from '../context';
-import { CatIcon, Icon, Segmented, useLocalState } from '../components/common';
+import { CatIcon, EmptyState, Icon, Segmented, useLocalState } from '../components/common';
 import { PeriodSwitcher } from '../components/PeriodSwitcher';
 
 export const RANGE_KEY = 'analysis-range';
@@ -45,9 +45,9 @@ export function Analysis() {
         <Segmented label="Időablak" options={RANGES} value={range} onChange={setRange} />
       </div>
       {anchor.id !== periodId && (
-        <div className="banner info">
+        <div className="callout tone-accent">
           <Icon name="info-circle" />
-          <span className="grow">Jövőbeli hónapnak még nincs ténye, ezért az Elemzés a mostani hónapig mutatja az adatokat.</span>
+          <span className="callout-text">Jövőbeli hónapnak még nincs ténye, ezért az Elemzés a mostani hónapig mutatja az adatokat.</span>
         </div>
       )}
       <WhereMoneyWent periods={periods} spend={spend} rangeText={rangeText + partial} />
@@ -61,7 +61,7 @@ export function Analysis() {
 type Spend = ReturnType<typeof savingsSpend>;
 
 function WhereMoneyWent({ periods, spend, rangeText }: { periods: PeriodSummary[]; spend: Spend; rangeText: string }) {
-  const { data, openTrend } = useBudget();
+  const { data, openTrend, openQuick } = useBudget();
   const [all, setAll] = useState(false);
   const rows = useMemo(() => spendingRows(data.categories, periods, spend), [data.categories, periods, spend]);
   const total = rows.reduce((s, r) => s + r.actual + r.fromSavings, 0);
@@ -83,7 +83,11 @@ function WhereMoneyWent({ periods, spend, rangeText }: { periods: PeriodSummary[
         </div>
       </div>
       {rows.length === 0 ? (
-        <p className="small muted" style={{ margin: 0 }}>Ebben az időablakban még nincs kiadás.</p>
+        <EmptyState
+          icon="receipt-off"
+          title="Ebben az időszakban még nincs kiadás"
+          action={<button className="btn sm primary" onClick={openQuick}><Icon name="plus" /> Kiadás rögzítése</button>}
+        />
       ) : (
         <ul className="where-list">
           {shown.map((r) => (
@@ -122,10 +126,12 @@ function WhereRow({ r, scale, onOpen }: { r: SpendRow; scale: number; onOpen: ()
               <span className="faint"> {r.plan > 0 ? `/ ${formatFt(r.plan)}` : unplanned || r.fromSavings ? '· nincs terv' : ''}</span>
             </span>
           </span>
-          <span className="where-bar" aria-hidden="true">
-            <span className={`wb-actual ${over ? 'over' : unplanned ? 'unplanned' : ''}`} style={{ width: pct(r.actual) }} />
-            {r.fromSavings > 0 && <span className="wb-savings" style={{ width: pct(r.fromSavings) }} />}
-            {r.plan > 0 && <span className="wb-plan" style={{ left: pct(r.plan) }} />}
+          <span className="meter-wrap where-meter" aria-hidden="true">
+            <span className="meter meter-lg">
+              <span className={`meter-fill ${over ? 'is-over' : unplanned ? 'is-unplanned' : ''}`} style={{ width: pct(r.actual) }} />
+              {r.fromSavings > 0 && <span className="meter-fill is-savings" style={{ width: pct(r.fromSavings) }} />}
+            </span>
+            {r.plan > 0 && <span className="meter-mark is-plan" style={{ left: pct(r.plan) }} />}
           </span>
           {r.fromSavings > 0 && <span className="tiny muted num">ebből megtakarításból {formatFt(r.fromSavings)}</span>}
         </span>
@@ -146,16 +152,16 @@ function Deviations({ periods, hasClosed, onWiden }: { periods: PeriodSummary[];
       </div>
       {closed === 0 && hasClosed ? (
         // Van lezárt időszak, csak a választott időablakban nincs (pl. „Ez az időszak”): ne állítsa, hogy még nincs.
-        <div className="small muted" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <div className="small muted cluster wrap gap-2">
           <span>A folyamatban lévő hónapot még nincs mihez mérni, az eltérések a lezárt hónapokból számolódnak.</span>
           <button className="btn sm" onClick={onWiden}>Utolsó 12 hónap</button>
         </div>
       ) : closed === 0 ? (
-        <p className="small muted" style={{ margin: 0 }}>
+        <p className="small muted m-0">
           Az első lezárt hónap után jelenik meg: a folyamatban lévő hónapot még nincs mihez mérni. Addig az Áttekintés jelzi a gyorsan fogyó kereteket.
         </p>
       ) : list.length === 0 ? (
-        <p className="small pos" style={{ margin: 0 }}>
+        <p className="small pos m-0">
           <Icon name="circle-check" /> Minden kategória a terv közelében maradt.
         </p>
       ) : (
@@ -340,7 +346,7 @@ function SearchAndTags() {
         ) : (
           <div className="tag-list">
             {tags.map((t) => (
-              <button key={t.tag} className="tag-chip" onClick={() => setQ(`#${t.tag}`)}>
+              <button key={t.tag} className="chip" onClick={() => setQ(`#${t.tag}`)}>
                 <span className="tag-name">#{t.tag}</span>
                 <span className="num">{formatFt(t.total)}</span>
                 <span className="faint num">{t.count} db</span>

@@ -70,7 +70,7 @@ export function Categories() {
 
       {(editing === 'new' || editing === 'new-goal') && (
         <div className="card">
-          {editing === 'new-goal' && <h2 style={{ marginBottom: 12 }}>Új megtakarítási cél</h2>}
+          {editing === 'new-goal' && <h2 className="mb-3">Új megtakarítási cél</h2>}
           <CategoryForm
             key={editing}
             currentId={summaries.currentId}
@@ -438,7 +438,7 @@ export function CategoryForm({
             : `Az alapértelmezett összeg a havi terv. ${effect}`}
       </div>
 
-      <div className="field small muted" style={{ marginBottom: 6 }}>Ikon</div>
+      <div className="field small muted mb-1-5">Ikon</div>
       <div className="icon-grid" role="radiogroup" aria-label="Ikon">
         {ICONS.map((i) => (
           <button key={i} role="radio" aria-checked={c.icon === i} aria-label={i} className={`icon-pick ${c.icon === i ? 'on' : ''}`} onClick={() => set({ icon: i })}>
@@ -447,7 +447,7 @@ export function CategoryForm({
         ))}
       </div>
       <div className="field small muted" style={{ margin: '12px 0 6px' }}>Szín</div>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }} role="radiogroup" aria-label="Szín">
+      <div className="cluster wrap gap-2" role="radiogroup" aria-label="Szín">
         {PALETTE.map((col) => (
           <button
             key={col}

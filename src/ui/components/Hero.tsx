@@ -136,7 +136,7 @@ export function Hero({ p, pace, stats = [] }: { p: PeriodSummary; pace: PaceOver
           disabled={!worst}
           aria-label={`${status.text}${status.more > 0 ? `, és még ${status.more} keret figyelmet kér` : ''}. Megnyitás a Rögzítésben`}
         >
-          <span className="hero-alert-icon">
+          <span className="tile tile-lg hero-alert-icon">
             <Icon name={icon} />
           </span>
           <span className="hero-alert-text num">

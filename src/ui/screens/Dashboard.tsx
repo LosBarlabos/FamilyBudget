@@ -10,7 +10,7 @@ import { displayUnits, type Unit } from '../../domain/units';
 import { NEW_GOAL, useBudget } from '../context';
 import { GoalRow } from '../components/Goals';
 import { BalanceChart, SpendingChart } from '../components/Charts';
-import { Bar, CatIcon, Delta, Icon, Kpi, PACE_TONE, useLocalState, type BarTone } from '../components/common';
+import { Bar, CatIcon, Delta, Icon, Stat, PACE_TONE, useLocalState, type BarTone } from '../components/common';
 import { Hero } from '../components/Hero';
 import { PeriodSwitcher } from '../components/PeriodSwitcher';
 import { Todos } from '../components/Todos';
@@ -88,20 +88,20 @@ export function Dashboard() {
       {current && <Todos p={p} pace={pace} goals={goals} />}
 
       {/* A folyamatban lévő időszakban a bevétel és a kiadás az eddigi tény, a terv és a várható alul. */}
-      <div className="kpis">
+      <div className="stats">
         {!current && (
           <>
-            <Kpi label={future ? 'Bevétel (várható)' : 'Bevétel'} value={formatFt(p.income)} sub={`terv ${formatFt(inc.plan)}`} />
-            <Kpi label={future ? 'Kiadás (várható)' : 'Kiadás'} value={formatFt(p.expense)} sub={`terv ${formatFt(exp.plan)}`} />
+            <Stat label={future ? 'Bevétel (várható)' : 'Bevétel'} value={formatFt(p.income)} sub={`terv ${formatFt(inc.plan)}`} />
+            <Stat label={future ? 'Kiadás (várható)' : 'Kiadás'} value={formatFt(p.expense)} sub={`terv ${formatFt(exp.plan)}`} />
           </>
         )}
-        <Kpi
+        <Stat
           label={p.status === 'closed' ? 'Havi egyenleg' : 'Várható havi egyenleg'}
           value={formatSigned(p.net)}
           valueClass={p.net < 0 ? 'neg' : 'pos'}
           sub={p.savings > 0 ? `megtakarításra félretéve ${formatFt(p.savings)}` : undefined}
         />
-        <Kpi
+        <Stat
           label="Futó egyenleg a végén"
           value={formatFt(p.endBalance)}
           valueClass={p.endBalance < 0 ? 'neg' : ''}
@@ -110,20 +110,20 @@ export function Dashboard() {
               <>
                 {reserve && (
                   <span
-                    className="kpi-line"
+                    className="stat-line"
                     title="Tartalék: az utolsó lezárt hónap végi egyenlege, az utolsó legfeljebb 3 lezárt hónap átlagos kiadásához mérve"
                   >
                     {reserve}
                   </span>
                 )}
-                {goals.length > 0 && <span className="kpi-line">félretéve most: {formatFt(savedNow)}</span>}
+                {goals.length > 0 && <span className="stat-line">félretéve most: {formatFt(savedNow)}</span>}
               </>
             ) : undefined
           }
         />
       </div>
 
-      <div className="grid-2" style={{ marginBottom: 16 }}>
+      <div className="grid-2 mb-4">
         <div className="card">
           <div className="card-head"><h2>Futó egyenleg</h2></div>
           <BalanceChart summaries={summaries} selectedId={periodId} onSelect={setPeriodId} />
@@ -138,7 +138,7 @@ export function Dashboard() {
         <div className="card">
           <div className="card-head">
             <h2>Megtakarítás és célok</h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div className="cluster gap-3">
               <span className="small faint">mai állás</span>
               <button className="btn sm" onClick={() => go('categories', NEW_GOAL)}>
                 <Icon name="plus" /> Új cél

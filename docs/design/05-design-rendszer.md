@@ -240,6 +240,34 @@ Minden lépés után: `npx tsc`, `npx vitest run`, `npm run build`, és a képer
   - a fókusz 213 Tab-lépésből egyszer sem kerül a magasabb alsó dokk alá;
   - 102 képernyőkép (`kepek/5c`). A Több lap csak kompakt elrendezésben létezik, ezért 2-vel kevesebb.
 
+### Az 5.D eredménye (2026-10-23)
+
+- **CSS-rétegek:** `@layer tokens, base, components, app, utilities`, a sorrend a `src/fonts.css` elején.
+  - A rétegekre bontás önmagában 0 látható változást okozott (képkülönbség: minden cella 0,005% alatt).
+  - A Tabler ikonfont CSS-e rétegen kívül maradt; csak a `.ti` betűjét állítja, így nem ütközik.
+- **Button:** a `<button>` alapstílusa csak viselkedés (betű, 14 px, kurzor, igazítás, fókusz, tiltott és nyomott állapot).
+  - A látható gomb a `.btn` és a változatai; egy szkript 96 gombra tette rá. A 26 saját felületű (menüpont, fül, sor, chip, naptárnap) nem kapta meg, így megszűnt 38 visszavonó deklaráció (DR7).
+  - A hover csak egeres eszközön (DR6). A foglalt gomb (`aria-busy`) látható állapotot kap.
+  - Képkülönbség: 0,005% alatt, miután 3 saját felület (chip, menüpont, ikonválasztó) megkapta a korábban örökölt tulajdonságait.
+- **Field:**
+  - a hibás mező (`aria-invalid`) piros kerete és a tiltott mező állapota;
+  - a kereső 16 px-es, így érintőképernyős táblagépen sem nagyít rá az iOS (DR9).
+- **Badge** (`<Badge tone size>`): a `.period-badge`, `.due`, `.chip` (célállapot), `.delta`, `.pill` és `.todos-count` egy komponens lett, öt tónussal és két mérettel. A törölhető badge gombja 24 px-es érintési célt kapott.
+- **Chip:** a gyorsrögzítő kategória- és számlachipje és az Elemzés #címkéje egy `.chip` komponens.
+- **IconTile:** `tile-sm/md/lg` (24/32/40 px). A `CatIcon` mérete választható. A 7 korábbi méret- és sugárpár 3-ra csökkent.
+- **Meter:** a keretsáv, a hero sávja és az Elemzés sávja egy szerkezet. A sáv mindkét végén lekerekített, a jelölő a burkolón van, így a lekerekítés nem vágja le.
+  - Menet közben egy névütközés derült ki: a `.lg` méretmódosító egy meglévő jelmagyarázat-osztállyal ütközött, és összenyomta az Elemzés sávját. Javítva (`.meter-lg`), és a többi új osztálynév ütközését is ellenőriztem.
+- **Callout** (`.callout tone-*`): a 8 `.banner` helyett, `danger` és `ok` tónussal is.
+- **Stat:** a `Kpi` neve `Stat`, a `.kpis` neve `.stats`.
+- **EmptyState:** ikon, cím, szöveg és egy művelet. A Számlanaptár (SZ35) és az Elemzés (SZ36) zsákutca üres állapota helyett.
+- **Row:** a 10 külön elválasztószabály egy szabály lett. A sorok belső rácsa képernyőnként, a 6. fázisban egységesül.
+- **Stack és Cluster:**
+  - `stack`, `cluster`, `cluster wrap`, `gap-*`, `mt-*`, `mb-*`, `m-0` a `utilities` rétegben;
+  - egy szkript 63 inline stílust cserélt osztályra (139 → 75);
+  - a maradék adatfüggő (szélesség, kategóriaszín) vagy egyszeri.
+- **Konténer-lekérdezések:** a tartalom 10 `@media` szabálya `@container content`-re váltott (680 és 860 px tartalomszélesség). Így 768 px-en, a sín mellett a kompakt sorok jelennek meg. 1024 px-en a Tervező és a Számlanaptár egy oszlopra vált, és ezzel megszűnt a Tervező 1024 px-es szétesése (K1, A05).
+- **Ellenőrzés:** `probe-core` 32 cellában 0 kontraszthiba, a fókusz 213 lépésből egyszer sem takart, friss betöltésnél 0 konzolhiba, 102 képernyőkép (`kepek/5d`).
+
 A képernyők tartalmi átalakítása a 6. fázisban jön: a MonthStrip és a Bill az Áttekintésen, az „utána marad” előnézet a gyorsrögzítőben, az idővonal a Tervezőben.
 
 ## Nyitott kérdések

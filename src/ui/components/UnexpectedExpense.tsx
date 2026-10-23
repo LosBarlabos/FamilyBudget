@@ -101,7 +101,7 @@ export function UnexpectedExpense({ onClose }: { onClose: () => void }) {
   return (
     <div className="card unexpected" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
       <div className="card-head">
-        <h2 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <h2 className="cluster gap-2">
           <Icon name="alert-triangle" style={{ color: 'var(--color-danger)' }} /> Váratlan kiadás
         </h2>
         <button className="btn sm ghost icon" aria-label="Bezárás" onClick={onClose}><Icon name="x" /></button>
@@ -143,7 +143,7 @@ export function UnexpectedExpense({ onClose }: { onClose: () => void }) {
       </div>
 
       {impact && <div className="small muted impact"><Icon name="info-circle" /> {impact}</div>}
-      {error && <div className="error" style={{ marginTop: 6 }}>{error}</div>}
+      {error && <div className="error mt-1-5">{error}</div>}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>
         <button className="btn" onClick={onClose}>Mégse</button>

@@ -14,9 +14,10 @@ export function Icon({ name, style, className = '' }: { name: string; style?: CS
   return <i className={`ti ti-${name} ${className}`} style={style} aria-hidden="true" />;
 }
 
-export function CatIcon({ cat }: { cat: Pick<Category, 'icon' | 'color'> }) {
+/** A kategória ikonja a kategória színével (IconTile; a méret alapból 32 px). */
+export function CatIcon({ cat, size = 'md' }: { cat: Pick<Category, 'icon' | 'color'>; size?: 'sm' | 'md' | 'lg' }) {
   return (
-    <span className="cat-icon" style={{ background: `${cat.color}1f`, color: cat.color }}>
+    <span className={`tile tile-${size} cat-icon`} style={{ background: `${cat.color}1f`, color: cat.color }}>
       <Icon name={cat.icon} />
     </span>
   );
@@ -39,23 +40,21 @@ export const PACE_TONE: Record<Pace, BarTone> = { ok: 'accent', fast: 'warn', ov
 /** A marker (0–1) a „ma” jelölő helye: az időszakból eddig eltelt idő aránya. */
 export function Bar({ value, max, tone, color, marker }: { value: number; max: number; tone?: BarTone; color?: string; marker?: number | null }) {
   const pct = barPercent(value, max);
-  const bar = (
-    <div className="bar" role="presentation">
-      <div style={{ width: `${pct}%`, background: color ?? TONE[tone ?? 'accent'] }} />
-    </div>
-  );
-  if (marker === undefined || marker === null) return bar;
   return (
-    <div className="bar-wrap">
-      {bar}
-      <span className="bar-today" style={{ left: `${Math.min(100, Math.max(0, marker * 100))}%` }} title="Ma" aria-hidden="true" />
+    <div className="meter-wrap">
+      <div className="meter" role="presentation">
+        <div className="meter-fill" style={{ width: `${pct}%`, background: color ?? TONE[tone ?? 'accent'] }} />
+      </div>
+      {marker !== undefined && marker !== null && (
+        <span className="meter-mark" style={{ left: `${Math.min(100, Math.max(0, marker * 100))}%` }} title="Ma" aria-hidden="true" />
+      )}
     </div>
   );
 }
 
-export function Kpi({ label, value, sub, valueClass }: { label: string; value: ReactNode; sub?: ReactNode; valueClass?: string }) {
+export function Stat({ label, value, sub, valueClass }: { label: string; value: ReactNode; sub?: ReactNode; valueClass?: string }) {
   return (
-    <div className="kpi">
+    <div className="stat">
       <div className="label">{label}</div>
       <div className={`value num ${valueClass ?? ''}`}>{value}</div>
       {sub && <div className="sub">{sub}</div>}
@@ -144,7 +143,7 @@ export function AmountInput({
 
   return (
     <div style={{ display: 'inline-flex', flexDirection: 'column', gap: 4 }}>
-      <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+      <div className="cluster wrap gap-1-5">
         <input
           ref={amountRef}
           type="text"
@@ -315,15 +314,45 @@ export function SettleButton({
   );
 }
 
+/** Üres állapot: ikon, cím, rövid magyarázat és egy következő lépés, hogy ne legyen zsákutca. */
+export function EmptyState({ icon, title, children, action }: { icon: string; title: string; children?: ReactNode; action?: ReactNode }) {
+  return (
+    <div className="empty">
+      <Icon name={icon} className="empty-icon" />
+      <p className="empty-title">{title}</p>
+      {children && <p className="empty-text">{children}</p>}
+      {action}
+    </div>
+  );
+}
+
+export type BadgeTone = 'neutral' | 'accent' | 'ok' | 'warn' | 'danger' | 'strong';
+
+/** Állapot, darabszám vagy rövid címke (a design-rendszer Badge komponense). */
+export function Badge({ tone = 'neutral', size, className = '', title, children, ...rest }: {
+  tone?: BadgeTone;
+  size?: 'sm';
+  className?: string;
+  title?: string;
+  children: ReactNode;
+  'aria-hidden'?: boolean;
+}) {
+  return (
+    <span className={`badge tone-${tone} ${size ?? ''} ${className}`} title={title} {...rest}>
+      {children}
+    </span>
+  );
+}
+
 export function Delta({
   pct, goodWhenUp = false, title = 'Változás az előző hónaphoz képest',
 }: { pct: number | null; goodWhenUp?: boolean; title?: string }) {
   if (pct === null || Math.abs(pct) < 3) return null;
   return (
-    <span className={`delta ${pct > 0 ? 'up' : 'down'} ${goodWhenUp ? 'good' : ''}`} title={title}>
+    <Badge size="sm" tone={(pct > 0) === goodWhenUp ? 'ok' : 'danger'} title={title}>
       {pct > 0 ? '+' : ''}
       {pct}%
-    </span>
+    </Badge>
   );
 }
 
