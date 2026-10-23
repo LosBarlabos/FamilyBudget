@@ -104,7 +104,7 @@ megtakarítás összesen(i) = Σ megtakarítás(első időszak … i)
 - **Állapot:** Elérve / Időben / Lemarad (a határidőre nem gyűlik össze) / Nincs havi terv.
 
 ### Váratlan kiadás
-- A Rögzítés képernyő „Váratlan kiadás” gombja (vagy a gyorsrögzítő „Váratlan kiadás” linkje, `#/rogzites/varatlan`): összeg, „mire ment?” megjegyzés, és hogy miből fizeted.
+- A Rögzítés képernyő „Váratlan kiadás” gombja (vagy a gyorsrögzítő „Váratlan kiadás” linkje, `#/rogzites/varatlan`) alsó lapon (asztalon panelen) nyílik: összeg, „mire ment?” megjegyzés, és hogy miből fizeted. Bezáráskor a fókusz a gombra kerül vissza.
   - **A havi pénzből:** alapértelmezésben a „Váratlan kiadások” kategóriába (`Category.role = 'unexpected'`; ha még nincs, létrejön), de bármelyik kiadási kategória választható (pl. autószerelés → Közlekedés).
   - **Megtakarításból:** felhasználásként rögzül a választott megtakarításon; nem lehet több, mint ami rajta van.
 - Beírás közben látszik a hatás: mennyivel csökken a futó egyenleg, vagy mennyit fedez még a választott keret.
@@ -245,7 +245,8 @@ A rögzítő képernyő és az irányítópult tervezésekor készült két inte
 - Összesítő: tervezett bevétel − kiadás − megtakarítás = tervezett havi egyenleg. Ha negatív, figyelmeztetés jelenik meg.
 
 ### 4.5 Kategóriák
-- Lista a megjelenítési sorrendben, a sorrend fel/le nyilakkal módosítható.
+- Lista típus szerint tagolva (Bevételek, Fix számlák, Keretek, Megtakarítás, mindegyik a darabszámmal), azon belül a megjelenítési sorrendben. A sorban a csoport és a részletek látszanak (a típus a szakasz címében). Mellette egy ceruza gomb (szerkesztés) és egy „⋯” menü: Feljebb, Lejjebb (a saját szakaszán belül; a többi típus helye nem mozdul), Archiválás.
+- Az „Új kategória” és az Áttekintés „Új cél” gombja (`#/kategoriak/uj-cel`) alsó lapon (asztalon panelen) nyitja meg az űrlapot, a lista mögötte marad; bezáráskor a cél útvonala is kikerül az URL-ből. A névmező példája a típushoz illik („pl. Nyaralás 2027”, „pl. Áram”), a csoporté fix számlánál „pl. Rezsi”.
 - Szerkeszthető mezők: név, ikon, szín, típus, csoport, alapértelmezett összeg, esedékességi nap (`fix`), bevételmód, „Beleszámít a napi elkölthető összegbe” (`keret`; alapból be van kapcsolva, a váratlan kiadásoknál ki). A napi összegen kívüli keret a listában „napi összegen kívül” jelölést kap.
 - A típus, ha a kategóriának már van rögzítése, csak a fix és a keret között váltható (mindkettő kiadás), különben a múltbeli tények is átfordulnának. Más váltásnál a mező zárolt: „Archiváld, és hozz létre újat”.
 - Az alapértelmezett összeg módosítása a mostani időszaktól érvényes terv lesz (lásd Terv), a múltat nem írja át. Ha ezzel későbbi egyedi tervek törlődnének, a szerkesztő mentés előtt megmutatja őket, az üzenet pedig a Tervezőhöz hasonlóan kimondja (pl. „Élelmiszer mentve · terv 110 000 Ft októbertől · a decemberi egyedi terv (150 000 Ft) törölve”).

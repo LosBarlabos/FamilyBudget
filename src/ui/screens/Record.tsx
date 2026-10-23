@@ -189,11 +189,10 @@ export function Record() {
       <h1 className="sr-only">Keretek és számlák</h1>
       <div className="page-head">
         <PeriodSwitcher />
-        {!unexpectedOpen && (
-          <button className="btn" onClick={() => setUnexpectedOpen(true)}>
-            <Icon name="alert-triangle" /> Váratlan kiadás
-          </button>
-        )}
+        {/* Mindig látszik: a lap bezárásakor ide kerül vissza a fókusz. */}
+        <button className="btn" onClick={() => setUnexpectedOpen(true)}>
+          <Icon name="alert-triangle" /> Váratlan kiadás
+        </button>
       </div>
 
       {unexpectedOpen && <UnexpectedExpense key={unexpectedKey} onClose={() => setUnexpectedOpen(false)} />}

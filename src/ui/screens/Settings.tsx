@@ -12,7 +12,7 @@ import { disconnect } from '../../sync/engine';
 export function Settings() {
   const s = useBudget().data.settings;
   return (
-    <>
+    <div className="settings">
       <div className="page-head">
         <h1 className="page-title">Beállítások</h1>
       </div>
@@ -27,7 +27,7 @@ export function Settings() {
       <Backup />
       <Storage />
       <DangerZone />
-    </>
+    </div>
   );
 }
 

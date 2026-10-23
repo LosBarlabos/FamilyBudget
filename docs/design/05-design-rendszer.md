@@ -293,7 +293,7 @@ Minden lépés után: `npx tsc`, `npx vitest run`, `npm run build`, és a képer
   - a `theme-color` is követi.
   - A böngészőben kipróbálva: „Sötét” mellett a világos rendszerbeállítás ellenére is sötét, újratöltés után is; „Rendszer”-re visszaállítva a `data-theme` eltűnik, és a két `theme-color` visszakapja a médiafeltételét.
 
-**Ami a rétegeknél maradt:** a Váratlan kiadás és az Új cél űrlapja ma a képernyőbe ágyazva nyílik meg, nem rétegként (K15). Ezek tartalmi átalakítása a 6. fázisban, a Rögzítés és a Kategóriák képernyővel együtt jön.
+**Ami a rétegeknél maradt:** a Váratlan kiadás és az Új cél űrlapja ma a képernyőbe ágyazva nyílik meg, nem rétegként (K15). Ezek tartalmi átalakítása a 6. fázisban, a Rögzítés és a Kategóriák képernyővel együtt jön. *(Kész a 6. fázisban: mindkettő, és az Új kategória is alsó lapon nyílik.)*
 
 A képernyők tartalmi átalakítása a 6. fázisban jön: a MonthStrip és a Bill az Áttekintésen, az „utána marad” előnézet a gyorsrögzítőben, az idővonal a Tervezőben.
 

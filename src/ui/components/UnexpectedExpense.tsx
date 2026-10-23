@@ -7,6 +7,7 @@ import { isExpense } from '../../domain/types';
 import { addEntry, ensureUnexpectedCategory, restoreEntries } from '../../db/repo';
 import { useBudget, useSafe, useToast } from '../context';
 import { Icon, NOTE_TAGS_LIST } from './common';
+import { Sheet } from './Sheet';
 
 const UNEXPECTED = '__unexpected__';
 
@@ -99,56 +100,53 @@ export function UnexpectedExpense({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="card unexpected" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
-      <div className="card-head">
-        <h2 className="cluster gap-2">
-          <Icon name="alert-triangle" style={{ color: 'var(--color-danger)' }} /> Váratlan kiadás
-        </h2>
-        <button className="btn sm ghost icon" aria-label="Bezárás" onClick={onClose}><Icon name="x" /></button>
-      </div>
-      <div className="form-grid">
-        <label className="field">
-          Összeg
-          <input type="text" inputMode="numeric" className="num" autoFocus placeholder="45 000" value={amountText}
-            aria-invalid={!!error}
-            onChange={(e) => { setAmountText(e.target.value); setError(''); }}
-            onKeyDown={(e) => e.key === 'Enter' && submit()} />
-        </label>
-        <label className="field">
-          Mire ment?
-          <input type="text" list={NOTE_TAGS_LIST} placeholder="Autószerelés" value={note} onChange={(e) => setNote(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && submit()} />
-        </label>
-      </div>
-
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', margin: '14px 0 10px' }}>
-        <span className="small muted">Miből fizeted?</span>
-        <div className="seg" role="group" aria-label="Miből fizeted">
-          <button className={source === 'monthly' ? 'on' : ''} onClick={() => { setSource('monthly'); setError(''); }}>A havi pénzből</button>
-          <button className={source === 'savings' ? 'on' : ''} onClick={() => { setSource('savings'); setError(''); }} disabled={savings.length === 0}>
-            Megtakarításból
-          </button>
+    // Alsó lapon (asztalon panelen): a Rögzítés lista helyben marad mögötte, az Esc és a fogantyú is bezárja.
+    <Sheet title="Váratlan kiadás" onClose={onClose}>
+      <div className="unexpected">
+        <div className="form-grid">
+          <label className="field">
+            Összeg
+            <input type="text" inputMode="numeric" className="num" autoFocus placeholder="45 000" value={amountText}
+              aria-invalid={!!error}
+              onChange={(e) => { setAmountText(e.target.value); setError(''); }}
+              onKeyDown={(e) => e.key === 'Enter' && submit()} />
+          </label>
+          <label className="field">
+            Mire ment?
+            <input type="text" list={NOTE_TAGS_LIST} placeholder="Autószerelés" value={note} onChange={(e) => setNote(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && submit()} />
+          </label>
         </div>
-        {source === 'savings' && (
-          <select className="sm" aria-label="Megtakarítás" value={savingsId} onChange={(e) => { setSavingsId(e.target.value); setError(''); }}>
-            {savings.map((s) => <option key={s.cat.id} value={s.cat.id}>{s.cat.name} · {formatFt(s.saved)} van rajta</option>)}
+
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', margin: '14px 0 10px' }}>
+          <span className="small muted">Miből fizeted?</span>
+          <div className="seg" role="group" aria-label="Miből fizeted">
+            <button className={source === 'monthly' ? 'on' : ''} onClick={() => { setSource('monthly'); setError(''); }}>A havi pénzből</button>
+            <button className={source === 'savings' ? 'on' : ''} onClick={() => { setSource('savings'); setError(''); }} disabled={savings.length === 0}>
+              Megtakarításból
+            </button>
+          </div>
+          {source === 'savings' && (
+            <select className="sm" aria-label="Megtakarítás" value={savingsId} onChange={(e) => { setSavingsId(e.target.value); setError(''); }}>
+              {savings.map((s) => <option key={s.cat.id} value={s.cat.id}>{s.cat.name} · {formatFt(s.saved)} van rajta</option>)}
+            </select>
+          )}
+          {/* Megtakarításból fizetve is egy kiadási kategóriához tartozik: az Elemzésben annak költéseként látszik. */}
+          <select className="sm" aria-label={source === 'savings' ? 'Melyik kiadásként jelenjen meg' : 'Kategória'} value={catId} onChange={(e) => setCatId(e.target.value)}>
+            <option value={unexpectedCat?.id ?? UNEXPECTED}>{unexpectedCat?.name ?? 'Váratlan kiadások'}</option>
+            <optgroup label="Vagy egy meglévő kategória">
+              {expenseCats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </optgroup>
           </select>
-        )}
-        {/* Megtakarításból fizetve is egy kiadási kategóriához tartozik: az Elemzésben annak költéseként látszik. */}
-        <select className="sm" aria-label={source === 'savings' ? 'Melyik kiadásként jelenjen meg' : 'Kategória'} value={catId} onChange={(e) => setCatId(e.target.value)}>
-          <option value={unexpectedCat?.id ?? UNEXPECTED}>{unexpectedCat?.name ?? 'Váratlan kiadások'}</option>
-          <optgroup label="Vagy egy meglévő kategória">
-            {expenseCats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </optgroup>
-        </select>
-      </div>
+        </div>
 
-      {impact && <div className="small muted impact"><Icon name="info-circle" /> {impact}</div>}
-      {error && <div className="error mt-1-5">{error}</div>}
+        {impact && <div className="small muted impact"><Icon name="info-circle" /> {impact}</div>}
+        {error && <div className="error mt-1-5">{error}</div>}
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>
-        <button className="btn" onClick={onClose}>Mégse</button>
-        <button className="btn primary" onClick={submit} disabled={pending}>Rögzítés</button>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>
+          <button className="btn" onClick={onClose}>Mégse</button>
+          <button className="btn primary" onClick={submit} disabled={pending}>Rögzítés</button>
+        </div>
       </div>
-    </div>
+    </Sheet>
   );
 }

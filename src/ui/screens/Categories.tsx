@@ -8,7 +8,24 @@ import { allowedTypes, type Category, type CategoryType, type PeriodId, type Pla
 import { autoPaidPayments } from '../../domain/balance';
 import { addCategory, reorderCategories, restoreCategory, restoreEntries, saveCategory, updateCategory } from '../../db/repo';
 import { NEW_GOAL, useBudget, useSafe, useToast } from '../context';
-import { CatIcon, Icon, useFieldErrors } from '../components/common';
+import { CatIcon, Icon, MenuButton, useFieldErrors } from '../components/common';
+import { Sheet } from '../components/Sheet';
+
+/** A lista típus szerint tagolva, ugyanabban a sorrendben, mint az Áttekintés és a Tervező. */
+const SECTIONS: { type: CategoryType; title: string }[] = [
+  { type: 'bevetel', title: 'Bevételek' },
+  { type: 'fix', title: 'Fix számlák' },
+  { type: 'keret', title: 'Keretek' },
+  { type: 'megtakaritas', title: 'Megtakarítás' },
+];
+
+/** A névmező példája a típushoz illő: egy megtakarítási célnál ne „Élelmiszer” álljon benne. */
+const NAME_EXAMPLE: Record<CategoryType, string> = {
+  bevetel: 'pl. Fizetés',
+  fix: 'pl. Áram',
+  keret: 'pl. Élelmiszer',
+  megtakaritas: 'pl. Nyaralás 2027',
+};
 
 export function Categories() {
   const { data, focusCategoryId, summaries, go } = useBudget();
@@ -20,7 +37,6 @@ export function Categories() {
   useEffect(() => {
     if (focusCategoryId === NEW_GOAL) {
       setEditing('new-goal');
-      window.scrollTo({ top: 0 });
     }
   }, [focusCategoryId]);
 
@@ -38,13 +54,18 @@ export function Categories() {
   // Az alapösszeg ettől az időszaktól hat (a költségvetés indulása előtt az elsőtől).
   const fromId = planStartId(summaries.currentId, data.settings.firstPeriodId);
 
+  // A sorrend a saját típusán belül változik (a lista típus szerint tagolt): a szomszéd az azonos típusú előző
+  // vagy következő, a többi típus helye nem mozdul.
   const move = (id: string, dir: -1 | 1) =>
     safe(async () => {
-      const ids = active.map((c) => c.id);
-      const i = ids.indexOf(id);
+      const type = active.find((c) => c.id === id)!.type;
+      const same = active.filter((c) => c.type === type).map((c) => c.id);
+      const i = same.indexOf(id);
       const j = i + dir;
-      if (j < 0 || j >= ids.length) return;
-      [ids[i], ids[j]] = [ids[j], ids[i]];
+      if (j < 0 || j >= same.length) return;
+      [same[i], same[j]] = [same[j], same[i]];
+      let k = 0;
+      const ids = active.map((c) => (c.type === type ? same[k++] : c.id));
       await reorderCategories([...ids, ...archived.map((c) => c.id)]);
     });
 
@@ -68,9 +89,9 @@ export function Categories() {
         </button>
       </div>
 
+      {/* Az új kategória és az új cél alsó lapon (asztalon panelen) nyílik, a lista helyben marad mögötte. */}
       {(editing === 'new' || editing === 'new-goal') && (
-        <div className="card">
-          {editing === 'new-goal' && <h2 className="mb-3">Új megtakarítási cél</h2>}
+        <Sheet title={editing === 'new-goal' ? 'Új megtakarítási cél' : 'Új kategória'} onClose={() => edit(null)}>
           <CategoryForm
             key={editing}
             currentId={summaries.currentId}
@@ -92,60 +113,70 @@ export function Categories() {
               })
             }
           />
-        </div>
+        </Sheet>
       )}
 
-      <div className="card">
-        {active.map((c, i) =>
-          editing === c.id ? (
-            <div key={c.id} className="cat-edit">
-              <CategoryForm
-                currentId={summaries.currentId}
-                fromId={fromId}
-                plans={data.plans}
-                initial={c}
-                groups={groups}
-                hasEntries={used.has(c.id)}
-                onCancel={() => edit(null)}
-                onSave={(nc) =>
-                  safe(async () => {
-                    // A csoportos beszedés kikapcsolása ne írja át a múltat: az eddig automatikusan kifizetett
-                    // számlák valódi rögzítést kapnak.
-                    const autoPayments = c.autoPayFrom && !nc.autoPayFrom ? autoPaidPayments(summaries, c) : [];
-                    const { plansBefore, amountChanged, fromId: from, addedEntryIds } = await updateCategory(c, nc, summaries.currentId, autoPayments);
-                    edit(null);
-                    // Ugyanúgy kimondja a törölt későbbi egyedi terveket, mint a Tervező.
-                    const msg = amountChanged
-                      ? `${nc.name} mentve · terv ${planChangeEffect(plansBefore, nc, from, nc.defaultAmount, 'from')}`
-                      : addedEntryIds.length > 0
-                        ? `${nc.name} mentve · az eddigi automatikus fizetések rögzítésként megmaradnak`
-                        : `${nc.name} mentve`;
-                    const cycleNote =
-                      cycleOf(nc) > 1
-                        ? ` · ${cycleLabel(cycleOf(nc))}, legközelebb ${periodName(nextDuePeriod(nc, summaries.currentId)).toLowerCase()}`
-                        : '';
-                    toast(msg + cycleNote, async () => {
-                      await restoreCategory(c, plansBefore);
-                      await restoreEntries([], addedEntryIds);
-                    });
-                  })
-                }
-              />
+      {SECTIONS.map(({ type, title }) => {
+        const list = active.filter((c) => c.type === type);
+        if (list.length === 0) return null;
+        return (
+          <section className="card" key={type} aria-labelledby={`cat-sec-${type}`}>
+            <div className="card-head">
+              <h2 id={`cat-sec-${type}`}>{title}</h2>
+              <span className="small muted num">{list.length}</span>
             </div>
-          ) : (
-            <CategoryRow
-              key={c.id}
-              cat={c}
-              first={i === 0}
-              last={i === active.length - 1}
-              onUp={() => move(c.id, -1)}
-              onDown={() => move(c.id, 1)}
-              onEdit={() => edit(c.id)}
-              onArchive={() => setArchived(c, true)}
-            />
-          ),
-        )}
-      </div>
+            {list.map((c, i) =>
+              editing === c.id ? (
+                <div key={c.id} className="cat-edit">
+                  <CategoryForm
+                    currentId={summaries.currentId}
+                    fromId={fromId}
+                    plans={data.plans}
+                    initial={c}
+                    groups={groups}
+                    hasEntries={used.has(c.id)}
+                    onCancel={() => edit(null)}
+                    onSave={(nc) =>
+                      safe(async () => {
+                        // A csoportos beszedés kikapcsolása ne írja át a múltat: az eddig automatikusan kifizetett
+                        // számlák valódi rögzítést kapnak.
+                        const autoPayments = c.autoPayFrom && !nc.autoPayFrom ? autoPaidPayments(summaries, c) : [];
+                        const { plansBefore, amountChanged, fromId: from, addedEntryIds } = await updateCategory(c, nc, summaries.currentId, autoPayments);
+                        edit(null);
+                        // Ugyanúgy kimondja a törölt későbbi egyedi terveket, mint a Tervező.
+                        const msg = amountChanged
+                          ? `${nc.name} mentve · terv ${planChangeEffect(plansBefore, nc, from, nc.defaultAmount, 'from')}`
+                          : addedEntryIds.length > 0
+                            ? `${nc.name} mentve · az eddigi automatikus fizetések rögzítésként megmaradnak`
+                            : `${nc.name} mentve`;
+                        const cycleNote =
+                          cycleOf(nc) > 1
+                            ? ` · ${cycleLabel(cycleOf(nc))}, legközelebb ${periodName(nextDuePeriod(nc, summaries.currentId)).toLowerCase()}`
+                            : '';
+                        toast(msg + cycleNote, async () => {
+                          await restoreCategory(c, plansBefore);
+                          await restoreEntries([], addedEntryIds);
+                        });
+                      })
+                    }
+                  />
+                </div>
+              ) : (
+                <CategoryRow
+                  key={c.id}
+                  cat={c}
+                  first={i === 0}
+                  last={i === list.length - 1}
+                  onUp={() => move(c.id, -1)}
+                  onDown={() => move(c.id, 1)}
+                  onEdit={() => edit(c.id)}
+                  onArchive={() => setArchived(c, true)}
+                />
+              ),
+            )}
+          </section>
+        );
+      })}
 
       {archived.length > 0 && (
         <div className="card">
@@ -183,8 +214,8 @@ function CategoryRow({
   onEdit: () => void;
   onArchive: () => void;
 }) {
+  // A típus a szakasz címében áll, itt csak a csoport és a részletek.
   const meta = [
-    TYPE_LABEL[cat.type],
     cat.group !== TYPE_LABEL[cat.type] ? cat.group : null,
     `alap ${formatFt(cat.defaultAmount)}`,
     cycleOf(cat) > 1 ? cycleLabel(cycleOf(cat)) : null,
@@ -202,11 +233,20 @@ function CategoryRow({
         <div className="rec-name">{cat.name}</div>
         <div className="tiny faint num">{meta.join(' · ')}</div>
       </div>
+      {/* A szerkesztés közvetlenül, a ritkább sorrend és archiválás a „⋯” menüben, hogy telefonon se legyen
+          minden sor alatt egy második gombsor. */}
       <div className="rec-actions">
-        <button className="btn sm ghost icon" aria-label="Feljebb" onClick={onUp} disabled={first}><Icon name="arrow-up" /></button>
-        <button className="btn sm ghost icon" aria-label="Lejjebb" onClick={onDown} disabled={last}><Icon name="arrow-down" /></button>
-        <button className="btn sm" onClick={onEdit}><Icon name="pencil" /> Szerkesztés</button>
-        <button className="btn sm ghost icon" aria-label="Archiválás" title="Archiválás" onClick={onArchive}><Icon name="archive" /></button>
+        <button className="btn sm icon" aria-label={`${cat.name} szerkesztése`} title="Szerkesztés" onClick={onEdit}>
+          <Icon name="pencil" />
+        </button>
+        <MenuButton
+          label={`${cat.name}: további műveletek`}
+          items={[
+            ...(first ? [] : [{ label: 'Feljebb', icon: 'arrow-up', onSelect: onUp }]),
+            ...(last ? [] : [{ label: 'Lejjebb', icon: 'arrow-down', onSelect: onDown }]),
+            { label: 'Archiválás', icon: 'archive', onSelect: onArchive },
+          ]}
+        />
       </div>
     </div>
   );
@@ -294,7 +334,7 @@ export function CategoryForm({
       <div className="form-grid">
         <label className="field">
           Név
-          <input type="text" value={c.name} autoFocus placeholder="Élelmiszer" onChange={(e) => set({ name: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && save()} {...field('name')} />
+          <input type="text" value={c.name} autoFocus placeholder={NAME_EXAMPLE[c.type]} onChange={(e) => set({ name: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && save()} {...field('name')} />
           {message('name')}
         </label>
         <label className="field">
@@ -321,7 +361,7 @@ export function CategoryForm({
         </label>
         <label className="field">
           Csoport (nem kötelező)
-          <input type="text" list="cat-groups" value={c.group ?? ''} placeholder="Rezsi" onChange={(e) => set({ group: e.target.value })} />
+          <input type="text" list="cat-groups" value={c.group ?? ''} placeholder={c.type === 'fix' ? 'pl. Rezsi' : undefined} onChange={(e) => set({ group: e.target.value })} />
           <datalist id="cat-groups">{groups.map((g) => <option key={g} value={g} />)}</datalist>
         </label>
         <label className="field">
