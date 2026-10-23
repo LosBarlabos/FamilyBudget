@@ -71,7 +71,7 @@ export async function checkRepo(cfg: RepoConfig): Promise<void> {
   if (res.status === 404) throw new SyncError('notFound', 'A tároló nem található, vagy a token nem fér hozzá.');
   if (!res.ok) throw new SyncError('other', `A GitHub hibát jelzett (${res.status}).`);
   const r = (await res.json()) as { private?: boolean; permissions?: { push?: boolean } };
-  if (!r.private) throw new SyncError('public', 'A tároló nyilvános! A költségvetés csak privát tárolóba kerülhet.');
+  if (!r.private) throw new SyncError('public', 'A tároló nyilvános, a költségvetés csak privát tárolóba kerülhet. Állítsd privátra a GitHubon (Settings → Change visibility), és próbáld újra.');
   if (r.permissions && r.permissions.push === false) throw new SyncError('forbidden', 'A token csak olvasni tudja a tárolót, írni nem.');
 }
 

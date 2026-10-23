@@ -18,8 +18,8 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarEleme
 function useChartTheme() {
   const scheme = useColorScheme();
   return scheme === 'dark'
-    ? { grid: '#2e2e2b', tick: '#8f8e86', surface: '#1f1f1d', accent: '#4a92e8', faint: '#7a7972', zero: '#4a4945' }
-    : { grid: '#e9e7e1', tick: '#8a8983', surface: '#ffffff', accent: '#2a78d6', faint: '#c3c2b7', zero: '#c3c2b7' };
+    ? { grid: '#2e2e2b', tick: '#9b9a92', surface: '#1f1f1d', accent: '#4a92e8', faint: '#7a7972', zero: '#4a4945' }
+    : { grid: '#e3e1da', tick: '#6b6a64', surface: '#ffffff', accent: '#2369c0', faint: '#c3c2b7', zero: '#c3c2b7' };
 }
 
 function baseOptions(t: ReturnType<typeof useChartTheme>, onSelect: (i: number) => void): ChartOptions<'line' | 'bar'> {
@@ -37,7 +37,7 @@ function baseOptions(t: ReturnType<typeof useChartTheme>, onSelect: (i: number) 
     },
     plugins: { legend: { display: false } },
     scales: {
-      x: { grid: { display: false }, ticks: { color: t.tick, autoSkip: false, maxRotation: 0 }, border: { color: t.grid } },
+      x: { grid: { display: false }, ticks: { color: t.tick, autoSkip: true, autoSkipPadding: 6, maxRotation: 0 }, border: { color: t.grid } },
       y: {
         grid: { color: (c) => (c.tick.value === 0 ? t.zero : t.grid) },
         border: { display: false },

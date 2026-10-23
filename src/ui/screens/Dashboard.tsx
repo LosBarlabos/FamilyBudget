@@ -3,7 +3,8 @@ import { changeVsSameDay, type CategoryFigures, type PeriodSummary } from '../..
 import { goalProgress } from '../../domain/goals';
 import { formatFt, formatSigned } from '../../domain/money';
 import { envelopeLeftText, envelopeView, paceOverview, reserveMonths, reserveText, type PaceOverview } from '../../domain/pace';
-import { shiftPeriod } from '../../domain/periods';
+import { periodName, shiftPeriod } from '../../domain/periods';
+import { cycleOf, isDuePeriod, nextDuePeriod } from '../../domain/plans';
 import type { Category } from '../../domain/types';
 import { displayUnits, type Unit } from '../../domain/units';
 import { NEW_GOAL, useBudget } from '../context';
@@ -78,6 +79,7 @@ export function Dashboard() {
 
   return (
     <>
+      <h1 className="sr-only">Áttekintés</h1>
       <div className="page-head">
         <PeriodSwitcher />
       </div>
@@ -243,7 +245,11 @@ function Row({
   // A sáv színe a tempót követi (keretnél a folyamatban lévő időszakban az eltelt időhöz mérve, máshol csak
   // a túllépés számít). Terv nélküli (pl. váratlan) kiadásnál nincs mihez képest túllépni.
   const view = envelopeView(cats, figs, pace.days, pace.current);
-  const unplanned = figs.plan === 0;
+  // A nem havonta esedékes számlának (és az olyan csoportnak, amelynek egyik tagja sem esedékes) a köztes
+  // hónapban 0 a terve, de ettől nem „nem tervezett”: a legközelebbi esedékességet mutatja.
+  const notDue = figs.plan === 0 && figs.actual === 0 && cats.every((c) => c.type === 'fix' && cycleOf(c) > 1 && !isDuePeriod(c, p.id));
+  const nextDue = notDue ? cats.map((c) => nextDuePeriod(c, p.id)).sort()[0] : null;
+  const unplanned = figs.plan === 0 && !notDue;
   const tone: BarTone = income ? 'good' : unplanned ? 'accent' : PACE_TONE[view.pace];
   const envelopeRow = pace.current && !unplanned && cats.every((c) => c.type === 'keret');
   const { data, cfg, today } = useBudget();
@@ -275,14 +281,16 @@ function Row({
       </div>
       <div className="barcell">
         {/* Terv és költés nélkül a sáv és a „ma” jelölő csak zaj lenne. */}
-        {planOnly ? (
+        {notDue ? null : planOnly ? (
           <Bar value={figs.plan} max={figs.plan} tone="plan" />
         ) : unplanned && figs.actual === 0 ? null : (
           <Bar value={figs.actual} max={unplanned ? figs.actual : figs.plan} tone={tone} marker={income ? null : view.marker} />
         )}
       </div>
       <div className="amounts num">
-        {planOnly ? (
+        {nextDue ? (
+          <span className="faint">nem esedékes · legközelebb {periodName(nextDue).toLowerCase()}</span>
+        ) : planOnly ? (
           <span className="muted">terv {formatFt(figs.plan)}</span>
         ) : (
           <>

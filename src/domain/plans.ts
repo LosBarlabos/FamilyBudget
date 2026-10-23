@@ -1,4 +1,5 @@
 import { formatFt } from './money';
+import { article } from './pace';
 import { periodAdjective, periodDistance, periodForName, periodFromName, periodShortLabel, shiftPeriod } from './periods';
 import type { Category, PeriodId, Plan } from './types';
 
@@ -190,7 +191,8 @@ export function planChangeEffect(plans: Plan[], cat: Category, periodId: PeriodI
   const removed = plansRemovedFrom(plans, cat, periodId, amount);
   let tail = '';
   if (removed.length === 1) {
-    tail = ` · a ${periodAdjective(removed[0].periodId, periodId)} egyedi terv (${formatFt(removed[0].amount)}) törölve`;
+    const adj = periodAdjective(removed[0].periodId, periodId);
+    tail = ` · ${article(adj).toLowerCase()} ${adj} egyedi terv (${formatFt(removed[0].amount)}) törölve`;
   } else if (removed.length > 1) {
     const list = removed.map((p) => `${periodShortLabel(p.periodId, periodId)}: ${formatFt(p.amount)}`).join(', ');
     tail = ` · ${removed.length} későbbi egyedi terv törölve (${list})`;

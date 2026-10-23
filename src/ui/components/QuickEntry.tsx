@@ -9,7 +9,7 @@ import { addEntry, restoreEntries } from '../../db/repo';
 import { useSettleRest } from '../actions';
 import { UNEXPECTED_PANEL, useBudget, useToast } from '../context';
 import { writeError } from '../errors';
-import { CatIcon, Icon, NOTE_TAGS_LIST, useLocalState } from './common';
+import { CatIcon, Icon, NOTE_TAGS_LIST, Segmented, useLocalState } from './common';
 import { Sheet } from './Sheet';
 import { handOffUnexpected } from './UnexpectedExpense';
 
@@ -165,13 +165,12 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
 
         {canPickPrev && (
           <div className="quick-period">
-            <div className="seg" role="group" aria-label="Melyik időszakba">
-              {[currentId, prevId].map((id) => (
-                <button key={id} className={periodId === id ? 'on' : ''} aria-pressed={periodId === id} onClick={() => setPrevChosen(id === prevId)}>
-                  {periodShortName(id)}.
-                </button>
-              ))}
-            </div>
+            <Segmented
+              label="Melyik időszakba"
+              options={[currentId, prevId].map((id) => ({ id, label: `${periodShortName(id)}.` }))}
+              value={periodId}
+              onChange={(id) => setPrevChosen(id === prevId)}
+            />
             <span className="tiny faint">Az új időszak első napjaiban az előzőbe is rögzíthetsz.</span>
           </div>
         )}

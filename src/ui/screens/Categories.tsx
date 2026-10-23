@@ -8,7 +8,7 @@ import { allowedTypes, type Category, type CategoryType, type PeriodId, type Pla
 import { autoPaidPayments } from '../../domain/balance';
 import { addCategory, reorderCategories, restoreCategory, restoreEntries, saveCategory, updateCategory } from '../../db/repo';
 import { NEW_GOAL, useBudget, useSafe, useToast } from '../context';
-import { CatIcon, Icon } from '../components/common';
+import { CatIcon, Icon, useFieldErrors } from '../components/common';
 
 export function Categories() {
   const { data, focusCategoryId, summaries, go } = useBudget();
@@ -236,7 +236,7 @@ export function CategoryForm({
   // Határidő: a mostani időszaktól 10 évig, plusz a már beállított (akár múltbeli) érték.
   const deadlines = periodRange(currentId, shiftPeriod(currentId, 120));
   if (initial.goalDeadline && !deadlines.includes(initial.goalDeadline)) deadlines.unshift(initial.goalDeadline);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { field, message, check } = useFieldErrors<'name' | 'amount' | 'due' | 'goal' | 'goalStart'>();
   const set = (patch: Partial<Category>) => setC({ ...c, ...patch });
   // Esedékességi nap a fix számlának és az egyösszegű bevételnek van (a számlanaptár ehhez igazodik).
   const hasDueDay = c.type === 'fix' || (c.type === 'bevetel' && (c.incomeMode ?? 'fix') === 'fix');
@@ -259,7 +259,7 @@ export function CategoryForm({
     : `Ha módosítod, ${periodFromName(fromId)} ez lesz minden hónap terve, a Tervezőben megadott értékek helyett is. A korábbi hónapokat nem érinti.`;
 
   const save = () => {
-    const e: Record<string, string> = {};
+    const e: Partial<Record<'name' | 'amount' | 'due' | 'goal' | 'goalStart', string>> = {};
     if (!c.name.trim()) e.name = 'Adj nevet a kategóriának';
     const amount = typedAmount;
     if (amount === null) e.amount = 'Ez nem érvényes összeg';
@@ -271,8 +271,7 @@ export function CategoryForm({
     if (savings && goal === null) e.goal = 'Ez nem érvényes összeg';
     const goalStart = goalStartText.trim() === '' || goalStartText.trim() === '0' ? undefined : parseAmount(goalStartText);
     if (savings && goalStart === null) e.goalStart = 'Ez nem érvényes összeg';
-    setErrors(e);
-    if (Object.keys(e).length) return;
+    if (!check(e)) return;
     onSave({
       ...c,
       name: c.name.trim(),
@@ -295,12 +294,14 @@ export function CategoryForm({
       <div className="form-grid">
         <label className="field">
           Név
-          <input type="text" value={c.name} autoFocus placeholder="Élelmiszer" onChange={(e) => set({ name: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && save()} />
-          {errors.name && <span className="error">{errors.name}</span>}
+          <input type="text" value={c.name} autoFocus placeholder="Élelmiszer" onChange={(e) => set({ name: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && save()} {...field('name')} />
+          {message('name')}
         </label>
         <label className="field">
           Típus
+          {/* A körbeölelő címke a select összes lehetőségét a nevébe olvasná: külön név kell. */}
           <select
+            aria-label="Típus"
             value={c.type}
             disabled={types.length === 1}
             aria-describedby={hasEntries ? 'cat-type-hint' : undefined}
@@ -325,8 +326,8 @@ export function CategoryForm({
         </label>
         <label className="field">
           {cycle > 1 ? 'Összeg alkalmanként' : 'Alapértelmezett havi összeg'}
-          <input type="text" inputMode="numeric" className="num" value={amountText} placeholder="0" onChange={(e) => setAmountText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && save()} />
-          {errors.amount && <span className="error">{errors.amount}</span>}
+          <input type="text" inputMode="numeric" className="num" value={amountText} placeholder="0" onChange={(e) => setAmountText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && save()} {...field('amount')} />
+          {message('amount')}
           {removedLater.length > 0 && (
             <span className="tiny num later-plans">
               <Icon name="alert-triangle" />
@@ -337,7 +338,7 @@ export function CategoryForm({
         {c.type === 'fix' && (
           <label className="field">
             Milyen gyakran?
-            <select value={cycle} onChange={(e) => setCycle(Number(e.target.value))}>
+            <select aria-label="Milyen gyakran?" value={cycle} onChange={(e) => setCycle(Number(e.target.value))}>
               {CYCLES.map((x) => (
                 <option key={x.months} value={x.months}>{capitalize(x.label)}</option>
               ))}
@@ -347,7 +348,7 @@ export function CategoryForm({
         {cycle > 1 && (
           <label className="field">
             Legközelebb esedékes
-            <select value={c.cycleStart ?? currentId} onChange={(e) => set({ cycleStart: e.target.value })}>
+            <select aria-label="Legközelebb esedékes" value={c.cycleStart ?? currentId} onChange={(e) => set({ cycleStart: e.target.value })}>
               {cycleChoices.map((p) => (
                 <option key={p} value={p}>{periodName(p, p.slice(0, 4) !== currentId.slice(0, 4))}</option>
               ))}
@@ -357,14 +358,14 @@ export function CategoryForm({
         {hasDueDay && (
           <label className="field">
             {c.type === 'fix' ? 'Esedékesség napja' : 'Érkezés napja'} (nem kötelező)
-            <input type="number" min={1} max={31} value={dueText} placeholder="15" onChange={(e) => setDueText(e.target.value)} />
-            {errors.due && <span className="error">{errors.due}</span>}
+            <input type="number" min={1} max={31} value={dueText} placeholder="15" onChange={(e) => setDueText(e.target.value)} {...field('due')} />
+            {message('due')}
           </label>
         )}
         {c.type === 'bevetel' && (
           <label className="field">
             Hogyan érkezik?
-            <select value={c.incomeMode ?? 'fix'} onChange={(e) => set({ incomeMode: e.target.value as 'fix' | 'keret' })}>
+            <select aria-label="Hogyan érkezik?" value={c.incomeMode ?? 'fix'} onChange={(e) => set({ incomeMode: e.target.value as 'fix' | 'keret' })}>
               <option value="fix">Egy összegben (pl. fizetés)</option>
               <option value="keret">Több részletben</option>
             </select>
@@ -410,12 +411,12 @@ export function CategoryForm({
         <div className="form-grid goal-fields">
           <label className="field">
             Célösszeg (nem kötelező)
-            <input type="text" inputMode="numeric" className="num" value={goalText} placeholder="800 000" onChange={(e) => setGoalText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && save()} />
-            {errors.goal && <span className="error">{errors.goal}</span>}
+            <input type="text" inputMode="numeric" className="num" value={goalText} placeholder="800 000" onChange={(e) => setGoalText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && save()} {...field('goal')} />
+            {message('goal')}
           </label>
           <label className="field">
             Határidő (nem kötelező)
-            <select value={c.goalDeadline ?? ''} disabled={!goalText.trim()} onChange={(e) => set({ goalDeadline: e.target.value || undefined })}>
+            <select aria-label="Határidő" value={c.goalDeadline ?? ''} disabled={!goalText.trim()} onChange={(e) => set({ goalDeadline: e.target.value || undefined })}>
               <option value="">Nincs határidő</option>
               {deadlines.map((p) => (
                 <option key={p} value={p}>{periodName(p, true)} végéig</option>
@@ -424,8 +425,8 @@ export function CategoryForm({
           </label>
           <label className="field">
             Ebből már félretéve
-            <input type="text" inputMode="numeric" className="num" value={goalStartText} placeholder="0" onChange={(e) => setGoalStartText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && save()} />
-            {errors.goalStart && <span className="error">{errors.goalStart}</span>}
+            <input type="text" inputMode="numeric" className="num" value={goalStartText} placeholder="0" onChange={(e) => setGoalStartText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && save()} {...field('goalStart')} />
+            {message('goalStart')}
           </label>
         </div>
       )}

@@ -118,7 +118,10 @@ export function Record() {
   const expPlan = [...fixed, ...envelopes].reduce((s, c) => s + fig(c).plan, 0);
   const fixSt = (c: Category) => fixStatus(fig(c).plan, fig(c).actual, fig(c).settled);
   const doneIds = doneFixedIds(data, p);
-  const fixDone = doneIds.length;
+  // A számláló csak az ebben az időszakban esedékes számlákat számolja: a nem esedékes (pl. évente fizetett)
+  // számlát itt nem lehet kifizetni, így a „7 / 9” sosem érhetné el a teljes számot.
+  const dueFixed = fixed.filter((c) => isDuePeriod(c, p.id));
+  const fixDone = dueFixed.filter((c) => doneIds.includes(c.id)).length;
   const fixLeft = fixed.reduce((s, c) => s + (fig(c).settled ? 0 : Math.max(0, fig(c).plan - fig(c).actual)), 0);
   // Terv nélkül (pl. az első időszak előtt) nincs mit kifizetni, így lejárni sem tud.
   const checkOverdue = (c: Category) => p.status === 'current' && fig(c).plan > 0;
@@ -183,6 +186,7 @@ export function Record() {
 
   return (
     <>
+      <h1 className="sr-only">Rögzítés</h1>
       <div className="page-head">
         <PeriodSwitcher />
         {!unexpectedOpen && (
@@ -213,7 +217,7 @@ export function Record() {
         <Kpi label="Rögzített kiadás" value={formatFt(expActual)} sub={`terv ${formatFt(expPlan)}`} />
         <Kpi
           label="Fix számlák"
-          value={`${fixDone} / ${fixed.length} kifizetve`}
+          value={`${fixDone} / ${dueFixed.length} kifizetve`}
           sub={
             <>
               hátra {formatFt(fixLeft)}
@@ -241,7 +245,7 @@ export function Record() {
           {(showDone ? fixDone > 0 : hiddenIds.size > 0) && (
             <button className="rec-more" aria-expanded={showDone} onClick={toggleDone}>
               <Icon name="chevron-right" className={`chev ${showDone ? 'open' : ''}`} />
-              <span className="num">{fixDone} / {fixed.length} kifizetve</span>
+              <span className="num">{fixDone} / {dueFixed.length} kifizetve</span>
               <span className="faint">· {showDone ? 'elrejt' : 'mutasd'}</span>
             </button>
           )}

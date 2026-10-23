@@ -7,7 +7,7 @@ import type { BudgetData } from './types';
 describe('összegek', () => {
   it('formázás', () => {
     expect(formatFt(1234567).replace(/\s/g, ' ')).toBe('1 234 567 Ft');
-    expect(formatFt(-1500).replace(/\s/g, ' ')).toBe('-1 500 Ft');
+    expect(formatFt(-1500).replace(/\s/g, ' ')).toBe('−1 500 Ft');
     expect(formatShort(450_000)).toBe('450e');
     expect(formatShort(1_200_000)).toBe('1,2M');
     expect(formatShort(2_000_000)).toBe('2M');

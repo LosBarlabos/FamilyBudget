@@ -1,9 +1,9 @@
 const ft = new Intl.NumberFormat('hu-HU', { maximumFractionDigits: 0, useGrouping: 'always' });
 
-/** '1 234 567 Ft', negatívnál '-1 234 Ft'. */
+/** '1 234 567 Ft', negatívnál '−1 234 Ft' (valódi mínuszjel, U+2212, ahogy a kézzel írt helyeken is). */
 export function formatFt(n: number): string {
   const r = Math.round(n);
-  return `${r < 0 ? '-' : ''}${ft.format(Math.abs(r))}\u00a0Ft`;
+  return `${r < 0 ? '−' : ''}${ft.format(Math.abs(r))}\u00a0Ft`;
 }
 
 export function formatSigned(n: number): string {
@@ -13,7 +13,7 @@ export function formatSigned(n: number): string {
 /** Tengelyfeliratokhoz: '450e', '1,2M'. */
 export function formatShort(n: number): string {
   const a = Math.abs(n);
-  const sign = n < 0 ? '-' : '';
+  const sign = n < 0 ? '−' : '';
   if (a >= 1_000_000) return `${sign}${(a / 1_000_000).toFixed(1).replace('.', ',').replace(',0', '')}M`;
   if (a >= 1000) return `${sign}${Math.round(a / 1000)}e`;
   return `${sign}${Math.round(a)}`;

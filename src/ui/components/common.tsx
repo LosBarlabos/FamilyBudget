@@ -363,3 +363,77 @@ export function useLocalState<T>(key: string, initial: T): [T, (v: T | ((prev: T
   const set = (nv: T | ((prev: T) => T)) => writeLocal(key, initial, nv);
   return [v, set];
 }
+
+/**
+ * Egymást kizáró választás gombsorként, rádiócsoport szemantikával: a kiválasztott elem felolvasható, a csoportba
+ * egy Tab-lépéssel lehet belépni, és a nyílbillentyűk váltanak (WAI-ARIA rádiócsoport minta).
+ */
+export function Segmented<T extends string>({ label, options, value, onChange }: {
+  label: string;
+  options: readonly { id: T; label: ReactNode }[];
+  value: T;
+  onChange: (id: T) => void;
+}) {
+  const refs = useRef<(HTMLButtonElement | null)[]>([]);
+  const onKeyDown = (e: KeyboardEvent<HTMLButtonElement>, i: number) => {
+    const step = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
+    if (!step) return;
+    e.preventDefault();
+    const next = (i + step + options.length) % options.length;
+    onChange(options[next].id);
+    refs.current[next]?.focus();
+  };
+  return (
+    <div className="seg" role="radiogroup" aria-label={label}>
+      {options.map((o, i) => (
+        <button
+          key={o.id}
+          ref={(el) => {
+            refs.current[i] = el;
+          }}
+          role="radio"
+          aria-checked={value === o.id}
+          tabIndex={value === o.id ? 0 : -1}
+          className={value === o.id ? 'on' : ''}
+          onClick={() => onChange(o.id)}
+          onKeyDown={(e) => onKeyDown(e, i)}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Űrlapmezők hibáinak bekötése: a hibás mező `aria-invalid` és a hibaszövegre mutató `aria-describedby`
+ * jelzést kap, a hibaszöveg `role="alert"`, így a képernyőolvasó is bejelenti. A `check` beállítja a hibákat,
+ * és ha van, az első hibás mezőre viszi a fókuszt; igazat ad, ha nincs hiba.
+ */
+export function useFieldErrors<K extends string>() {
+  const base = useId();
+  const [errors, setErrors] = useState<Partial<Record<K, string>>>({});
+  // Az első hibás mező a megjelenítés után kap fókuszt (amikor az aria-describedby már a helyén van).
+  const [focusKey, setFocusKey] = useState<{ k: K } | null>(null);
+  const idOf = (k: K) => `${base}-${k}`;
+  useEffect(() => {
+    if (focusKey) document.querySelector<HTMLElement>(`[aria-describedby="${base}-${focusKey.k}"]`)?.focus();
+  }, [focusKey, base]);
+  const field = (k: K) => ({
+    'aria-invalid': errors[k] ? true : undefined,
+    'aria-describedby': errors[k] ? idOf(k) : undefined,
+  });
+  const message = (k: K) =>
+    errors[k] ? (
+      <span className="error" id={idOf(k)} role="alert">
+        {errors[k]}
+      </span>
+    ) : null;
+  const check = (next: Partial<Record<K, string>>) => {
+    setErrors(next);
+    const first = (Object.keys(next) as K[]).find((k) => next[k]);
+    if (first) setFocusKey({ k: first });
+    return !first;
+  };
+  return { field, message, check };
+}

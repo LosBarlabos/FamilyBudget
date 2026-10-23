@@ -152,6 +152,17 @@ Ezek hibák, nem ízlés kérdései. Mindegyik néhány sor, és egyik sem akad�
 | 9 | A „Fizetésnap” és a Kategóriák hibáinak bekötése | AK8 | `Settings.tsx`, `Categories.tsx` |
 | 10 | „az októberi”, a felkiáltójel és a mínuszjel egységesítése | SZ1, SZ2, SZ14 | `plans.ts:193`, `github.ts:74` |
 
+**Állapot: mind a 10 kész (2026-10-23).** Ellenőrzés a böngészőben és újramérve:
+- a `probe-core` 0 kontraszthibát talál a 32 mért cellában (2 téma × 375/1440 px × 8 képernyő), korábban a világos cellák fele elérte a 25-ös plafont;
+- a fókusz 213 Tab-lépésből egyszer sem kerül az alsó sáv alá (korábban 7-szer);
+- a „4 / 7 kifizetve”, az „Autó · nem esedékes · legközelebb november” és az eltérések új üres állapota a mintán megjelenik.
+
+Két dolog a listán túl is bekerült, mert ugyanaz a hiba volt:
+- a Kategóriák űrlapjának öt, címkébe ágyazott selectje is külön nevet kapott (A10);
+- a gyorsrögzítő hónapválasztója is a közös rádiócsoport-komponenst használja (AK11).
+
+A Tervező 1024 px-es elrendezése (A05) nem gyors javítás, az 5. fázisban készül.
+
 ## Döntések a 2. fázishoz
 
 A szövegjelentés szójegyzéke néhány ponton felhasználói döntést kér. Ezek az 5–6. fázis szövegeit határozzák meg:

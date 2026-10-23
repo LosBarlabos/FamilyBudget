@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  applyPlanOps, cycleOf, effectivePlan, indexPlans, isDuePeriod, missingBasePlans, newCategoryPlans, nextDuePeriod, planChangeOps, planStartId,
-  scheduledPlan,
+  applyPlanOps, cycleOf, effectivePlan, indexPlans, isDuePeriod, missingBasePlans, newCategoryPlans, nextDuePeriod, planChangeOps, planChangeSummary,
+  planStartId, scheduledPlan,
 } from './plans';
 import type { Category, Plan } from './types';
 
@@ -157,5 +157,20 @@ describe('nem havonta esedékes számla', () => {
     expect(cycleOf({ ...q, cycleStart: undefined })).toBe(1);
     expect(cycleOf({ ...q, cycleMonths: 5 })).toBe(1);
     expect(isDuePeriod({ ...q, type: 'keret' }, '2026-10')).toBe(true);
+  });
+});
+
+describe('tervmódosítás összegzése', () => {
+  const base: Plan = { periodId: '2026-01', categoryId: 'c1', amount: 100_000 };
+  const sp = (t: string) => t.replace(/\s/g, ' ');
+
+  it('magánhangzós hónap előtt „az” a névelő', () => {
+    const plans = [base, { periodId: '2026-10', categoryId: 'c1', amount: 150_000 }];
+    expect(sp(planChangeSummary(plans, cat, '2026-09', 95_000, 'from'))).toBe('Élelmiszer: 95 000 Ft szeptembertől · az októberi egyedi terv (150 000 Ft) törölve');
+  });
+
+  it('mássalhangzós hónap előtt „a” a névelő', () => {
+    const plans = [base, { periodId: '2026-12', categoryId: 'c1', amount: 150_000 }];
+    expect(sp(planChangeSummary(plans, cat, '2026-11', 95_000, 'from'))).toContain('· a decemberi egyedi terv');
   });
 });

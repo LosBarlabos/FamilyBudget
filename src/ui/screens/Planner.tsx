@@ -11,7 +11,7 @@ import type { Category, PeriodId, Plan } from '../../domain/types';
 import { changePlan, replacePlans, restorePlansOf, snapshotPlans } from '../../db/repo';
 import { useBudget, useSafe, useToast } from '../context';
 import { BalanceChart } from '../components/Charts';
-import { CatIcon, Icon } from '../components/common';
+import { CatIcon, Icon, Segmented } from '../components/common';
 import { GoalStateChip } from '../components/Goals';
 import { PeriodSwitcher } from '../components/PeriodSwitcher';
 
@@ -27,6 +27,11 @@ interface Draft {
   amount: number;
 }
 
+
+const MODES: { id: PlanMode; label: string }[] = [
+  { id: 'from', label: 'Ettől a hónaptól' },
+  { id: 'only', label: 'Csak erre a hónapra' },
+];
 export function Planner() {
   const { data, summaries, periodId, setPeriodId, today } = useBudget();
   const toast = useToast();
@@ -116,13 +121,11 @@ export function Planner() {
 
   return (
     <>
+      <h1 className="sr-only">Tervező</h1>
       <div className="page-head">
         <PeriodSwitcher />
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <div className="seg" role="group" aria-label="Módosítás hatálya">
-            <button className={mode === 'from' ? 'on' : ''} onClick={() => setMode('from')}>Ettől a hónaptól</button>
-            <button className={mode === 'only' ? 'on' : ''} onClick={() => setMode('only')}>Csak erre a hónapra</button>
-          </div>
+          <Segmented label="Módosítás hatálya" options={MODES} value={mode} onChange={setMode} />
         </div>
       </div>
 

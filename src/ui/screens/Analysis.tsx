@@ -9,7 +9,7 @@ import { periodName, periodShortLabel, shortDate } from '../../domain/periods';
 import { isExpense, type Category, type Entry } from '../../domain/types';
 import { displayUnits, type Unit } from '../../domain/units';
 import { useBudget } from '../context';
-import { CatIcon, Icon, useLocalState } from '../components/common';
+import { CatIcon, Icon, Segmented, useLocalState } from '../components/common';
 import { PeriodSwitcher } from '../components/PeriodSwitcher';
 
 export const RANGE_KEY = 'analysis-range';
@@ -39,15 +39,10 @@ export function Analysis() {
 
   return (
     <>
+      <h1 className="sr-only">Elemzés</h1>
       <div className="page-head">
         <PeriodSwitcher />
-        <div className="seg" role="group" aria-label="Időablak">
-          {RANGES.map((r) => (
-            <button key={r.id} className={range === r.id ? 'on' : ''} aria-pressed={range === r.id} onClick={() => setRange(r.id)}>
-              {r.label}
-            </button>
-          ))}
-        </div>
+        <Segmented label="Időablak" options={RANGES} value={range} onChange={setRange} />
       </div>
       {anchor.id !== periodId && (
         <div className="banner info">
@@ -56,7 +51,7 @@ export function Analysis() {
         </div>
       )}
       <WhereMoneyWent periods={periods} spend={spend} rangeText={rangeText + partial} />
-      <Deviations periods={periods} />
+      <Deviations periods={periods} hasClosed={summaries.periods.some((p) => p.status === 'closed')} onWiden={() => setRange('last12')} />
       <Heatmap periods={heatPeriods(summaries, periodId, range)} spend={spend} anchorId={anchor.id} />
       <SearchAndTags />
     </>
@@ -139,7 +134,7 @@ function WhereRow({ r, scale, onOpen }: { r: SpendRow; scale: number; onOpen: ()
   );
 }
 
-function Deviations({ periods }: { periods: PeriodSummary[] }) {
+function Deviations({ periods, hasClosed, onWiden }: { periods: PeriodSummary[]; hasClosed: boolean; onWiden: () => void }) {
   const { data, go, openTrend } = useBudget();
   const list = useMemo(() => deviations(data.categories, periods), [data.categories, periods]);
   const closed = periods.filter((p) => p.status === 'closed').length;
@@ -149,7 +144,13 @@ function Deviations({ periods }: { periods: PeriodSummary[] }) {
         <h2 id="dev-title">Legnagyobb eltérések a tervtől</h2>
         {closed > 0 && <span className="small faint">{closed} lezárt időszak alapján</span>}
       </div>
-      {closed === 0 ? (
+      {closed === 0 && hasClosed ? (
+        // Van lezárt időszak, csak a választott időablakban nincs (pl. „Ez az időszak”): ne állítsa, hogy még nincs.
+        <div className="small muted" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span>A folyamatban lévő időszakot még nincs mihez mérni, az eltérések a lezárt időszakokból számolódnak.</span>
+          <button className="sm" onClick={onWiden}>Utolsó 12 időszak</button>
+        </div>
+      ) : closed === 0 ? (
         <p className="small muted" style={{ margin: 0 }}>
           Az első lezárt időszak után jelenik meg: a folyamatban lévő hónapot még nincs mihez mérni. Addig az Áttekintés jelzi a gyorsan fogyó kereteket.
         </p>

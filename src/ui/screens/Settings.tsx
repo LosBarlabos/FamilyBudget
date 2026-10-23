@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { buildCsv, parseImport, previewImport, type ExportFile, type ImportPreview } from '../../domain/exportFormat';
 import { parseSignedAmount } from '../../domain/money';
 import { formatRange, periodName, periodStart, validateOverride } from '../../domain/periods';
 import { clearOverride, importAll, requestPersistence, restoreSettings, saveBasicSettings, setOverride, wipeAll } from '../../db/repo';
 import { backupLabel, daysSince, exportBackup } from '../backup';
 import { useBudget, useSafe, useToast } from '../context';
-import { downloadFile, Icon } from '../components/common';
+import { downloadFile, Icon, useFieldErrors } from '../components/common';
 import { SyncPanel } from '../components/SyncPanel';
 import { disconnect } from '../../sync/engine';
 
@@ -38,18 +38,17 @@ function BasicSettings() {
   const [payday, setPayday] = useState(String(s.payday));
   const [opening, setOpening] = useState(String(s.openingBalance));
   const [forecast, setForecast] = useState(String(s.forecastPeriods));
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { field, message, check } = useFieldErrors<'payday' | 'opening' | 'forecast'>();
 
   const save = async () => {
-    const e: Record<string, string> = {};
+    const e: Partial<Record<'payday' | 'opening' | 'forecast', string>> = {};
     const pd = Number(payday);
     if (!Number.isInteger(pd) || pd < 1 || pd > 31) e.payday = '1 és 31 közötti nap';
     const ob = parseSignedAmount(opening);
     if (ob === null) e.opening = 'Ez nem érvényes összeg';
     const fc = Number(forecast);
     if (!Number.isInteger(fc) || fc < 1 || fc > 24) e.forecast = '1 és 24 között';
-    setErrors(e);
-    if (Object.keys(e).length) return;
+    if (!check(e)) return;
     await safe(async () => {
       const { before, removed } = await saveBasicSettings({ payday: pd, openingBalance: ob!, forecastPeriods: fc });
       const undo = () => restoreSettings(before, removed);
@@ -65,18 +64,18 @@ function BasicSettings() {
       <div className="form-grid">
         <label className="field">
           Fizetésnap (a hónap napja)
-          <input type="number" min={1} max={31} value={payday} onChange={(e) => setPayday(e.target.value)} />
-          {errors.payday && <span className="error">{errors.payday}</span>}
+          <input type="number" min={1} max={31} value={payday} onChange={(e) => setPayday(e.target.value)} {...field('payday')} />
+          {message('payday')}
         </label>
         <label className="field">
           Nyitó egyenleg (az első időszak elején)
-          <input type="text" inputMode="numeric" className="num" value={opening} onChange={(e) => setOpening(e.target.value)} />
-          {errors.opening && <span className="error">{errors.opening}</span>}
+          <input type="text" inputMode="numeric" className="num" value={opening} onChange={(e) => setOpening(e.target.value)} {...field('opening')} />
+          {message('opening')}
         </label>
         <label className="field">
           Előrejelzés (időszak előre)
-          <input type="number" min={1} max={24} value={forecast} onChange={(e) => setForecast(e.target.value)} />
-          {errors.forecast && <span className="error">{errors.forecast}</span>}
+          <input type="number" min={1} max={24} value={forecast} onChange={(e) => setForecast(e.target.value)} {...field('forecast')} />
+          {message('forecast')}
         </label>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 14, flexWrap: 'wrap' }}>
@@ -96,6 +95,7 @@ function PeriodOverrides() {
   const [pid, setPid] = useState(summaries.currentId);
   const [date, setDate] = useState(periodStart(summaries.currentId, cfg));
   const [error, setError] = useState('');
+  const overrideErrorId = useId();
 
   useEffect(() => setDate(periodStart(pid, cfg)), [pid, cfg]);
 
@@ -118,7 +118,8 @@ function PeriodOverrides() {
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'flex-end' }}>
         <label className="field">
           Időszak
-          <select value={pid} onChange={(e) => { setPid(e.target.value); setError(''); }}>
+          {/* A címke körbeöleli a mezőt: külön név nélkül a felolvasott név az összes lehetőséget tartalmazná. */}
+          <select aria-label="Időszak" value={pid} onChange={(e) => { setPid(e.target.value); setError(''); }}>
             {summaries.periods.map((p) => (
               <option key={p.id} value={p.id}>{periodName(p.id, true)} ({formatRange(p.start, p.end)})</option>
             ))}
@@ -126,11 +127,11 @@ function PeriodOverrides() {
         </label>
         <label className="field">
           Kezdőnap
-          <input type="date" value={date} onChange={(e) => { setDate(e.target.value); setError(''); }} />
+          <input type="date" value={date} aria-invalid={error ? true : undefined} aria-describedby={error ? overrideErrorId : undefined} onChange={(e) => { setDate(e.target.value); setError(''); }} />
         </label>
         <button onClick={save}>Beállítás</button>
       </div>
-      {error && <div className="error" style={{ marginTop: 6 }}>{error}</div>}
+      {error && <div className="error" id={overrideErrorId} role="alert" style={{ marginTop: 6 }}>{error}</div>}
       {data.overrides.length > 0 && (
         <div style={{ marginTop: 12 }}>
           {data.overrides.map((o) => (
