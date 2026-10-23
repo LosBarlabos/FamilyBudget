@@ -137,7 +137,7 @@ function ConnectForm({ join }: { join: boolean }) {
       <div className="form-grid">
         <label className="field">
           Tároló (tulajdonos/név)
-          <input type="text" placeholder="pl. LosBarlabos/FamilyBudget-adatok" value={repo} autoCapitalize="off" autoCorrect="off" spellCheck={false} onChange={(e) => setRepo(e.target.value)} />
+          <input type="text" placeholder="pl. felhasznalonev/koltsegvetes-adatok" value={repo} autoCapitalize="off" autoCorrect="off" spellCheck={false} onChange={(e) => setRepo(e.target.value)} />
         </label>
         <label className="field">
           GitHub-token

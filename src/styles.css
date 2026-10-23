@@ -847,6 +847,8 @@ label.ob-row.ob-past { cursor: pointer; }
 .cal-list { display: grid; }
 .cal-row {
   display: grid; grid-template-columns: 64px 30px minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 52px;
+  /* A sor gomb: az alap gombstílus egysoros, fix magasságú; itt az állapotszöveg törhet, az összeg nem. */
+  height: auto; white-space: normal;
   padding: 6px 8px; border: none; border-radius: var(--radius); background: transparent; color: var(--text); text-align: left; font: inherit;
 }
 .cal-row + .cal-row { box-shadow: 0 -1px 0 var(--border); }
@@ -854,7 +856,7 @@ label.ob-row.ob-past { cursor: pointer; }
 .cal-date { font-size: 13px; color: var(--text-2); }
 .cal-main { display: flex; flex-direction: column; min-width: 0; }
 .cal-main .rec-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cal-amount { font-weight: 600; }
+.cal-amount { font-weight: 600; white-space: nowrap; }
 @media (max-width: 900px) {
   .cal-layout { grid-template-columns: minmax(0, 1fr); }
 }
