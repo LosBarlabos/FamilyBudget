@@ -73,6 +73,8 @@ A `FEJLESZTESI_TERV.md` általános szabályai érvényesek (magyar, mondatkezd�
 
 **Kimenet:** `docs/design/02-osszegzes.md`, a végén egy rangsorolt listával, amiből a felhasználó választ.
 
+**Állapot (2026-10-23):** a kutatási terv és eszközök kész (`docs/design/02-felhasznaloi-kutatas.md`, adatkivonat: `node scripts/hasznalat.mjs <mentés.json>`). Az összegzés ideiglenes rangsorral kész, 16 munkacsomaggal. A beszélgetések és a napló a családra várnak, utánuk véglegesedik.
+
 ## 3. Funkciófelmérés
 
 Minden jelöltnél: mit old meg, mekkora munka, kell-e hozzá domain-változás vagy új npm-csomag, és a felhasználó döntése (igen / később / nem). A lista a 2. fázis után bővülhet.
