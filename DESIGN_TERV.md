@@ -125,7 +125,7 @@ Minden jelöltnél: mit old meg, mekkora munka, kell-e hozzá domain-változás 
 
 **Kimenet:** `docs/design/05-design-rendszer.md`, és a tokenek a kódban, a vizuális megjelenés változtatása nélkül (első lépésként csak csere tokenekre, hogy a későbbi különbség tiszta legyen).
 
-**Állapot (2026-10-23):** a specifikáció kész, az 5.A (tokenek, 0 látható változás, képkülönbséggel igazolva) kész. Következik az 5.B (a Csekk palettája és betűi).
+**Állapot (2026-10-23):** a specifikáció kész, az 5.A (tokenek, 0 látható változás, képkülönbséggel igazolva) kész. Az 5.B (a Csekk palettája és saját tárhelyes betűi) kész. Következik az 5.C (a keret: három elrendezési osztály).
 
 ## 6. Megvalósítás képernyőnként
 

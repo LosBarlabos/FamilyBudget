@@ -208,6 +208,23 @@ Minden lépés után: `npx tsc`, `npx vitest run`, `npm run build`, és a képer
   - 3 képen a gyorsrögzítő és a Továbbiak lap az egész oldalas képen máshol áll. Ez a képkészítés mellékhatása: az egész oldalas kép a nézetet ideiglenesen megnyújtja, és a réteg `12vh`-s eltolása vele változik. Ugyanezek a rétegek a hajtás feletti képeken azonosak.
 - **Következtetés:** a CSS-csere 0 látható változást okozott. Rétegeknél a hajtás feletti képek mérvadók (`--csak-hajtas`).
 
+### Az 5.B eredménye (2026-10-23)
+
+- **Betűk:** a Barlow Condensed (600, 700) és az IBM Plex Sans (változó, 400–600) saját tárhelyről jön (`public/fonts/`, 6 woff2, 114 kB, licencekkel), `src/fonts.css`, latin és latin-ext részhalmaz. A build relatív útvonalat ír (`../fonts/…`), így alkönyvtárban is működik, és a PWA offline is gyorsítótárazza.
+- **A tokenek a Csekk értékeit kapták:**
+  - paletta világos és sötét témára, új szerepekkel (`--color-bill`, `--color-surface-inverse`, `--color-day`, `--color-scrim`);
+  - folyékony `--text-xl`, `--text-2xl`, `--text-3xl` és `--text-display`;
+  - sugár 10/14/20/24 px;
+  - tintakék hero kártya.
+- **Ikonok:** a betűmérettel együtt nőtt volna a 18 ikonszabály, ezért külön `--icon-*` tokenekre kerültek, változatlan mérettel.
+- **Display betű:** a h1, a h2, a hero összege és címe, a KPI-értékek és a hero számai.
+- **Grafikonok, böngésző-témaszín, manifest:** a grafikonok kézi színtáblája, a `theme-color` (témánként) és a manifest színei az új palettához igazodtak. A tokenből olvasás az 5.F-ben jön.
+- **Kontraszt:**
+  - 26 új színpár számolva;
+  - a vezérlőkeret (`--color-border-strong`) a háttéren 2,91:1 volt, `#78859b`-re sötétítve 3,30–3,73:1;
+  - a `probe-core` újramérése: 32 cellában (2 téma × 375/1440 px × 8 képernyő) 0 kontraszthiba;
+  - a fókusz 213 Tab-lépésből egyszer sem kerül az alsó sáv alá.
+
 A képernyők tartalmi átalakítása a 6. fázisban jön: a MonthStrip és a Bill az Áttekintésen, az „utána marad” előnézet a gyorsrögzítőben, az idővonal a Tervezőben.
 
 ## Nyitott kérdések

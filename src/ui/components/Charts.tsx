@@ -18,8 +18,8 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarEleme
 function useChartTheme() {
   const scheme = useColorScheme();
   return scheme === 'dark'
-    ? { grid: '#2e2e2b', tick: '#9b9a92', surface: '#1f1f1d', accent: '#4a92e8', faint: '#7a7972', zero: '#4a4945' }
-    : { grid: '#e3e1da', tick: '#6b6a64', surface: '#ffffff', accent: '#2369c0', faint: '#c3c2b7', zero: '#c3c2b7' };
+    ? { grid: '#2b3656', tick: '#9aa5b8', surface: '#172038', accent: '#93b2ff', faint: '#5d6b8d', zero: '#6c7a9c' }
+    : { grid: '#dce2eb', tick: '#5a6679', surface: '#ffffff', accent: '#2346a8', faint: '#b9c3d2', zero: '#9aa5b8' };
 }
 
 function baseOptions(t: ReturnType<typeof useChartTheme>, onSelect: (i: number) => void): ChartOptions<'line' | 'bar'> {
