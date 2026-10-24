@@ -160,6 +160,8 @@ A 3. fázisban elfogadott funkciók a hozzájuk tartozó képernyővel együtt k
 
 **Kimenet:** `docs/design/07-visszameres.md`, előtte–utána táblázattal.
 
+**Állapot (2026-10-24):** kész, a teljesítménymérés nélkül (a felhasználó döntése a token-keret miatt; a szkript elkészült, de ellenőrizetlen). A szöveges kontraszthibák 809-ről 0-ra, a `<h1>` nélküli képernyők 48-ról 0-ra, a 24 px alatti érintési célok 406-ról 146-ra csökkentek (a maradék javítva, újramérés nélkül). Az 1. fázis 12 akadálymentességi megállapítása mind javítva. Jelentés: `docs/design/07-visszameres.md`.
+
 ## Döntési pontok a felhasználónak
 
 | Mikor | Kérdés |

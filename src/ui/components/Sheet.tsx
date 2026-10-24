@@ -68,7 +68,9 @@ export function Sheet({
       vv?.removeEventListener('scroll', fit);
       document.body.style.overflow = overflow;
       // A StrictMode próba-lebontásakor az elem a helyén marad; ott nem szabad elvenni a fókuszt.
-      if (!el.isConnected) (opener?.isConnected ? opener : fallback.current?.())?.focus({ preventScroll: true });
+      // Billentyűvel (pl. N) nyitva nincs megnyitó elem, csak a body: ilyenkor a tartalék kapja a fókuszt.
+      const back = opener && opener !== document.body && opener.isConnected ? opener : fallback.current?.();
+      if (!el.isConnected) back?.focus({ preventScroll: true });
     };
   }, [opener]);
 

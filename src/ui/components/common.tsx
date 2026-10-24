@@ -350,8 +350,14 @@ export function Delta({
   if (pct === null || Math.abs(pct) < 3) return null;
   return (
     <Badge size="sm" tone={(pct > 0) === goodWhenUp ? 'ok' : 'danger'} title={title}>
-      {pct > 0 ? '+' : ''}
-      {pct}%
+      {/* A title-t a felolvasók többsége nem mondja ki, és érintőképernyőn sem látszik: a jelentés szövegben is. */}
+      <span aria-hidden="true">
+        {pct > 0 ? '+' : ''}
+        {pct}%
+      </span>
+      <span className="sr-only">
+        {Math.abs(pct)}%-kal {pct > 0 ? 'több' : 'kevesebb'} ({title})
+      </span>
     </Badge>
   );
 }

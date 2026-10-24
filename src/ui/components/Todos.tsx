@@ -208,9 +208,9 @@ export function Todos({ p, pace, goals }: { p: PeriodSummary; pace: PaceOverview
         <section className="bills" aria-labelledby="bills-title">
           <div className="bills-head">
             <h2 id="bills-title" tabIndex={-1}>{money.some((t) => t.kind === 'bill') ? 'Fizetendő és várható' : 'Várt bevétel'}</h2>
+            {/* Nem kitöltött gomb: az első képernyőn a „Kiadás rögzítése” az egyetlen elsődleges művelet. */}
             {billGroup?.kind === 'group' && (
               <SettleButton
-                primary
                 label="Mind kifizetve"
                 ariaLabel={`${billGroup.items.length} számla: mind kifizetve`}
                 onClick={async () => {

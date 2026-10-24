@@ -279,6 +279,7 @@ function Heatmap({ periods, spend, anchorId }: { periods: PeriodSummary[]; spend
       </div>
       <div className="heat-scroll" ref={scrollRef} tabIndex={0} aria-label="Kategóriák hónaponként, görgethető táblázat">
         <table className="heat">
+          <caption className="sr-only">Kategóriák tény és terv aránya hónaponként</caption>
           <thead>
             <tr>
               <th scope="col" className="heat-name"><span className="sr-only">Kategória</span></th>

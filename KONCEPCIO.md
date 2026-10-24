@@ -186,7 +186,7 @@ A rögzítő képernyő és az irányítópult tervezésekor készült két inte
 - **Fizetendő és várható** (csak a folyamatban lévő időszakban): csekkszerű sorok, mindegyik a saját gombjával. Ugyanaz a lezáró rögzítés és visszavonás, mint a Rögzítésen.
   - lejárt vagy 5 napon belül esedékes, még le nem zárt fix számla (terv nélküli és esedékességi nap nélküli nem): név, „lejárt okt. 20.” / „ma esedékes” / „esedékes okt. 25.”, összeg (részlegesnél a hátralék), „Kifizetve” gomb, részlegesnél „Maradék”. A lejárt számla csekksárga, az esedékes szaggatott keretű;
   - egyösszegű bevétel, ami az időszak 3. napja után sem (vagy csak részben) érkezett meg, „+26 600 Ft” és „Megérkezett” gombbal;
-  - két vagy több számlánál a cím mellett „Mind kifizetve” gomb. Ha csak bevétel vár, a cím „Várt bevétel”.
+  - két vagy több számlánál a cím mellett „Mind kifizetve” gomb (keretes, nem kitöltött: az első képernyőn a „Kiadás rögzítése” az elsődleges művelet). Ha csak bevétel vár, a cím „Várt bevétel”.
 - **Teendők** (csak a folyamatban lévő időszakban, legfeljebb 5 elem, fontossági sorrendben):
   - gyorsan fogyó vagy túllépett keret, utánuk a terv nélkül költött napi keret (összesen legfeljebb 2), ami a Rögzítés sorára visz; ha van keret, amelyben maradt pénz, mellette a „Átcsoportosítás” gomb is (lásd Rugalmas keretek);
   - lemaradó cél, ami a Tervezőbe visz;
@@ -225,7 +225,7 @@ A rögzítő képernyő és az irányítópult tervezésekor készült két inte
 - **Megtakarítás** és **Bevételek** a fix számlák módján (a részletekben érkező bevétel a keretek módján, tempó nélkül).
 - Hibás vagy üres összegnél a mező mellett hibaüzenet jelenik meg, és nem rögzít. Mentés közben a mező zárolva van, így a dupla Enter vagy kattintás nem rögzít kétszer; ha a mentés nem sikerül, a beírt összeg megmarad.
 - Összegbevitel: a szóköz elválasztó, az „e” utótag ezret jelent („12e” = 12 000). A pont csak akkor ezres elválasztó, ha pontosan 3 számjegy követi („1.234.567”), különben tizedesjel, mint a vessző („12.5e” = „12,5e” = 12 500). Mobilon a mezők 16 px-esek, hogy az iOS ne nagyítson rá a fókuszkor.
-- **Gyors rögzítés** bárhonnan (a + gomb, az `N` billentyű, a `?gyors` paraméter vagy a PWA-parancsikon), mobilon alsó lapként, asztalon középre igazított panelként:
+- **Gyors rögzítés** bárhonnan (a + gomb, az `N` billentyű, a `?gyors` paraméter vagy a PWA-parancsikon), mobilon alsó lapként, asztalon középre igazított panelként. Bezárás után a fókusz a megnyitó gombra kerül vissza, billentyűvel nyitva a látható „Kiadás rögzítése” gombra:
   - Felül nagy, automatikusan fókuszált összegmező. Érintőképernyőn (durva mutatónál) a telefon billentyűzete nem nyílik fel: a lap alján saját számbillentyűzet van (1–9, 000, 0, törlés), így a keretek láthatók maradnak; a kijelzőn ezres tagolással („4 500”). Billentyűzetes eszközön a mezőbe gépelni kell (tizedes billentyűzettel).
   - Az összeg alatt, amint van érvényes összeg, a következmény a kiválasztott keretre: „Utána 28 250 Ft marad az Élelmiszer keretben, naponta kb. 2 000 Ft.” (a napi összeg csak napi keretnél, a folyamatban lévő hónapban); túllépésnél „Ezzel 3 000 Ft-tal túllépi a Ruházat keretet.”, terv nélküli keretnél „Az Ajándék keretnek ebben a hónapban nincs terve.”
   - Alatta a kiválasztott keret javasolt összegei (ugyanazok, mint a keretsor gyorsgombjai, „Javasolt (Élelmiszer): …”): koppintásra beíródnak a mezőbe. Telefonon egy sorban, oldalra görgethetően.

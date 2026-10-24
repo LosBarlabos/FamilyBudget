@@ -14,6 +14,10 @@ import { CatIcon, Icon, NOTE_TAGS_LIST, Segmented, useCoarsePointer, useLocalSta
 import { Sheet } from './Sheet';
 import { handOffUnexpected } from './UnexpectedExpense';
 
+/** Az elrendezéstől függően az alsó sáv vagy az oldalsáv „Kiadás rögzítése” gombja: amelyik épp látszik. */
+const visibleAddButton = () =>
+  [...document.querySelectorAll<HTMLElement>('.dock-add, .side-add')].find((b) => b.getClientRects().length > 0) ?? null;
+
 /** A számbillentyűzet gombjai, soronként balról jobbra. */
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '000', '0', 'del'] as const;
 /** Legfeljebb ennyi számjegy (999 millió Ft alatt). */
@@ -147,7 +151,8 @@ export function QuickEntry({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <Sheet title="Gyors rögzítés" onClose={onClose}>
+    // Az N billentyűvel nyitva a bezárás után a látható „Kiadás rögzítése” gombra kerül a fókusz, nem a body-ra.
+    <Sheet title="Gyors rögzítés" onClose={onClose} fallbackFocus={visibleAddButton}>
       <div className="quick">
         <div className="quick-amount">
           <input

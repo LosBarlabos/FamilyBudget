@@ -82,7 +82,7 @@ export function BillCalendar() {
 
       <div className="cal-layout">
         <section className="card" aria-label="Havi naptár">
-          <div className="cal-grid" role="grid" aria-label={`${month.slice(0, 4)}. ${MONTHS[first.getMonth()].toLowerCase()}`}>
+          <div className="cal-grid" role="group" aria-label={`${month.slice(0, 4)}. ${MONTHS[first.getMonth()].toLowerCase()}`}>
             {WEEKDAYS.map((w) => (
               <span key={w} className="cal-wd" aria-hidden="true">{w}</span>
             ))}
@@ -90,7 +90,8 @@ export function BillCalendar() {
               if (!d) return <span key={`x${i}`} />;
               const list = byDay.get(d) ?? [];
               const tone = dayTone(list);
-              const label = `${shortDate(d)}${list.length ? `: ${list.map((e) => e.cat.name).join(', ')}` : ''}`;
+              // A pötty színe mellett a felolvasott név is kimondja az állapotot: „okt. 20.: Áram, lejárt”.
+              const label = `${shortDate(d)}${list.length ? `: ${list.map((e) => `${e.cat.name}, ${eventText(e)}`).join('; ')}` : ''}`;
               return (
                 <button
                   key={d}

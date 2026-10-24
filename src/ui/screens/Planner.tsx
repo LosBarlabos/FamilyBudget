@@ -379,6 +379,7 @@ function PlanRow({
         step={step}
         value={value}
         aria-label={`${cat.name} terve`}
+        aria-valuetext={formatFt(value)}
         onChange={(e) => onDraft(Number(e.target.value))}
         onPointerUp={(e) => onCommit(Number((e.target as HTMLInputElement).value))}
         onKeyUp={(e) => onCommit(Number((e.target as HTMLInputElement).value))}

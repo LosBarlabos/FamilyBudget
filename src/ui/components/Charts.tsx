@@ -8,6 +8,7 @@ import type { Summaries } from '../../domain/balance';
 import { formatFt, formatShort } from '../../domain/money';
 import { periodName, periodShortLabel, periodShortName } from '../../domain/periods';
 import { savingsSpend, type TrendPoint } from '../../domain/analysis';
+import { outlookSentence } from '../../domain/overview';
 import type { Category, Entry, PeriodId } from '../../domain/types';
 import { isExpense } from '../../domain/types';
 import { displayUnits } from '../../domain/units';
@@ -158,13 +159,21 @@ export function BalanceChart({
         )}
       </div>
       <div style={{ position: 'relative', height }}>
-        <Line data={data} options={options} aria-label="Futó egyenleg hónaponként" role="img" />
+        <Line data={data} options={options} aria-label={`Futó egyenleg hónaponként. ${outlookSentence(summaries) ?? ''}`} role="img" />
       </div>
     </div>
   );
 }
 
 const MAX_UNITS = 8;
+
+/** A kiadásgrafikon felolvasott összegzése: a legdrágább eddigi hónap, hogy ne csak a grafikon címe hangozzék el. */
+function spendingSummary(s: Summaries): string {
+  const past = s.periods.filter((p) => p.status !== 'future');
+  if (past.length === 0) return 'Kiadások kategóriánként, hónaponként';
+  const top = past.reduce((m, p) => (p.expense > m.expense ? p : m));
+  return `Kiadások kategóriánként, hónaponként. A legtöbb ${periodName(top.id, true)}: ${formatFt(top.expense)}.`;
+}
 
 export function SpendingChart({
   summaries,
@@ -284,7 +293,7 @@ export function SpendingChart({
         )}
       </div>
       <div style={{ position: 'relative', height }}>
-        <BarChart data={data} options={options} aria-label="Kiadások kategóriánként, hónaponként" role="img" />
+        <BarChart data={data} options={options} aria-label={spendingSummary(summaries)} role="img" />
       </div>
     </div>
   );
