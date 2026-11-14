@@ -2,7 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { computeSummaries } from '../domain/balance';
 import { formatRange, makeConfig, msUntilNextDay, periodName, periodStart, shortDate, todayISO } from '../domain/periods';
-import type { BudgetData, PeriodId } from '../domain/types';
+import type { BudgetData, ISODate, PeriodId } from '../domain/types';
 import { SAMPLE } from '../db/sampleMode';
 import { loadAll, migrateBasePlans, requestPersistence, updateSettings } from '../db/repo';
 import { backupIsStale, backupLabel, daysSince, exportBackup } from './backup';
@@ -15,6 +15,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { QuickEntry } from './components/QuickEntry';
 import { Sheet } from './components/Sheet';
 import { parseTrendSheet, TrendSheet, trendSheetName } from './components/Trend';
+import { parseWeekSheet, WeekSheet, weekSheetName } from './components/WeekSheet';
 import { tagSummary } from '../domain/analysis';
 import { dueBills } from '../domain/todos';
 
@@ -154,6 +155,8 @@ function Main({ data }: { data: BudgetData }) {
   const cover = parseCoverSheet(router.sheet);
   const openTrend = useCallback((key: string) => openSheet(trendSheetName(key)), [openSheet]);
   const trend = parseTrendSheet(router.sheet);
+  const openWeek = useCallback((start: ISODate, categoryId: string) => openSheet(weekSheetName(start, categoryId)), [openSheet]);
+  const week = parseWeekSheet(router.sheet);
   // A megjegyzésmezők javaslatai a korábbi #címkékből.
   const tags = useMemo(() => tagSummary(data.entries).map((t) => t.tag), [data.entries]);
 
@@ -204,7 +207,7 @@ function Main({ data }: { data: BudgetData }) {
   );
 
   return (
-    <BudgetProvider value={{ data, summaries, cfg, today, periodId, setPeriodId, go, openQuick, openCover, openTrend, focusCategoryId: route.focus, clearFocus }}>
+    <BudgetProvider value={{ data, summaries, cfg, today, periodId, setPeriodId, go, openQuick, openCover, openTrend, openWeek, focusCategoryId: route.focus, clearFocus }}>
       <div className="app">
         {/* Asztalon oldalsáv: logó, kiemelt rögzítés, a menü ikonokkal, alul a mentés állapota. */}
         <aside className="sidebar">
@@ -340,6 +343,7 @@ function Main({ data }: { data: BudgetData }) {
           </Sheet>
         )}
         {trend && <TrendSheet unitKey={trend} onClose={closeLayer} />}
+        {week && <WeekSheet start={week.start} categoryId={week.categoryId} onClose={closeLayer} />}
         <datalist id={NOTE_TAGS_LIST}>
           {tags.map((t) => <option key={t} value={`#${t}`} />)}
         </datalist>

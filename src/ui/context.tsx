@@ -17,6 +17,9 @@ export const NEW_GOAL = 'uj-cel';
 /** A Rögzítésen a Váratlan kiadás panelt nyitja meg (`#/rogzites/varatlan`), pl. a gyorsrögzítőből. */
 export const UNEXPECTED_PANEL = 'varatlan';
 
+/** Az Elemzés heti nézete (`#/elemzes/het`); fókusz nélkül a legutóbb használt nézet nyílik meg. */
+export const WEEK_VIEW = 'het';
+
 export interface BudgetCtx {
   data: BudgetData;
   summaries: Summaries;
@@ -32,6 +35,8 @@ export interface BudgetCtx {
   openCover: (categoryId: string) => void;
   /** Az Elemzés trendlapja egy kategóriához („c:<id>”) vagy csoporthoz („g:<név>”). */
   openTrend: (key: string) => void;
+  /** Az Elemzés heti nézetéből: egy kategória rögzítései a megadott hétfővel kezdődő héten. */
+  openWeek: (weekStart: ISODate, categoryId: string) => void;
   focusCategoryId: string | null;
   /** A fókusz törlése az URL-ből, hogy a vissza lépés és az újratöltés ne alkalmazza újra. */
   clearFocus: () => void;

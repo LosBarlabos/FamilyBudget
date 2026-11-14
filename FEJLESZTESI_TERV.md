@@ -144,6 +144,8 @@ Ha nincs teendő, egy sor jelenik meg: „Minden rendben”.
 
 > **Megbeszélt első kör (2026. október):** a „Hova ment a pénz” (tény/terv kategóriánként a választott időablakban), a legnagyobb eltérések (csak lezárt időszakokból), a hőtérkép a kategória-trenddel, a kereső és a #címkék, valamint a megtakarításból fizetett költés kiadásként. Időablak: „Ez az időszak / Utolsó 12 időszak / Naptári év”. Az éves összesítő (idei és tavalyi) és a „ki mennyit rögzített” bontás későbbre marad. Telefonon az Elemzés a Továbbiak lapon marad.
 
+> **Második kör, heti nézet (2026. november):** az Elemzés tetején „Heti | Havi” választó; a heti a `#/elemzes/het` címen érhető el, fókusz nélküli útvonalon a legutóbb használt nézet nyílik meg. A hét naptári hét (hétfőtől vasárnapig), és a rögzítés napja szerint számol, így két hónapba is eshet (ilyenkor egy sor jelzi). Csak a keretekből, a havi pénzből elment költés számít: a számlák külön sorban állnak (a csoportos beszedésűek az esedékesség napján), a megtakarításból fizetett költés a kategória sorában külön látszik, a „Havi összeg megadása” rögzítései kimaradnak. A hétnek nincs saját terve: a mérce az előző legfeljebb 4 teljes hét átlaga (az üres hét is számít; a rögzítés kezdete és a kategória első tétele előtti hét nem). A heti nézetben nincs piros: borostyán jelzi, ha a hét az átlagnál legalább 15%-kal és 1000 Ft-tal több. Egy kategóriára koppintva a hét rögzítései nyílnak meg, onnan a havi trend. Későbbre marad a „Hetente” hőtérkép (kategóriák × utolsó 8 hét) és az Áttekintés „Ez a hét” kártyája.
+
 - **Időablak:** „Utolsó 12 időszak” vagy naptári év választó.
 - **Hőtérkép:**
   - A sorok a kategóriák, csoportonként összecsukhatók. Az oszlopok az időszakok, a lezártak és a folyamatban lévő.

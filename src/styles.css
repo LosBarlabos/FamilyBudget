@@ -972,10 +972,68 @@
   .tag-name { font-weight: 600; color: var(--color-accent-text); }
   .search-row { grid-template-columns: 30px minmax(0, 1fr) auto; }
   .trend { display: grid; gap: 14px; }
+
+  /* --- Elemzés: heti nézet --- */
+  /* A hétnek nincs saját terve, ezért itt nincs piros: borostyán jelzi, ami az előző hetek átlagánál több. */
+  .meter-fill.is-more, .lg-more { background: var(--color-warn-fill); }
+  .week-switch { display: flex; align-items: center; gap: var(--space-1-5); flex-wrap: wrap; }
+  .week-label { margin: 0; min-width: 136px; display: flex; flex-direction: column; align-items: center; line-height: 1.25; }
+  .week-label strong { font-size: var(--text-md); font-weight: 600; }
+  .week-top { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); margin-bottom: var(--space-4); }
+  .week-top > .card { margin-bottom: 0; }
+  .week-sum { padding: 0 var(--space-1); }
+  .week-sum p { margin: 0; }
+  .week-sum-label { font-size: var(--text-ui); color: var(--color-text-muted); }
+  .week-sum-value { font-family: var(--font-display); font-size: clamp(56px, 3vw + 36px, 80px); font-weight: 700; line-height: 0.95; margin: var(--space-0-5) 0 var(--space-1-5); }
+  .week-sum-unit { font-size: 0.46em; font-weight: 600; margin-left: 0.2em; }
+  .week-sum-text { font-size: var(--text-ui); color: var(--color-text-muted); }
+  .week-sum-text strong, .week-days-strong { font-weight: 600; color: var(--color-text); }
+  .week-sum-text strong.warn-text { color: var(--color-warn); }
+  /* Napi oszlopok: a magasságuk a --week-h arányában számolódik, a nap összege fölöttük áll. */
+  .week-days-card { --week-h: 72px; display: grid; gap: 10px; }
+  .week-days-card .card-head { margin-bottom: 0; }
+  .week-days, .week-day-names { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-1-5); }
+  .week-days { position: relative; height: calc(var(--week-h) + 20px); align-items: end; }
+  .week-day { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px; min-width: 0; }
+  /* A felirat a szaggatott átlagvonal fölött marad, és kitakarja maga alatt. */
+  .week-day-amount { position: relative; z-index: 1; padding: 0 var(--space-0-5); border-radius: 2px; background: var(--color-surface); font-size: var(--text-2xs); line-height: 1.2; color: var(--color-text-muted); white-space: nowrap; }
+  .week-day-amount:empty { display: none; }
+  .week-day-bar { width: 100%; max-width: 48px; min-height: 4px; border-radius: var(--radius-xs); background: var(--color-text); }
+  .week-day.zero .week-day-bar { background: var(--color-day); }
+  .week-day.today .week-day-bar { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  .week-avg { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--color-border-strong); pointer-events: none; }
+  .week-day-names { font-size: var(--text-xs); color: var(--color-text-subtle); text-align: center; }
+  .week-day-names .on { color: var(--color-text); font-weight: 600; }
+  .week-quiet { margin: var(--space-2) var(--space-1) 0; }
+  .week-note { margin: 0 var(--space-1) var(--space-4); }
+  /* A számlák sora a csekk sárgájával és aszimmetrikus sarkával; koppintásra a hét számlái nyílnak le. */
+  .week-bills { padding: 0; border-radius: var(--radius-bill); }
+  .week-bills-head { width: 100%; display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) 18px; text-align: left; white-space: normal; border-radius: inherit; }
+  .week-bills-head:active { transform: none; }
+  .week-bills-icon { border-radius: 50%; background: var(--color-bill); color: var(--color-on-bill); }
+  .week-bills-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .week-bills-title, .week-bills-sum { font-weight: 600; }
+  .week-bills-sum { white-space: nowrap; }
+  .week-bills-list { padding: 0 18px var(--space-2); }
+  .week-entries { list-style: none; margin: 0; padding: 0; }
+  .week-entry { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; }
+  .week-entry + .week-entry { box-shadow: 0 -1px 0 var(--color-border); }
+  .week-entry-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .week-entry-note { font-weight: 500; overflow-wrap: anywhere; }
+  .week-entry-amount, .week-sheet-amount { font-weight: 600; white-space: nowrap; }
+  .week-sheet-trend { height: 40px; justify-content: center; }
+  .week-sheet-h { margin-bottom: var(--space-0-5); font-size: var(--text-sm); font-weight: 500; color: var(--color-text-subtle); letter-spacing: 0; }
+  @container content (min-width: 860px) {
+    .week-top { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: center; }
+    .week-days-card { --week-h: 112px; }
+  }
   @container content (max-width: 680px) {
     .heat .heat-name { min-width: 104px; max-width: 120px; }
     .page-head .seg { width: 100%; }
     .page-head .seg button { flex: 1; height: 36px; }
+    .week-switch { width: 100%; justify-content: space-between; }
+    .week-switch .btn.icon { width: 44px; height: 44px; border-radius: var(--radius-full); }
+    .week-label { flex: 1; }
   }
 
   /* --- Számlanaptár --- */

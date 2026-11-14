@@ -7,6 +7,7 @@ import { useBudget } from '../context';
 import { TrendChart } from './Charts';
 import { useLocalState } from './common';
 import { Sheet } from './Sheet';
+import { weekRowSelector } from './WeekSheet';
 
 // A lap neve a router memóriabeli rétegében: „trend|c:<kategóriaId>” vagy „trend|g:<csoport>”.
 const PREFIX = 'trend|';
@@ -35,7 +36,8 @@ export function TrendSheet({ unitKey, onClose }: { unitKey: string; onClose: () 
   const lastPlan = points.at(-1)?.plan ?? 0;
 
   return (
-    <Sheet title={name} onClose={onClose}>
+    // A heti nézet kategória-lapjáról nyitva a megnyitó gomb már nincs meg: a fókusz a kategória heti sorára kerül vissza.
+    <Sheet title={name} onClose={onClose} fallbackFocus={() => (group ? null : document.querySelector<HTMLElement>(weekRowSelector(unitKey.slice(2))))}>
       {cats.length === 0 ? (
         <p className="small muted">Ez a kategória már nem található.</p>
       ) : (

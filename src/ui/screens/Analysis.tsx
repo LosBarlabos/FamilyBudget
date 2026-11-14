@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   anchorPeriod, deviations, heatPeriods, heatTone, rangePeriods, savingsSpend, searchEntries, shortAmount, spendingRows, tagSummary,
   type AnalysisRange, type SpendRow,
@@ -8,9 +8,10 @@ import { formatFt } from '../../domain/money';
 import { periodName, periodShortLabel, shortDate } from '../../domain/periods';
 import { isExpense, type Category, type Entry } from '../../domain/types';
 import { displayUnits, type Unit } from '../../domain/units';
-import { useBudget } from '../context';
+import { useBudget, WEEK_VIEW } from '../context';
 import { CatIcon, EmptyState, Icon, Segmented, useLocalState } from '../components/common';
 import { PeriodSwitcher } from '../components/PeriodSwitcher';
+import { AnalysisWeek } from './AnalysisWeek';
 
 export const RANGE_KEY = 'analysis-range';
 const RANGES: { id: AnalysisRange; label: string }[] = [
@@ -21,7 +22,32 @@ const RANGES: { id: AnalysisRange; label: string }[] = [
 /** A „Hova ment a pénz” listából alapból ennyi sor látszik. */
 const TOP_ROWS = 8;
 
+/** A legutóbb használt nézet: fókusz nélküli útvonalon (`#/elemzes`) ez nyílik meg. */
+export const VIEW_KEY = 'analysis-view';
+type View = 'week' | 'month';
+const VIEWS: { id: View; label: string }[] = [
+  { id: 'week', label: 'Heti' },
+  { id: 'month', label: 'Havi' },
+];
+
 export function Analysis() {
+  const { focusCategoryId, go } = useBudget();
+  const [stored, setStored] = useLocalState<View>(VIEW_KEY, 'month');
+  const view: View = focusCategoryId === WEEK_VIEW ? 'week' : stored;
+  const setView = (v: View) => {
+    setStored(v);
+    go('analysis', v === 'week' ? WEEK_VIEW : undefined);
+  };
+  const tabs = <Segmented label="Elemzés nézete" options={VIEWS} value={view} onChange={setView} />;
+  return (
+    <>
+      <h1 className="sr-only">Elemzés</h1>
+      {view === 'week' ? <AnalysisWeek tabs={tabs} /> : <AnalysisMonth tabs={tabs} />}
+    </>
+  );
+}
+
+function AnalysisMonth({ tabs }: { tabs: ReactNode }) {
   const { data, summaries, periodId } = useBudget();
   const [range, setRange] = useLocalState<AnalysisRange>(RANGE_KEY, 'period');
   const spend = useMemo(() => savingsSpend(data.entries), [data.entries]);
@@ -39,8 +65,8 @@ export function Analysis() {
 
   return (
     <>
-      <h1 className="sr-only">Elemzés</h1>
       <div className="page-head">
+        {tabs}
         <PeriodSwitcher />
         <Segmented label="Időablak" options={RANGES} value={range} onChange={setRange} />
       </div>
