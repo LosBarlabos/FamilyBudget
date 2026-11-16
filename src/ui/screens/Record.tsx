@@ -14,7 +14,7 @@ import {
   addEntry, addSettlingEntry, changePlan, clearEntries, deleteEntry, markSettled, restoreEntries, restorePlansOf, setMonthlyTotal,
 } from '../../db/repo';
 import { useSettleRest } from '../actions';
-import { UNEXPECTED_PANEL, useBudget, useSafe, useToast } from '../context';
+import { ENTRIES_VIEW, UNEXPECTED_PANEL, useBudget, useSafe, useToast } from '../context';
 import { AmountInput, Badge, Bar, CatIcon, Icon, Stat, MenuButton, PACE_TONE, useLocalState, type MenuItem } from '../components/common';
 import { GoalStateChip } from '../components/Goals';
 import { UnexpectedExpense } from '../components/UnexpectedExpense';
@@ -757,9 +757,12 @@ function EnvelopeRow({
   );
 }
 
-/** Az utolsó 10 rögzítés minden kategóriából és időszakból, összecsukható listában, egyenként törölhetően. */
+/**
+ * Az utolsó 10 rögzítés minden kategóriából és időszakból, összecsukható listában, egyenként szerkeszthetően és
+ * törölhetően; a teljes lista az Elemzés „Rögzítések” nézete.
+ */
 function RecentEntries() {
-  const { data, summaries, today } = useBudget();
+  const { data, summaries, today, go, openEntry } = useBudget();
   const toast = useToast();
   const safe = useSafe();
   const [open, setOpen] = useLocalState('recent-open', false);
@@ -808,12 +811,21 @@ function RecentEntries() {
                   {sign}
                   {formatFt(e.amount)}
                 </span>
+                <button className="btn sm ghost icon" data-entry-row={e.id} aria-label={`${name}: ${formatFt(e.amount)} szerkesztése`} onClick={() => openEntry(e.id)}>
+                  <Icon name="pencil" />
+                </button>
                 <button className="btn sm ghost icon" aria-label={`${name}: ${formatFt(e.amount)} törlése`} onClick={() => remove(e, name)}>
                   <Icon name="trash" />
                 </button>
               </li>
             );
           })}
+          <li>
+            <button className="rec-more" onClick={() => go('analysis', ENTRIES_VIEW)}>
+              <Icon name="chevron-right" className="chev" />
+              Minden rögzítés
+            </button>
+          </li>
         </ul>
       )}
     </section>

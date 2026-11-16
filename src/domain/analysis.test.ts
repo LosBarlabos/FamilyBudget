@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  deviations, heatPeriods, heatTone, rangePeriods, savingsSpend, searchEntries, shortAmount, spendingRows, tagsOf, tagSummary, trendSeries,
+  deviations, heatPeriods, heatTone, rangePeriods, savingsSpend, shortAmount, spendingRows, tagsOf, tagSummary, trendSeries,
 } from './analysis';
 import { computeSummaries } from './balance';
 import type { BudgetData, Category, Entry } from './types';
@@ -110,7 +110,7 @@ describe('hőtérkép és trend', () => {
   });
 });
 
-describe('címkék és kereső', () => {
+describe('címkék', () => {
   it('címkék kisbetűsen, ékezettel, ismétlés nélkül', () => {
     expect(tagsOf('gumi #Autó és #autó, #nyaralás-2027!')).toEqual(['autó', 'nyaralás-2027']);
     expect(tagsOf(undefined)).toEqual([]);
@@ -122,14 +122,5 @@ describe('címkék és kereső', () => {
       { tag: 'nyaralás', total: 50_000, count: 1 },
       { tag: 'buli', total: 120_000, count: 1 },
     ].sort((a, b) => b.total - a.total));
-  });
-
-  it('keresés megjegyzésben, kategórianévben, névben és címkére', () => {
-    const ids = (q: string) => searchEntries(entries, categories, q).map((e) => e.note ?? e.categoryId);
-    expect(ids('#autó')).toEqual(['gumi #Autó', 'szerviz #autó']);
-    expect(ids('MOZI')).toEqual(['mozi']);
-    expect(ids('partner')).toEqual(['gumi #Autó']);
-    expect(ids('áram').length).toBe(2);
-    expect(ids('  ')).toEqual([]);
   });
 });

@@ -100,13 +100,14 @@ export function sameData(a: BudgetData, b: BudgetData): boolean {
   );
 }
 
-/** A szinkron commit üzenete, pl. „Anna: 3 új rögzítés, 1 törölve”. */
+/** A szinkron commit üzenete, pl. „Anna: 3 új rögzítés, 1 módosítva, 1 törölve”. */
 export function changeSummary(before: BudgetData | null, after: BudgetData, who: string): string {
   if (!before) return `${who}: első feltöltés`;
-  const ids = new Set(before.entries.map((e) => e.id));
+  const old = new Map(before.entries.map((e) => [e.id, e]));
   const now = new Set(after.entries.map((e) => e.id));
-  const added = after.entries.filter((e) => !ids.has(e.id)).length;
+  const added = after.entries.filter((e) => !old.has(e.id)).length;
+  const changed = after.entries.filter((e) => old.has(e.id) && !same(old.get(e.id), e)).length;
   const removed = before.entries.filter((e) => !now.has(e.id)).length;
-  const parts = [added && `${added} új rögzítés`, removed && `${removed} törölve`].filter(Boolean);
+  const parts = [added && `${added} új rögzítés`, changed && `${changed} módosítva`, removed && `${removed} törölve`].filter(Boolean);
   return `${who}: ${parts.length ? parts.join(', ') : 'módosítás'}`;
 }

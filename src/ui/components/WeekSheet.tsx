@@ -24,7 +24,7 @@ const capital = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 /** Egy kategória a héten: az összeg, a mérce, a havi keret maradéka és a hét rögzítései. */
 export function WeekSheet({ start, categoryId, onClose }: { start: ISODate; categoryId: string; onClose: () => void }) {
-  const { data, summaries, cfg, today, openTrend } = useBudget();
+  const { data, summaries, cfg, today, openTrend, openEntry } = useBudget();
   const w = useMemo(() => weekSummary(data, summaries, cfg, start, today), [data, summaries, cfg, start, today]);
   const list = useMemo(() => weekEntries(data.entries, categoryId, w.start), [data.entries, categoryId, w.start]);
   const cat = data.categories.find((c) => c.id === categoryId);
@@ -68,16 +68,23 @@ export function WeekSheet({ start, categoryId, onClose }: { start: ISODate; cate
             ) : (
               <ul className="week-entries">
                 {list.map((e) => (
-                  <li key={e.id} className="week-entry">
-                    <span className="week-entry-main">
-                      <span className={e.note ? 'week-entry-note' : 'muted'}>{e.note ?? 'megjegyzés nélkül'}</span>
-                      <span className="tiny faint">
-                        {weekdayName(e.date)}, {shortDate(e.date)}
-                        {e.createdBy && ` · ${e.createdBy}`}
-                        {e.kind === 'withdrawal' && ' · megtakarításból'}
+                  <li key={e.id}>
+                    <button
+                      className="week-entry week-entry-btn"
+                      onClick={() => openEntry(e.id)}
+                      aria-label={`${e.note ?? 'megjegyzés nélkül'}, ${weekdayName(e.date)}: ${formatFt(e.amount)}. Szerkesztés`}
+                    >
+                      <span className="week-entry-main">
+                        <span className={e.note ? 'week-entry-note' : 'muted'}>{e.note ?? 'megjegyzés nélkül'}</span>
+                        <span className="tiny faint">
+                          {weekdayName(e.date)}, {shortDate(e.date)}
+                          {e.createdBy && ` · ${e.createdBy}`}
+                          {e.kind === 'withdrawal' && ' · megtakarításból'}
+                        </span>
                       </span>
-                    </span>
-                    <span className="small num week-entry-amount">{formatFt(e.amount)}</span>
+                      <span className="small num week-entry-amount">{formatFt(e.amount)}</span>
+                      <Icon name="chevron-right" className="chev" />
+                    </button>
                   </li>
                 ))}
               </ul>

@@ -90,6 +90,9 @@ describe('összehasonlítás és üzenet', () => {
     const after = data({ entries: [entry('a', 1), entry('c', 3), entry('d', 4)] });
     expect(changeSummary(before, after, 'Anna')).toBe('Anna: 2 új rögzítés, 1 törölve');
     expect(changeSummary(before, before, 'Anna')).toBe('Anna: módosítás');
+    // A helyben szerkesztett rögzítés azonosítója marad: módosításként számít, nem újként és töröltként.
+    const edited = data({ entries: [entry('a', 1, { note: 'pékség' }), entry('b', 5), entry('c', 3)] });
+    expect(changeSummary(before, edited, 'Anna')).toBe('Anna: 1 új rögzítés, 2 módosítva');
     expect(changeSummary(null, after, 'Anna')).toBe('Anna: első feltöltés');
   });
 });

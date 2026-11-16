@@ -173,7 +173,7 @@ export function trendSeries(catIds: string[], periods: PeriodSummary[], spend: M
   return points;
 }
 
-// --- Címkék és kereső -------------------------------------------------------
+// --- Címkék (a kereső a rögzítések listájában van: entries.ts) ----------------
 
 const TAG_RE = /#([\p{L}\p{N}_-]+)/gu;
 
@@ -201,25 +201,4 @@ export function tagSummary(entries: Entry[]): TagSummary[] {
     }
   }
   return [...m.values()].sort((a, b) => b.total - a.total || a.tag.localeCompare(b.tag, 'hu'));
-}
-
-/**
- * Keresés a rögzítésekben, a legújabbtól. „#címke” keresésnél pontos címkeegyezés, egyébként a megjegyzésben,
- * a kategória nevében és a rögzítő nevében keres (kis- és nagybetűtől függetlenül).
- */
-export function searchEntries(entries: Entry[], categories: Category[], query: string, limit = 50): Entry[] {
-  const q = query.trim().toLocaleLowerCase('hu');
-  if (!q) return [];
-  const names = new Map(categories.map((c) => [c.id, c.name.toLocaleLowerCase('hu')]));
-  const tag = q.startsWith('#') ? q.slice(1) : null;
-  const hit = (e: Entry) =>
-    tag !== null
-      ? tagsOf(e.note).includes(tag)
-      : (e.note ?? '').toLocaleLowerCase('hu').includes(q) ||
-        (names.get(e.categoryId) ?? '').includes(q) ||
-        (e.createdBy ?? '').toLocaleLowerCase('hu').includes(q);
-  return entries
-    .filter(hit)
-    .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt))
-    .slice(0, limit);
 }

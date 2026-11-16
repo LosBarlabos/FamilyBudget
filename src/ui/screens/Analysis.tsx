@@ -1,16 +1,17 @@
 import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
-  anchorPeriod, deviations, heatPeriods, heatTone, rangePeriods, savingsSpend, searchEntries, shortAmount, spendingRows, tagSummary,
+  anchorPeriod, deviations, heatPeriods, heatTone, rangePeriods, savingsSpend, shortAmount, spendingRows,
   type AnalysisRange, type SpendRow,
 } from '../../domain/analysis';
 import type { PeriodSummary } from '../../domain/balance';
 import { formatFt } from '../../domain/money';
-import { periodName, periodShortLabel, shortDate } from '../../domain/periods';
-import { isExpense, type Category, type Entry } from '../../domain/types';
+import { periodName, periodShortLabel } from '../../domain/periods';
+import { isExpense, type Category } from '../../domain/types';
 import { displayUnits, type Unit } from '../../domain/units';
-import { useBudget, WEEK_VIEW } from '../context';
+import { ENTRIES_VIEW, useBudget, WEEK_VIEW } from '../context';
 import { CatIcon, EmptyState, Icon, Segmented, useLocalState } from '../components/common';
 import { PeriodSwitcher } from '../components/PeriodSwitcher';
+import { AnalysisEntries } from './AnalysisEntries';
 import { AnalysisWeek } from './AnalysisWeek';
 
 export const RANGE_KEY = 'analysis-range';
@@ -24,25 +25,28 @@ const TOP_ROWS = 8;
 
 /** A legutóbb használt nézet: fókusz nélküli útvonalon (`#/elemzes`) ez nyílik meg. */
 export const VIEW_KEY = 'analysis-view';
-type View = 'week' | 'month';
+type View = 'week' | 'month' | 'entries';
 const VIEWS: { id: View; label: string }[] = [
   { id: 'week', label: 'Heti' },
   { id: 'month', label: 'Havi' },
+  { id: 'entries', label: 'Rögzítések' },
 ];
+/** A nézet az útvonalban; a havinak nincs saját fókusza. */
+const VIEW_FOCUS: Record<View, string | undefined> = { week: WEEK_VIEW, month: undefined, entries: ENTRIES_VIEW };
 
 export function Analysis() {
   const { focusCategoryId, go } = useBudget();
   const [stored, setStored] = useLocalState<View>(VIEW_KEY, 'month');
-  const view: View = focusCategoryId === WEEK_VIEW ? 'week' : stored;
+  const view: View = focusCategoryId === WEEK_VIEW ? 'week' : focusCategoryId === ENTRIES_VIEW ? 'entries' : stored;
   const setView = (v: View) => {
     setStored(v);
-    go('analysis', v === 'week' ? WEEK_VIEW : undefined);
+    go('analysis', VIEW_FOCUS[v]);
   };
   const tabs = <Segmented label="Elemzés nézete" options={VIEWS} value={view} onChange={setView} />;
   return (
     <>
       <h1 className="sr-only">Elemzés</h1>
-      {view === 'week' ? <AnalysisWeek tabs={tabs} /> : <AnalysisMonth tabs={tabs} />}
+      {view === 'week' ? <AnalysisWeek tabs={tabs} /> : view === 'entries' ? <AnalysisEntries tabs={tabs} /> : <AnalysisMonth tabs={tabs} />}
     </>
   );
 }
@@ -79,7 +83,6 @@ function AnalysisMonth({ tabs }: { tabs: ReactNode }) {
       <WhereMoneyWent periods={periods} spend={spend} rangeText={rangeText + partial} />
       <Deviations periods={periods} hasClosed={summaries.periods.some((p) => p.status === 'closed')} onWiden={() => setRange('last12')} />
       <Heatmap periods={heatPeriods(summaries, periodId, range)} spend={spend} anchorId={anchor.id} />
-      <SearchAndTags />
     </>
   );
 }
@@ -337,85 +340,5 @@ function Heatmap({ periods, spend, anchorId }: { periods: PeriodSummary[]; spend
         <span><span className="lg t-current" /> folyamatban</span>
       </div>
     </section>
-  );
-}
-
-const RESULT_LIMIT = 50;
-
-function SearchAndTags() {
-  const { data } = useBudget();
-  const [q, setQ] = useState('');
-  const tags = useMemo(() => tagSummary(data.entries), [data.entries]);
-  const results = useMemo(() => searchEntries(data.entries, data.categories, q, RESULT_LIMIT + 1), [data.entries, data.categories, q]);
-  const cats = useMemo(() => new Map(data.categories.map((c) => [c.id, c])), [data.categories]);
-  const sum = results.slice(0, RESULT_LIMIT).reduce((s, e) => s + e.amount, 0);
-
-  return (
-    <section className="card" aria-labelledby="search-title">
-      <div className="card-head">
-        <h2 id="search-title">Keresés és címkék</h2>
-      </div>
-      <label className="search-box">
-        <Icon name="search" />
-        <span className="sr-only">Keresés a rögzítésekben</span>
-        <input type="search" placeholder="Megjegyzés, kategória, név vagy #címke" value={q} onChange={(e) => setQ(e.target.value)} />
-        {q && (
-          <button className="btn sm ghost icon" aria-label="Keresés törlése" onClick={() => setQ('')}>
-            <Icon name="x" />
-          </button>
-        )}
-      </label>
-      {!q.trim() ? (
-        tags.length === 0 ? (
-          <p className="small muted" style={{ margin: '10px 0 0' }}>
-            Írj címkét a megjegyzésbe, pl. <strong>#nyaralás</strong> vagy <strong>#autó</strong>, és itt összesítve látod, mennyi ment el rá.
-          </p>
-        ) : (
-          <div className="tag-list">
-            {tags.map((t) => (
-              <button key={t.tag} className="chip" onClick={() => setQ(`#${t.tag}`)}>
-                <span className="tag-name">#{t.tag}</span>
-                <span className="num">{formatFt(t.total)}</span>
-                <span className="faint num">{t.count} db</span>
-              </button>
-            ))}
-          </div>
-        )
-      ) : results.length === 0 ? (
-        <p className="small muted" style={{ margin: '10px 0 0' }}>Nincs találat.</p>
-      ) : (
-        <>
-          <p className="small muted num" style={{ margin: '10px 0 4px' }} role="status">
-            {results.length > RESULT_LIMIT ? `Az első ${RESULT_LIMIT} találat` : `${results.length} találat`} · összesen {formatFt(sum)}
-          </p>
-          <ul className="recent-list">
-            {results.slice(0, RESULT_LIMIT).map((e) => (
-              <ResultRow key={e.id} e={e} cat={cats.get(e.categoryId)} spendName={e.spendCategoryId ? cats.get(e.spendCategoryId)?.name : undefined} />
-            ))}
-          </ul>
-        </>
-      )}
-    </section>
-  );
-}
-
-function ResultRow({ e, cat, spendName }: { e: Entry; cat?: Category; spendName?: string }) {
-  const name = cat?.name ?? 'Ismeretlen kategória';
-  return (
-    <li className="recent-row search-row">
-      <CatIcon cat={cat ?? { icon: 'question-mark', color: '#8a8983' }} />
-      <div className="recent-main">
-        <div className="small recent-name">
-          {name}
-          {e.note && <span className="muted"> · {e.note}</span>}
-        </div>
-        <div className="tiny faint">
-          {shortDate(e.date)}
-          {e.createdBy && ` · ${e.createdBy}`}
-          {e.kind === 'withdrawal' && ` · megtakarításból${spendName ? ` → ${spendName}` : ''}`}
-        </div>
-      </div>
-      <span className="small num">{formatFt(e.amount)}</span>
-    </li>
   );
 }

@@ -11,6 +11,7 @@ import { useRouter } from './router';
 import { isQuickEntryKey } from './shortcuts';
 import { applyTheme, Icon, NOTE_TAGS_LIST, useThemePref } from './components/common';
 import { CoverSheet, coverSheetName, parseCoverSheet } from './components/Cover';
+import { EntrySheet, entrySheetName, parseEntrySheet } from './components/EntrySheet';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { QuickEntry } from './components/QuickEntry';
 import { Sheet } from './components/Sheet';
@@ -157,6 +158,8 @@ function Main({ data }: { data: BudgetData }) {
   const trend = parseTrendSheet(router.sheet);
   const openWeek = useCallback((start: ISODate, categoryId: string) => openSheet(weekSheetName(start, categoryId)), [openSheet]);
   const week = parseWeekSheet(router.sheet);
+  const openEntry = useCallback((entryId: string) => openSheet(entrySheetName(entryId)), [openSheet]);
+  const editedEntry = parseEntrySheet(router.sheet);
   // A megjegyzésmezők javaslatai a korábbi #címkékből.
   const tags = useMemo(() => tagSummary(data.entries).map((t) => t.tag), [data.entries]);
 
@@ -207,7 +210,7 @@ function Main({ data }: { data: BudgetData }) {
   );
 
   return (
-    <BudgetProvider value={{ data, summaries, cfg, today, periodId, setPeriodId, go, openQuick, openCover, openTrend, openWeek, focusCategoryId: route.focus, clearFocus }}>
+    <BudgetProvider value={{ data, summaries, cfg, today, periodId, setPeriodId, go, openQuick, openCover, openTrend, openWeek, openEntry, focusCategoryId: route.focus, clearFocus }}>
       <div className="app">
         {/* Asztalon oldalsáv: logó, kiemelt rögzítés, a menü ikonokkal, alul a mentés állapota. */}
         <aside className="sidebar">
@@ -344,6 +347,7 @@ function Main({ data }: { data: BudgetData }) {
         )}
         {trend && <TrendSheet unitKey={trend} onClose={closeLayer} />}
         {week && <WeekSheet start={week.start} categoryId={week.categoryId} onClose={closeLayer} />}
+        {editedEntry && <EntrySheet entryId={editedEntry} onClose={closeLayer} />}
         <datalist id={NOTE_TAGS_LIST}>
           {tags.map((t) => <option key={t} value={`#${t}`} />)}
         </datalist>

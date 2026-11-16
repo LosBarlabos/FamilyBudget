@@ -4,7 +4,7 @@ import { db } from './db';
 import {
   addCategory, addEntry, addSettlingEntry, changePlan, importAll, initialize, markSettled, migrateBasePlans, moveCover, rawDump,
   restartFrom, restoreCategory, restoreEntries, restorePlansOf, restoreSettings, saveBasicSettings, setMonthlyTotal, setOverride, unsettle,
-  undoMoveCover, undoRestart, updateCategory, wipeAll,
+  undoMoveCover, undoRestart, updateCategory, updateEntry, wipeAll,
 } from './repo';
 import { computeSummaries } from '../domain/balance';
 import { buildExport, parseImport } from '../domain/exportFormat';
@@ -117,6 +117,27 @@ describe('fix tétel lezárása', () => {
     expect(await markSettled('2026-10', 'aram')).toBeNull();
     await restoreEntries([before!]);
     expect((await db.entries.get(last.id))!.settles).toBeUndefined();
+  });
+
+  it('a rögzítés helyben módosítható, és a módosítás visszavonható', async () => {
+    const e = await addEntry('2026-10', 'aram', 5_000, '2026-10-11', 'részlet');
+    const before = await updateEntry({ ...e, amount: 6_500, date: '2026-10-12', note: undefined });
+    expect(before).toEqual(e);
+    expect(await db.entries.get(e.id)).toMatchObject({ id: e.id, amount: 6_500, date: '2026-10-12', createdAt: e.createdAt });
+    expect((await db.entries.get(e.id))!.note).toBeUndefined();
+    expect(await db.entries.count()).toBe(1);
+    await restoreEntries([before!]);
+    expect(await db.entries.get(e.id)).toEqual(e);
+  });
+
+  it('a közben törölt rögzítést a módosítás nem hozza vissza, az érvénytelen összeget nem menti', async () => {
+    const e = await addEntry('2026-10', 'aram', 5_000, '2026-10-11');
+    await expect(updateEntry({ ...e, amount: 0 })).rejects.toThrow('Érvénytelen összeg.');
+    await expect(updateEntry({ ...e, amount: 12.5 })).rejects.toThrow('Érvénytelen összeg.');
+    expect((await db.entries.get(e.id))!.amount).toBe(5_000);
+    await db.entries.delete(e.id);
+    expect(await updateEntry({ ...e, amount: 6_000 })).toBeUndefined();
+    expect(await db.entries.count()).toBe(0);
   });
 
   it('rögzítés nélkül nincs mit lezárni', async () => {

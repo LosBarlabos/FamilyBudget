@@ -732,7 +732,8 @@
   .recent-toggle { width: 100%; height: 44px; padding: 0 var(--space-2); gap: 10px; justify-content: flex-start; }
   .recent-title { flex: 1; text-align: left; font-weight: 500; }
   .recent-list { list-style: none; margin: 0; padding: 0 0 var(--space-1-5); }
-  .recent-row { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: var(--space-1-5) var(--space-2); }
+  .recent-row { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto auto auto; gap: 10px; align-items: center; padding: var(--space-1-5) var(--space-2); }
+  .recent-row .btn.icon + .btn.icon { margin-left: calc(var(--space-1-5) * -1); }
   .recent-main { min-width: 0; }
   .recent-name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .recent-name .muted { font-weight: 400; }
@@ -970,7 +971,6 @@
   .search-box input { flex: 1; min-width: 0; height: 40px; border: none; outline: none; background: transparent; color: var(--color-text); font: inherit; font-size: var(--text-md); /* 16 px: az iOS így érintőképernyős táblagépen sem nagyít rá (DR9) */ }
   .tag-list { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
   .tag-name { font-weight: 600; color: var(--color-accent-text); }
-  .search-row { grid-template-columns: 30px minmax(0, 1fr) auto; }
   .trend { display: grid; gap: 14px; }
 
   /* --- Elemzés: heti nézet --- */
@@ -1017,12 +1017,41 @@
   .week-bills-list { padding: 0 18px var(--space-2); }
   .week-entries { list-style: none; margin: 0; padding: 0; }
   .week-entry { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; }
-  .week-entry + .week-entry { box-shadow: 0 -1px 0 var(--color-border); }
+  .week-entries > li + li { box-shadow: 0 -1px 0 var(--color-border); }
+  /* A hét rögzítése a kategória-lapon gomb: koppintásra a szerkesztő lap nyílik. */
+  .week-entry-btn { width: 100%; min-height: 48px; text-align: left; white-space: normal; border-radius: var(--radius-md); }
+  .week-entry-btn:active { transform: none; }
   .week-entry-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
   .week-entry-note { font-weight: 500; overflow-wrap: anywhere; }
   .week-entry-amount, .week-sheet-amount { font-weight: 600; white-space: nowrap; }
   .week-sheet-trend { height: 40px; justify-content: center; }
   .week-sheet-h { margin-bottom: var(--space-0-5); font-size: var(--text-sm); font-weight: 500; color: var(--color-text-subtle); letter-spacing: 0; }
+
+  /* --- Elemzés: a rögzítések listája és a szerkesztő lap --- */
+  .entries-filters { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--space-2); align-items: center; }
+  .entries-filters select { height: 44px; max-width: 220px; }
+  .entries-sum { margin: var(--space-3) var(--space-1) 0; }
+  .entries-tip { margin: var(--space-3) var(--space-1) 0; }
+  .entries-day { margin: var(--space-4) var(--space-1) var(--space-0-5); font-size: var(--text-xs); font-weight: 600; color: var(--color-text-subtle); letter-spacing: 0; }
+  .entries-list { list-style: none; margin: 0; padding: 0; }
+  .entries-list > li + li { box-shadow: 0 -1px 0 var(--color-border); }
+  .entries-row {
+    width: 100%; min-height: 48px; display: grid; grid-template-columns: 32px minmax(0, 1fr) auto 16px; gap: 10px; align-items: center;
+    padding: var(--space-1-5) var(--space-1); border-radius: var(--radius-md); text-align: left;
+  }
+  .entries-row:active { transform: none; }
+  .entries-row .recent-name, .entries-sub { display: block; }
+  .entries-sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .entries-amount { font-weight: 600; white-space: nowrap; }
+  @media (hover: hover) { .entries-row:hover, .week-entry-btn:hover { background: var(--color-surface-sunken); } }
+  /* Programból kapott fókusz (törölt sor után): a képernyőolvasó felolvassa, keret nem kell. */
+  #entries-title:focus { outline: none; }
+  .entry-form { display: grid; gap: var(--space-3); }
+  .entry-form .field > input, .entry-form .field > select { width: 100%; height: 44px; }
+  .entry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3); }
+  .entry-grid:empty { display: none; }
+  .entry-actions { display: flex; justify-content: space-between; gap: var(--space-2); margin-top: var(--space-1); }
+  .entry-actions .btn { height: 44px; padding: 0 var(--space-4); }
   @container content (min-width: 860px) {
     .week-top { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: center; }
     .week-days-card { --week-h: 112px; }
@@ -1031,6 +1060,12 @@
     .heat .heat-name { min-width: 104px; max-width: 120px; }
     .page-head .seg { width: 100%; }
     .page-head .seg button { flex: 1; height: 36px; }
+    /* Telefonon a címkék egy sorban, oldalra görgethetően, hogy a lista ne csússzon a hajtás alá. */
+    .tag-list { flex-wrap: nowrap; overflow-x: auto; margin-right: -18px; padding: var(--space-0-5) 18px var(--space-0-5) var(--space-0-5); scrollbar-width: none; }
+    .tag-list .chip { flex-shrink: 0; }
+    .entries-filters { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .entries-filters .search-box { grid-column: 1 / -1; }
+    .entries-filters select { width: 100%; max-width: none; }
     .week-switch { width: 100%; justify-content: space-between; }
     .week-switch .btn.icon { width: 44px; height: 44px; border-radius: var(--radius-full); }
     .week-label { flex: 1; }

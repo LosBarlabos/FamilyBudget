@@ -19,6 +19,8 @@ export const UNEXPECTED_PANEL = 'varatlan';
 
 /** Az Elemzés heti nézete (`#/elemzes/het`); fókusz nélkül a legutóbb használt nézet nyílik meg. */
 export const WEEK_VIEW = 'het';
+/** Az Elemzés „Rögzítések” nézete (`#/elemzes/rogzitesek`): az összes rögzítés szűrhető, szerkeszthető listája. */
+export const ENTRIES_VIEW = 'rogzitesek';
 
 export interface BudgetCtx {
   data: BudgetData;
@@ -37,6 +39,8 @@ export interface BudgetCtx {
   openTrend: (key: string) => void;
   /** Az Elemzés heti nézetéből: egy kategória rögzítései a megadott hétfővel kezdődő héten. */
   openWeek: (weekStart: ISODate, categoryId: string) => void;
+  /** Egy rögzítés szerkesztő lapja; bármelyik listából nyitható. */
+  openEntry: (entryId: string) => void;
   focusCategoryId: string | null;
   /** A fókusz törlése az URL-ből, hogy a vissza lépés és az újratöltés ne alkalmazza újra. */
   clearFocus: () => void;

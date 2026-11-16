@@ -229,6 +229,20 @@ export async function deleteEntry(id: string) {
   return e;
 }
 
+/**
+ * Egy rögzítés módosítása helyben (az azonosítója marad). A korábbi állapotot adja vissza a visszavonáshoz
+ * (restoreEntries([előtte])); undefined, ha a rögzítés közben megszűnt (pl. egy másik eszköz törölte).
+ */
+export async function updateEntry(next: Entry): Promise<Entry | undefined> {
+  if (!Number.isInteger(next.amount) || next.amount < 0 || (next.amount === 0 && !next.settles)) throw new Error('Érvénytelen összeg.');
+  return db.transaction('rw', db.entries, async () => {
+    const old = await db.entries.get(next.id);
+    if (!old) return undefined;
+    await db.entries.put(next);
+    return old;
+  });
+}
+
 /** Visszavonás: a megadott rögzítéseket visszaállítja, az újonnan hozzáadottakat törli. */
 export async function restoreEntries(restore: Entry[], removeIds: string[] = []) {
   await db.transaction('rw', db.entries, async () => {
